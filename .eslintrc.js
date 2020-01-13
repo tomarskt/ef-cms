@@ -298,7 +298,11 @@ module.exports = {
           'workitems',
           'xpos',
         ],
-        skipIfMatch: ['^https?://[^\\s]*$', '^[^\\s]{35,}$'],
+        skipIfMatch: [
+          '^https?://[^\\s]*$',
+          'https?://[^\\s]*',
+          '^[^\\s]{35,}$',
+        ],
         minLength: 4,
       },
     ],

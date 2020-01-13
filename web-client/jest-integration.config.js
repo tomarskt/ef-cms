@@ -1,3 +1,6 @@
+const rootDir = '..';
+const { moduleNameMapper } = require('../aliases');
+
 module.exports = {
   collectCoverage: true,
   collectCoverageFrom: [
@@ -14,6 +17,8 @@ module.exports = {
       statements: 50,
     },
   },
+  moduleNameMapper,
+  rootDir,
   testEnvironment: 'node',
   //this is to ignore imported html files
   transform: {

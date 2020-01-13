@@ -1,10 +1,10 @@
 const joi = require('joi-browser');
 const {
   joiValidationDecorator,
-} = require('../../../utilities/JoiValidationDecorator');
+} = require('@/shared/src/utilities/JoiValidationDecorator');
 const {
   makeRequiredHelper,
-} = require('../externalDocument/externalDocumentHelpers');
+} = require('@/entities/externalDocument/externalDocumentHelpers');
 
 /**
  *

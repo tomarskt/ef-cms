@@ -1,3 +1,6 @@
+const rootDir = '..';
+const { moduleNameMapper } = require('../aliases');
+
 module.exports = {
   collectCoverage: true,
   coverageDirectory: './coverage',
@@ -9,5 +12,7 @@ module.exports = {
       statements: 95,
     },
   },
+  moduleNameMapper,
+  rootDir,
   verbose: true,
 };

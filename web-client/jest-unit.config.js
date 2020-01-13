@@ -1,3 +1,6 @@
+const rootDir = '..';
+const { moduleNameMapper } = require('../aliases');
+
 module.exports = {
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.js', '!e2e/**/*.js', '!src/**/*.test.js'],
@@ -13,6 +16,8 @@ module.exports = {
   globals: {
     window: true,
   },
+  moduleNameMapper,
+  rootDir,
   //this is to ignore imported html files
   testEnvironment: 'node',
   transform: {
