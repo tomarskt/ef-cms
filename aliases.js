@@ -15,7 +15,7 @@ const { alias } = require('./package.json');
 const moduleNameMapper = {};
 for (let [key, value] of Object.entries(alias)) {
   const newKey = `^${key}/(.*)`;
-  const newValue = `${value.replace(/^\./, '<rootDir>')}/$1`;
+  const newValue = `${value.replace(/^\.\//, '<rootDir>/')}/$1`;
   moduleNameMapper[newKey] = newValue;
 }
 
