@@ -7,8 +7,9 @@
   "alias": {
     "@/entities": "./shared/src/business/entities",
     "@/shared": "./shared",
-    "@/web-api": "./web-api",
-    "@/web-client": "./web-client"
+    "@/api": "./web-api/src",
+    "@/web": "./web-client/src",
+    "@": "./.",
   },
   "devDependencies": {
     "@babel/cli": "^7.7.5",
