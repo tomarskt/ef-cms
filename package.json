@@ -5,11 +5,12 @@
   "license": "CC0-1.0",
   "repository": "https://github.com/ustaxcourt/ef-cms",
   "alias": {
+    "note-on-aliases": "should be sorted 'most-specific first'",
     "@/entities": "./shared/src/business/entities",
-    "@/shared": "./shared",
+    "@/shared": "./shared/src",
     "@/api": "./web-api/src",
     "@/web": "./web-client/src",
-    "@": "./.",
+    "@": "./."
   },
   "devDependencies": {
     "@babel/cli": "^7.7.5",

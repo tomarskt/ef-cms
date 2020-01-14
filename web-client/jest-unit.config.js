@@ -21,7 +21,7 @@ module.exports = {
   //this is to ignore imported html files
   testEnvironment: 'node',
   transform: {
-    '^.+\\.html?$': '@/web-client/htmlLoader.js',
+    '^.+\\.html?$': '../web-client/htmlLoader.js',
     '^.+\\.js$': 'babel-jest',
     '^.+\\.jsx$': 'babel-jest',
   },
