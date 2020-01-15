@@ -32,9 +32,9 @@ module.exports = {
   moduleNameMapper,
   rootDir,
   testEnvironment: 'node',
-  // this is to ignore imported html files
   transform: {
-    '^.+\\.html?$': '../web-client/htmlLoader.js',
+    // this is to ignore imported html files
+    '^.+\\.html?$': './web-client/htmlLoader.js',
     '^.+\\.js$': 'babel-jest',
     '^.+\\.jsx$': 'babel-jest',
   },
