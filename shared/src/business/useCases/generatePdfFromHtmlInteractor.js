@@ -16,6 +16,7 @@ exports.generatePdfFromHtmlInteractor = async ({
   footerHtml,
   headerHtml,
   overwriteHeader,
+  pdfPath,
 }) => {
   let browser = null;
   let result = null;
@@ -74,6 +75,7 @@ exports.generatePdfFromHtmlInteractor = async ({
         bottom: '100px',
         top: '80px',
       },
+      path: pdfPath,
       printBackground: true,
     });
   } catch (error) {

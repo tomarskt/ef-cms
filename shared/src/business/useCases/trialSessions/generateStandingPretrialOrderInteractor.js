@@ -58,5 +58,7 @@ exports.generateStandingPretrialOrderInteractor = async ({
     headerHtml:
       '<div style="text-align:center;"><span class="pageNumber"></span></div>',
     overwriteHeader: true,
+    pdfPath:
+      '/Users/wbagayoko/Projects/ef-cms/shared/src/business/useCaseHelper/standingPretrialOrder/standingPretrialOrder.pdf',
   });
 };
