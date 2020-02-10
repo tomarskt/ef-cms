@@ -7,14 +7,18 @@
 export const cloneFile = file =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.addEventListener('load', () => {
+
+    const onLoad = () => {
+      reader.removeEventListener('load', onLoad);
       resolve(
         new File([reader.result], file.name, {
           type: file.type,
         }),
       );
-    });
+    };
+
+    reader.readAsArrayBuffer(file);
+    reader.addEventListener('load', onLoad);
     reader.addEventListener('error', () => {
       reject();
     });
