@@ -1,41 +1,25 @@
 version: 2
 jobs:
   bundle:
-    docker:
-      - image: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ef-cms-us-east-1:latest
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    machine:
+      docker_layer_caching: true
     steps:
-      - restore_cache:
-          name: Source - Restoring Cache
-          keys:
-            - source-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ .Revision }}
-            - source-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-
-            - source-{{ .Environment.CACHE_VERSION }}-
-      - checkout
-      - save_cache:
-          name: Source - Saving Cache
-          key: source-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - '.git'
       - run:
-          name: NPM - Install
-          command: npm ci && npm rebuild node-sass
+          name: Build Docker Image
+          command: docker build -t efcms -f Dockerfile .
+      - checkout
       - persist_to_workspace:
           root: ~/
           paths:
             - project
 
   build-api:
-    docker:
-      - image: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ef-cms-us-east-1:latest
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    machine:
+      docker_layer_caching: true
     steps:
-      - attach_workspace:
-          at: ~/
+      - run:
+          name: Build Docker Image
+          command: docker build -t efcms -f Dockerfile .
       - run:
           name: Lint
           command: |
@@ -61,16 +45,14 @@ jobs:
             -Dsonar.host.url="https://sonarcloud.io"
 
   build-shared:
-    docker:
-      - image: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ef-cms-us-east-1:latest
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    machine:
+      docker_layer_caching: true
     environment:
       _JAVA_OPTIONS: '-Xms1024m -Xmx2024m'
     steps:
-      - attach_workspace:
-          at: ~/
+      - run:
+          name: Build Docker Image
+          command: docker build -t efcms -f Dockerfile .
       - run:
           name: Shared - Test
           command: npm run test:shared
@@ -88,17 +70,15 @@ jobs:
             -Dsonar.host.url="https://sonarcloud.io"
 
   build-client:
-    docker:
-      - image: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ef-cms-us-east-1:latest
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    machine:
+      docker_layer_caching: true
     environment:
       _JAVA_OPTIONS: '-Xms1024m -Xmx2048m'
     resource_class: 2xlarge
     steps:
-      - attach_workspace:
-          at: ~/
+      - run:
+          name: Build Docker Image
+          command: docker build -t efcms -f Dockerfile .
       - run:
           name: Web Client - Test
           command: |
@@ -119,11 +99,8 @@ jobs:
             -Dsonar.host.url="https://sonarcloud.io"
 
   e2e-pa11y:
-    docker:
-      - image: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ef-cms-us-east-1:latest
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    machine:
+      docker_layer_caching: true
     environment:
       _JAVA_OPTIONS: '-Xms2048m -Xmx4096m'
     resource_class: 2xlarge
@@ -170,11 +147,8 @@ jobs:
           path: /tmp/pa11y
 
   e2e-cypress:
-    docker:
-      - image: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ef-cms-us-east-1:latest
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    machine:
+      docker_layer_caching: true
     environment:
       _JAVA_OPTIONS: '-Xms1024m -Xmx2048m'
     resource_class: 2xlarge
