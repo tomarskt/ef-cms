@@ -132,6 +132,7 @@ import { navigateToPathSequence } from './sequences/navigateToPathSequence';
 import { navigateToPrintPreviewSequence } from './sequences/navigateToPrintPreviewSequence';
 import { navigateToPrintableCaseConfirmationSequence } from './sequences/navigateToPrintableCaseConfirmationSequence';
 import { navigateToPrintableDocketRecordSequence } from './sequences/navigateToPrintableDocketRecordSequence';
+import { navigateToReviewPetitionFromPaperSequence } from './sequences/navigateToReviewPetitionFromPaperSequence';
 import { navigateToReviewPetitionSequence } from './sequences/navigateToReviewPetitionSequence';
 import { notFoundErrorSequence } from './sequences/notFoundErrorSequence';
 import { openAddEditCaseNoteModalSequence } from './sequences/openAddEditCaseNoteModalSequence';
@@ -494,6 +495,7 @@ export const presenter = {
     navigateToPrintPreviewSequence,
     navigateToPrintableCaseConfirmationSequence,
     navigateToPrintableDocketRecordSequence,
+    navigateToReviewPetitionFromPaperSequence,
     navigateToReviewPetitionSequence,
     notFoundErrorSequence,
     openAddEditCaseNoteModalSequence,

@@ -11,6 +11,8 @@ import React from 'react';
 export const CaseDetailEdit = connect(
   {
     navigateBackSequence: sequences.navigateBackSequence,
+    navigateToReviewPetitionSequence:
+      sequences.navigateToReviewPetitionSequence,
     screenMetadata: state.screenMetadata,
     submitCaseDetailEditSaveSequence:
       sequences.submitCaseDetailEditSaveSequence,
@@ -18,6 +20,7 @@ export const CaseDetailEdit = connect(
   },
   ({
     navigateBackSequence,
+    navigateToReviewPetitionSequence,
     screenMetadata,
     submitCaseDetailEditSaveSequence,
     waitingForResponse,
@@ -41,6 +44,15 @@ export const CaseDetailEdit = connect(
           </Tab>
         </Tabs>
 
+        <Button
+          id="submit-case"
+          type="button"
+          onClick={() => {
+            navigateToReviewPetitionSequence();
+          }}
+        >
+          Review Petition
+        </Button>
         <Button
           aria-disabled={waitingForResponse ? 'true' : 'false'}
           disabled={waitingForResponse}

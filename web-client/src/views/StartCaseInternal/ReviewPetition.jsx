@@ -16,7 +16,6 @@ import React from 'react';
 export const ReviewPetition = connect(
   {
     constants: state.constants,
-    form: state.form,
     formCancelToggleCancelSequence: sequences.formCancelToggleCancelSequence,
     goBackToStartCaseInternalSequence:
       sequences.goBackToStartCaseInternalSequence,
@@ -29,7 +28,6 @@ export const ReviewPetition = connect(
   },
   ({
     constants,
-    form,
     formCancelToggleCancelSequence,
     goBackToStartCaseInternalSequence,
     openConfirmServeToIrsModalSequence,
@@ -50,7 +48,7 @@ export const ReviewPetition = connect(
             </h2>
           </Focus>
 
-          <OrdersNeededSummary data={form} />
+          <OrdersNeededSummary data={reviewPetitionHelper.data} />
 
           <div className="grid-container padding-x-0 create-case-review">
             <div className="grid-row grid-gap">
@@ -66,7 +64,7 @@ export const ReviewPetition = connect(
                         >
                           Party type
                         </label>
-                        {form.partyType}
+                        {reviewPetitionHelper.data.partyType}
                       </div>
                       <div className="tablet:grid-col-4 margin-bottom-1">
                         <label
@@ -75,13 +73,17 @@ export const ReviewPetition = connect(
                         >
                           Petitioner’s contact information
                         </label>
-                        {form.contactPrimary && (
+                        {reviewPetitionHelper.data.contactPrimary && (
                           <address aria-labelledby="primary-label">
-                            {AddressDisplay(form.contactPrimary, constants, {
-                              nameOverride:
-                                startCaseHelper.showCaseNameForPrimary &&
-                                startCaseHelper.caseName,
-                            })}
+                            {AddressDisplay(
+                              reviewPetitionHelper.data.contactPrimary,
+                              constants,
+                              {
+                                nameOverride:
+                                  startCaseHelper.showCaseNameForPrimary &&
+                                  startCaseHelper.caseName,
+                              },
+                            )}
                           </address>
                         )}
                       </div>
@@ -94,7 +96,10 @@ export const ReviewPetition = connect(
                             >
                               Spouse’s contact information
                             </label>
-                            {AddressDisplay(form.contactSecondary, constants)}
+                            {AddressDisplay(
+                              reviewPetitionHelper.data.contactSecondary,
+                              constants,
+                            )}
                           </>
                         )}
                       </div>
@@ -124,7 +129,7 @@ export const ReviewPetition = connect(
                           >
                             Case caption
                           </label>
-                          {form.caseCaption}
+                          {reviewPetitionHelper.data.caseCaption}
                         </div>
                         <div className="margin-top-3 margin-bottom-2">
                           <label
@@ -133,7 +138,7 @@ export const ReviewPetition = connect(
                           >
                             Requested trial location
                           </label>
-                          {form.preferredTrialCity}
+                          {reviewPetitionHelper.data.preferredTrialCity}
                         </div>
                       </div>
                       <div className="tablet:grid-col-6 margin-bottom-1">
@@ -154,7 +159,7 @@ export const ReviewPetition = connect(
                           >
                             Case procedure
                           </label>
-                          {form.procedureType}
+                          {reviewPetitionHelper.data.procedureType}
                         </div>
 
                         <div className="margin-top-3 margin-bottom-2">
@@ -198,7 +203,7 @@ export const ReviewPetition = connect(
                           >
                             Type of notice/case
                           </label>
-                          {form.caseType}
+                          {reviewPetitionHelper.data.caseType}
                         </div>
                       </div>
                       <div className="tablet:grid-col-4 margin-bottom-1">
@@ -223,36 +228,14 @@ export const ReviewPetition = connect(
                   <div className="content-wrapper">
                     <h3 className="underlined">Attachments</h3>
                     <div>
-                      <div className="margin-top-3 margin-bottom-2">
-                        <label
-                          className="usa-label usa-label-display"
-                          htmlFor="filing-petition"
-                        >
-                          Petition
-                        </label>
-                        <div className="grid-row">
-                          <div className="grid-col flex-auto">
-                            <FontAwesomeIcon
-                              className="fa-icon-blue"
-                              icon={['fas', 'file-pdf']}
-                            />
-                          </div>
-                          <div className="grid-col flex-fill">
-                            <PDFPreviewButton
-                              file={form.petitionFile}
-                              title="Petition"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="margin-top-3 margin-bottom-2">
-                        <label
-                          className="usa-label usa-label-display"
-                          htmlFor="filing-parties"
-                        >
-                          Statement of Taxpayer Identification
-                        </label>
-                        <div>
+                      {reviewPetitionHelper.data.petitionFile && (
+                        <div className="margin-top-3 margin-bottom-2">
+                          <label
+                            className="usa-label usa-label-display"
+                            htmlFor="filing-petition"
+                          >
+                            Petition
+                          </label>
                           <div className="grid-row">
                             <div className="grid-col flex-auto">
                               <FontAwesomeIcon
@@ -262,14 +245,40 @@ export const ReviewPetition = connect(
                             </div>
                             <div className="grid-col flex-fill">
                               <PDFPreviewButton
-                                file={form.stinFile}
-                                title="Statement of Taxpayer Identification"
+                                file={reviewPetitionHelper.data.petitionFile}
+                                title="Petition"
                               />
                             </div>
                           </div>
                         </div>
-                      </div>
-                      {form.requestForPlaceOfTrialFile && (
+                      )}
+                      {reviewPetitionHelper.data.stinFile && (
+                        <div className="margin-top-3 margin-bottom-2">
+                          <label
+                            className="usa-label usa-label-display"
+                            htmlFor="filing-parties"
+                          >
+                            Statement of Taxpayer Identification
+                          </label>
+                          <div>
+                            <div className="grid-row">
+                              <div className="grid-col flex-auto">
+                                <FontAwesomeIcon
+                                  className="fa-icon-blue"
+                                  icon={['fas', 'file-pdf']}
+                                />
+                              </div>
+                              <div className="grid-col flex-fill">
+                                <PDFPreviewButton
+                                  file={reviewPetitionHelper.data.stinFile}
+                                  title="Statement of Taxpayer Identification"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {reviewPetitionHelper.data.requestForPlaceOfTrialFile && (
                         <div className="margin-top-3 margin-bottom-3">
                           <label
                             className="usa-label usa-label-display margin-top-3"
@@ -287,7 +296,10 @@ export const ReviewPetition = connect(
                               </div>
                               <div className="grid-col flex-fill">
                                 <PDFPreviewButton
-                                  file={form.requestForPlaceOfTrialFile}
+                                  file={
+                                    reviewPetitionHelper.data
+                                      .requestForPlaceOfTrialFile
+                                  }
                                   title="Request for Place of Trial"
                                 />
                               </div>
@@ -295,7 +307,7 @@ export const ReviewPetition = connect(
                           </div>
                         </div>
                       )}
-                      {form.ownershipDisclosureFile && (
+                      {reviewPetitionHelper.data.ownershipDisclosureFile && (
                         <div className="margin-top-3 margin-bottom-3">
                           <label
                             className="usa-label usa-label-display margin-top-3"
@@ -313,7 +325,10 @@ export const ReviewPetition = connect(
                               </div>
                               <div className="grid-col flex-fill">
                                 <PDFPreviewButton
-                                  file={form.ownershipDisclosureFile}
+                                  file={
+                                    reviewPetitionHelper.data
+                                      .ownershipDisclosureFile
+                                  }
                                   title="Ownership Disclosure Statement"
                                 />
                               </div>
