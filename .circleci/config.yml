@@ -13,6 +13,7 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
+      - checkout
       - run:
           name: Build Docker Image
           command: docker build -t efcms -f Dockerfile .
@@ -46,6 +47,7 @@ jobs:
     environment:
       _JAVA_OPTIONS: '-Xms1024m -Xmx2024m'
     steps:
+      - checkout
       - run:
           name: Build Docker Image
           command: docker build -t efcms -f Dockerfile .
@@ -72,6 +74,7 @@ jobs:
       _JAVA_OPTIONS: '-Xms1024m -Xmx2048m'
     resource_class: 2xlarge
     steps:
+      - checkout
       - run:
           name: Build Docker Image
           command: docker build -t efcms -f Dockerfile .
@@ -101,8 +104,7 @@ jobs:
       _JAVA_OPTIONS: '-Xms2048m -Xmx4096m'
     resource_class: 2xlarge
     steps:
-      - attach_workspace:
-          at: ~/
+      - checkout
       - run:
           name: Create Pa11y Artifacts Directory
           command: mkdir /tmp/pa11y
@@ -149,16 +151,11 @@ jobs:
       _JAVA_OPTIONS: '-Xms1024m -Xmx2048m'
     resource_class: 2xlarge
     steps:
-      - attach_workspace:
-          at: ~/
+      - checkout
       - run:
           name: Cypress
           command: |
-            npm run build:all &&
-            CYPRESS_VERSION=`./node_modules/.bin/cypress --version | awk -F' ' '{print $4; exit}'`
-            if [ ! -e "/root/.cache/Cypress/${CYPRESS_VERSION}/Cypress/Cypress" ]; then
-              ./node_modules/.bin/cypress install
-            fi
+            npm run build:all
 
             TEMP_DOCUMENTS_BUCKET_NAME=noop-temp-documents-local-us-east-1 DOCUMENTS_BUCKET_NAME=noop-documents-local-us-east-1 S3_ENDPOINT=http://localhost:9000 MASTER_DYNAMODB_ENDPOINT=http://localhost:8000  AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop SLS_DEPLOYMENT_BUCKET=noop npx run-p start:api:ci start:client:ci > /dev/null &
             ./wait-until-services.sh
