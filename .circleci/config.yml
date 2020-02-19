@@ -41,33 +41,20 @@ jobs:
           command: docker run -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "npm run test:api"
       - run:
           name: Web API - SonarQube
-          command: docker run -e SONAR_SCANNER_OPTS="-Xmx2048m" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "/home/app/sonar_home/bin/sonar-scanner -Dsonar.projectKey=\"${API_SONAR_KEY}\" -Dsonar.branch.name=\"${CIRCLE_BRANCH} -Dsonar.organization=\"${SONAR_ORG}\" -Dsonar.projectBaseDir=\"web-api\" -Dproject.settings=\"web-api/sonar-project.properties\" -Dsonar.login=\"${API_SONAR_TOKEN}\" -Dsonar.host.url=\"https://sonarcloud.io\""
+          command: docker run -e SONAR_SCANNER_OPTS="-Xmx2048m" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "/home/app/sonar_home/bin/sonar-scanner -Dsonar.projectKey=\"${API_SONAR_KEY}\" -Dsonar.branch.name=\"${CIRCLE_BRANCH}\" -Dsonar.organization=\"${SONAR_ORG}\" -Dsonar.projectBaseDir=\"web-api\" -Dproject.settings=\"web-api/sonar-project.properties\" -Dsonar.login=\"${API_SONAR_TOKEN}\" -Dsonar.host.url=\"https://sonarcloud.io\""
 
   build-shared:
     machine:
       docker_layer_caching: true
     environment:
-      _JAVA_OPTIONS: '-Xms1024m -Xmx2024m'
+      _JAVA_OPTIONS: '-Xms1024m -Xmx2048m'
     steps:
-      - checkout
-      - run:
-          name: Build Docker Image
-          command: docker build -t efcms -f Dockerfile .
       - run:
           name: Shared - Test
           command: docker run -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" -e "EFCMS_DOMAIN=${EFCMS_DOMAIN}" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "npm run test:shared"
       - run:
           name: Shared - SonarQube
-          command: |
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            /home/app/sonar_home/bin/sonar-scanner \
-            -Dsonar.projectKey="${SHARED_SONAR_KEY}" \
-            -Dsonar.branch.name="${CIRCLE_BRANCH}" \
-            -Dsonar.organization="${SONAR_ORG}" \
-            -Dsonar.projectBaseDir="shared" \
-            -Dproject.settings="shared/sonar-project.properties" \
-            -Dsonar.login="${SHARED_SONAR_TOKEN}" \
-            -Dsonar.host.url="https://sonarcloud.io"
+          command: docker run -e SONAR_SCANNER_OPTS="-Xmx2048m" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "/home/app/sonar_home/bin/sonar-scanner -Dsonar.projectKey=\"${SHARED_SONAR_KEY}\" -Dsonar.branch.name=\"${CIRCLE_BRANCH}\" -Dsonar.organization=\"${SONAR_ORG}\" -Dsonar.projectBaseDir=\"shared\" -Dproject.settings=\"shared/sonar-project.properties\" -Dsonar.login=\"${SHARED_SONAR_TOKEN}\" -Dsonar.host.url=\"https://sonarcloud.io\""
 
   build-client:
     machine:
@@ -76,28 +63,12 @@ jobs:
       _JAVA_OPTIONS: '-Xms2048m -Xmx4096m'
     resource_class: 2xlarge
     steps:
-      - checkout
-      - run:
-          name: Build Docker Image
-          command: docker build -t efcms -f Dockerfile .
       - run:
           name: Web Client - Test
-          command: |
-            AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npm run start:api:ci > /dev/null &
-            ./wait-until.sh http://localhost:3000/api/swagger
-            AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npm run test:client
+          command: docker run -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" -e "EFCMS_DOMAIN=${EFCMS_DOMAIN}" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "(npm run start:api:ci > /dev/null &) && ./wait-until.sh http://localhost:3000/api/swagger && npm run test:client"
       - run:
           name: Web Client - SonarQube
-          command: |
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            /home/app/sonar_home/bin/sonar-scanner \
-            -Dsonar.projectKey="${UI_SONAR_KEY}" \
-            -Dsonar.branch.name="${CIRCLE_BRANCH}" \
-            -Dsonar.organization="${SONAR_ORG}" \
-            -Dsonar.projectBaseDir="web-client" \
-            -Dproject.settings="web-client/sonar-project.properties" \
-            -Dsonar.login="${UI_SONAR_TOKEN}" \
-            -Dsonar.host.url="https://sonarcloud.io"
+          command: docker run -e SONAR_SCANNER_OPTS="-Xmx2048m" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "/home/app/sonar_home/bin/sonar-scanner -Dsonar.projectKey=\"${UI_SONAR_KEY}\" -Dsonar.branch.name=\"${CIRCLE_BRANCH}\" -Dsonar.organization=\"${SONAR_ORG}\" -Dsonar.projectBaseDir=\"web-client\" -Dproject.settings=\"web-client/sonar-project.properties\" -Dsonar.login=\"${UI_SONAR_TOKEN}\" -Dsonar.host.url=\"https://sonarcloud.io\""
 
   e2e-pa11y:
     machine:
