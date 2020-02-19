@@ -6,6 +6,7 @@ export const reviewPetitionHelper = (get, applicationContext) => {
 
   const {
     dateReceived,
+    documents,
     hasVerifiedIrsNotice,
     irsNoticeDate,
     mailingDate,
@@ -13,10 +14,6 @@ export const reviewPetitionHelper = (get, applicationContext) => {
   } = get(state.form);
 
   data = get(state.form);
-
-  if (!get(state.form.partyType)) {
-    data = get(state.caseDetail);
-  }
 
   const { PAYMENT_STATUS } = applicationContext.getConstants();
 
@@ -34,6 +31,11 @@ export const reviewPetitionHelper = (get, applicationContext) => {
 
   const petitionPaymentStatusFormatted =
     petitionPaymentStatus === PAYMENT_STATUS.PAID ? 'Paid' : 'Not paid';
+
+  const documentsByType = documents.reduce((acc, document) => {
+    acc[document.documentType] = document;
+    return acc;
+  }, {});
 
   if (shouldShowIrsNoticeDate) {
     irsNoticeDateFormatted = applicationContext
