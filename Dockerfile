@@ -41,8 +41,8 @@ ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 COPY package.json /home/app/package.json
 COPY package-lock.json /home/app/package-lock.json
-# RUN npm set progress=false && \
-# npm i
+RUN npm set progress=false && \
+  npm i
 
 COPY . /home/app
 
