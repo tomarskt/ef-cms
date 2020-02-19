@@ -18,7 +18,7 @@ jobs:
             - '.git'
       - run:
           name: NPM Install
-          command: npm ci
+          command: npm i
       - run:
           name: Build Docker Image
           command: docker build -t efcms -f Dockerfile .
