@@ -42,6 +42,7 @@ ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 COPY package.json /home/app/package.json
 COPY package-lock.json /home/app/package-lock.json
 RUN npm set progress=false && \
+  npm -g i npm && \
   npm i
 
 COPY . /home/app
@@ -50,3 +51,4 @@ RUN mkdir -p /home/app/web-client/cypress/screenshots && \
   mkdir -p /home/app/web-client/cypress/videos
 
 CMD echo "please overwrite this command"
+RUN node --version
