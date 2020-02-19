@@ -19,38 +19,29 @@ jobs:
       - run:
           name: Build Docker Image
           command: docker build -t efcms -f Dockerfile .
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project
 
   build-api:
     machine:
       docker_layer_caching: true
     steps:
-      - checkout
-      - run:
-          name: Build Docker Image
-          command: docker build -t efcms -f Dockerfile .
+      - attach_workspace:
+          at: ~/
       - run:
           name: Lint
-          command: |
-            npm run lint
+          command: docker run -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "npm run lint"
       - run:
           name: Shellcheck
-          command: |
-            ./run-shellcheck.sh
+          command: docker run -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "./run-shellcheck.sh"
       - run:
           name: Web API - Test
-          command: npm run test:api
+          command: docker run -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "npm run test:api"
       - run:
           name: Web API - SonarQube
-          command: |
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            /home/app/sonar_home/bin/sonar-scanner \
-            -Dsonar.projectKey="${API_SONAR_KEY}" \
-            -Dsonar.branch.name="${CIRCLE_BRANCH}" \
-            -Dsonar.organization="${SONAR_ORG}" \
-            -Dsonar.projectBaseDir="web-api" \
-            -Dproject.settings="web-api/sonar-project.properties" \
-            -Dsonar.login="${API_SONAR_TOKEN}" \
-            -Dsonar.host.url="https://sonarcloud.io"
+          command: docker run -e SONAR_SCANNER_OPTS="-Xmx2048m" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "/home/app/sonar_home/bin/sonar-scanner -Dsonar.projectKey=\"${API_SONAR_KEY}\" -Dsonar.branch.name=\"${CIRCLE_BRANCH} -Dsonar.organization=\"${SONAR_ORG}\" -Dsonar.projectBaseDir=\"web-api\" -Dproject.settings=\"web-api/sonar-project.properties\" -Dsonar.login=\"${API_SONAR_TOKEN}\" -Dsonar.host.url=\"https://sonarcloud.io\""
 
   build-shared:
     machine:
@@ -64,7 +55,7 @@ jobs:
           command: docker build -t efcms -f Dockerfile .
       - run:
           name: Shared - Test
-          command: npm run test:shared
+          command: docker run -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" -e "EFCMS_DOMAIN=${EFCMS_DOMAIN}" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "npm run test:shared"
       - run:
           name: Shared - SonarQube
           command: |
@@ -82,7 +73,7 @@ jobs:
     machine:
       docker_layer_caching: true
     environment:
-      _JAVA_OPTIONS: '-Xms1024m -Xmx2048m'
+      _JAVA_OPTIONS: '-Xms2048m -Xmx4096m'
     resource_class: 2xlarge
     steps:
       - checkout
