@@ -287,61 +287,61 @@ jobs:
       - setupEnv
       - buildDockerImage
       - deployApiLayerEast:
-          layerNameCased: Public Puppeteer
-          serverlessRunName: puppeteer
+          layerNameCased: "Public Puppeteer"
+          serverlessRunName: "puppeteer"
           deployIf: $(./web-api/deploy-diff.sh $ENV web-api/runtimes/puppeteer) = "true"
       - deployApiLayerEast:
-          layerNameCased: Public ClamAV
-          serverlessRunName: clamav
+          layerNameCased: "Public ClamAV"
+          serverlessRunName: "clamav"
           deployIf: $(./web-api/deploy-diff.sh $ENV web-api/runtimes/clamav) = "true"
       - deployApiLayerEast:
-          layerNameCased: Public API
-          serverlessRunName: public-api
+          layerNameCased: "Public API"
+          serverlessRunName: "public-api"
       - deployApiLayerEast:
-          layerNameCased: API
-          serverlessRunName: api
+          layerNameCased: "API"
+          serverlessRunName: "api"
       - deployApiLayerEast:
-          layerNameCased: Cases
-          serverlessRunName: cases
+          layerNameCased: "Cases"
+          serverlessRunName: "cases"
       - deployApiLayerEast:
-          layerNameCased: Case Parties
-          serverlessRunName: case-parties
+          layerNameCased: "Case Parties"
+          serverlessRunName: "case-parties"
       - deployApiLayerEast:
-          layerNameCased: Case Meta
-          serverlessRunName: case-meta
+          layerNameCased: "Case Meta"
+          serverlessRunName: "case-meta"
       - deployApiLayerEast:
-          layerNameCased: Case Documents
-          serverlessRunName: case-documents
+          layerNameCased: "Case Documents"
+          serverlessRunName: "case-documents"
       - deployApiLayerEast:
-          layerNameCased: Case Deadlines
-          serverlessRunName: case-deadlines
+          layerNameCased: "Case Deadlines"
+          serverlessRunName: "case-deadlines"
       - deployApiLayerEast:
-          layerNameCased: Case Notes
-          serverlessRunName: case-notes
+          layerNameCased: "Case Notes"
+          serverlessRunName: "case-notes"
       - deployApiLayerEast:
-          layerNameCased: Users
-          serverlessRunName: users
+          layerNameCased: "Users"
+          serverlessRunName: "users"
       - deployApiLayerEast:
-          layerNameCased: Documents
-          serverlessRunName: documents
+          layerNameCased: "Documents"
+          serverlessRunName: "documents"
       - deployApiLayerEast:
-          layerNameCased: Work Items
-          serverlessRunName: work-items
+          layerNameCased: "Work Items"
+          serverlessRunName: "work-items"
       - deployApiLayerEast:
-          layerNameCased: Sections
-          serverlessRunName: sections
+          layerNameCased: "Sections"
+          serverlessRunName: "sections"
       - deployApiLayerEast:
-          layerNameCased: Trial Sessions
-          serverlessRunName: trial-sessions
+          layerNameCased: "Trial Sessions"
+          serverlessRunName: "trial-sessions"
       - deployApiLayerEast:
-          layerNameCased: Notifications
-          serverlessRunName: notifications
+          layerNameCased: "Notifications"
+          serverlessRunName: "notifications"
       - deployApiLayerEast:
-          layerNameCased: Streams
-          serverlessRunName: streams
+          layerNameCased: "Streams"
+          serverlessRunName: "streams"
       - deployApiLayerEast:
-          layerNameCased: Migrate
-          serverlessRunName: migrate
+          layerNameCased: "Migrate"
+          serverlessRunName: "migrate"
 
   deploy-api-west:
     machine:
@@ -351,61 +351,61 @@ jobs:
       - setupEnv
       - buildDockerImage
       - deployApiLayerWest:
-          layerNameCased: Public Puppeteer
-          serverlessRunName: puppeteer
+          layerNameCased: "Public Puppeteer"
+          serverlessRunName: "puppeteer"
           deployIf: $(./web-api/deploy-diff.sh $ENV web-api/runtimes/puppeteer) = "true"
       - deployApiLayerWest:
-          layerNameCased: Public ClamAV
-          serverlessRunName: clamav
+          layerNameCased: "Public ClamAV"
+          serverlessRunName: "clamav"
           deployIf: $(./web-api/deploy-diff.sh $ENV web-api/runtimes/clamav) = "true"
       - deployApiLayerWest:
-          layerNameCased: Public API
-          serverlessRunName: public-api
+          layerNameCased: "Public API"
+          serverlessRunName: "public-api"
       - deployApiLayerWest:
-          layerNameCased: API
-          serverlessRunName: api
+          layerNameCased: "API"
+          serverlessRunName: "api"
       - deployApiLayerWest:
-          layerNameCased: Cases
-          serverlessRunName: cases
+          layerNameCased: "Cases"
+          serverlessRunName: "cases"
       - deployApiLayerWest:
-          layerNameCased: Case Parties
-          serverlessRunName: case-parties
+          layerNameCased: "Case Parties"
+          serverlessRunName: "case-parties"
       - deployApiLayerWest:
-          layerNameCased: Case Meta
-          serverlessRunName: case-meta
+          layerNameCased: "Case Meta"
+          serverlessRunName: "case-meta"
       - deployApiLayerWest:
-          layerNameCased: Case Documents
-          serverlessRunName: case-documents
+          layerNameCased: "Case Documents"
+          serverlessRunName: "case-documents"
       - deployApiLayerWest:
-          layerNameCased: Case Deadlines
-          serverlessRunName: case-deadlines
+          layerNameCased: "Case Deadlines"
+          serverlessRunName: "case-deadlines"
       - deployApiLayerWest:
-          layerNameCased: Case Notes
-          serverlessRunName: case-notes
+          layerNameCased: "Case Notes"
+          serverlessRunName: "case-notes"
       - deployApiLayerWest:
-          layerNameCased: Users
-          serverlessRunName: users
+          layerNameCased: "Users"
+          serverlessRunName: "users"
       - deployApiLayerWest:
-          layerNameCased: Documents
-          serverlessRunName: documents
+          layerNameCased: "Documents"
+          serverlessRunName: "documents"
       - deployApiLayerWest:
-          layerNameCased: Work Items
-          serverlessRunName: work-items
+          layerNameCased: "Work Items"
+          serverlessRunName: "work-items"
       - deployApiLayerWest:
-          layerNameCased: Sections
-          serverlessRunName: sections
+          layerNameCased: "Sections"
+          serverlessRunName: "sections"
       - deployApiLayerWest:
-          layerNameCased: Trial Sessions
-          serverlessRunName: trial-sessions
+          layerNameCased: "Trial Sessions"
+          serverlessRunName: "trial-sessions"
       - deployApiLayerWest:
-          layerNameCased: Notifications
-          serverlessRunName: notifications
+          layerNameCased: "Notifications"
+          serverlessRunName: "notifications"
       - deployApiLayerWest:
-          layerNameCased: Streams
-          serverlessRunName: streams
+          layerNameCased: "Streams"
+          serverlessRunName: "streams"
       - deployApiLayerWest:
-          layerNameCased: Migrate
-          serverlessRunName: migrate
+          layerNameCased: "Migrate"
+          serverlessRunName: "migrate"
 
   switch-and-deploy-ui:
     machine:
