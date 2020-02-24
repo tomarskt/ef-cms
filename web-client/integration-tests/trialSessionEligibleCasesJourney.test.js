@@ -1,5 +1,5 @@
 import { Case } from '../../shared/src/business/entities/cases/Case';
-import { setupTest } from './helpers';
+import { setupTest, wait } from './helpers';
 import { uploadPetition } from './helpers';
 import captureCreatedCase from './journey/captureCreatedCase';
 import docketClerkCreatesATrialSession from './journey/docketClerkCreatesATrialSession';
@@ -11,9 +11,8 @@ import markAllCasesAsQCed from './journey/markAllCasesAsQCed';
 import petitionerLogin from './journey/petitionerLogIn';
 import petitionerViewsDashboard from './journey/petitionerViewsDashboard';
 import petitionsClerkLogIn from './journey/petitionsClerkLogIn';
-import petitionsClerkRunsBatchProcess from './journey/petitionsClerkRunsBatchProcess';
-import petitionsClerkSendsCaseToIRSHoldingQueue from './journey/petitionsClerkSendsCaseToIRSHoldingQueue';
 import petitionsClerkSetsATrialSessionsSchedule from './journey/petitionsClerkSetsATrialSessionsSchedule';
+import petitionsClerkSubmitsCaseToIrs from './journey/petitionsClerkSubmitsCaseToIrs';
 import petitionsClerkUpdatesFiledBy from './journey/petitionsClerkUpdatesFiledBy';
 import userSignsOut from './journey/petitionerSignsOut';
 
@@ -22,6 +21,10 @@ const test = setupTest();
 describe('Trial Session Eligible Cases Journey', () => {
   beforeAll(() => {
     jest.setTimeout(30000);
+  });
+
+  afterAll(() => {
+    test.closeSocket();
   });
 
   const trialLocation = `Madison, Wisconsin, ${Date.now()}`;
@@ -61,8 +64,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -87,8 +89,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -113,8 +114,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -126,7 +126,7 @@ describe('Trial Session Eligible Cases Journey', () => {
         ...overrides,
         caseType: 'CDP (Lien/Levy)',
         procedureType: 'Small',
-        receivedAtDay: '01',
+        receivedAtDay: '01', //
         receivedAtMonth: '02',
         receivedAtYear: '2019',
       };
@@ -139,8 +139,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -165,8 +164,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -411,6 +409,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       test.setState('modal.trialSessionId', test.trialSessionId);
 
       await test.runSequence('addCaseToTrialSessionSequence');
+      await wait(5000);
 
       await test.runSequence('gotoCaseDetailSequence', {
         docketNumber: createdDocketNumbers[0],

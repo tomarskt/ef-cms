@@ -14,9 +14,8 @@ import markAllCasesAsQCed from './journey/markAllCasesAsQCed';
 import petitionerLogin from './journey/petitionerLogIn';
 import petitionerViewsDashboard from './journey/petitionerViewsDashboard';
 import petitionsClerkLogIn from './journey/petitionsClerkLogIn';
-import petitionsClerkRunsBatchProcess from './journey/petitionsClerkRunsBatchProcess';
-import petitionsClerkSendsCaseToIRSHoldingQueue from './journey/petitionsClerkSendsCaseToIRSHoldingQueue';
 import petitionsClerkSetsATrialSessionsSchedule from './journey/petitionsClerkSetsATrialSessionsSchedule';
+import petitionsClerkSubmitsCaseToIrs from './journey/petitionsClerkSubmitsCaseToIrs';
 import petitionsClerkUpdatesFiledBy from './journey/petitionsClerkUpdatesFiledBy';
 import userSignsOut from './journey/petitionerSignsOut';
 
@@ -27,6 +26,9 @@ describe('Trial Session Eligible Cases Journey (judge)', () => {
     jest.setTimeout(30000);
   });
 
+  afterAll(() => {
+    test.closeSocket();
+  });
   const trialLocation = `Boise, Idaho, ${Date.now()}`;
   const overrides = {
     maxCases: 3,
@@ -60,8 +62,7 @@ describe('Trial Session Eligible Cases Journey (judge)', () => {
   userSignsOut(test);
   petitionsClerkLogIn(test);
   petitionsClerkUpdatesFiledBy(test, caseOverrides);
-  petitionsClerkSendsCaseToIRSHoldingQueue(test);
-  petitionsClerkRunsBatchProcess(test);
+  petitionsClerkSubmitsCaseToIrs(test);
   userSignsOut(test);
 
   docketClerkLogIn(test);

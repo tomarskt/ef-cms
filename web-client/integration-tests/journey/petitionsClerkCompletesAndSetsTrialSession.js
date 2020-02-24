@@ -1,3 +1,5 @@
+import { wait } from '../helpers';
+
 export default (test, overrides = {}) => {
   return it('petitions clerk completes a trial session before calendaring', async () => {
     await test.runSequence('gotoEditTrialSessionSequence', {
@@ -10,7 +12,7 @@ export default (test, overrides = {}) => {
 
     expect(test.getState('alertWarning')).toEqual({
       message:
-        'You must provide an address and judge to be able to set this trial session ',
+        'You must provide an address and a judge to be able to set this trial session ',
       title: 'This trial session requires additional information',
     });
 
@@ -49,6 +51,7 @@ export default (test, overrides = {}) => {
     expect(test.getState('currentPage')).toEqual('TrialSessionDetail');
 
     await test.runSequence('setTrialSessionCalendarSequence');
+    await wait(5000);
 
     if (overrides.hasPaper) {
       expect(test.getState('currentPage')).toEqual('SimplePdfPreviewPage');

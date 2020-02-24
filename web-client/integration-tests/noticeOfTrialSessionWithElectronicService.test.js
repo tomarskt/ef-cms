@@ -13,8 +13,7 @@ import petitionerViewsDashboard from './journey/petitionerViewsDashboard';
 
 import petitionsClerkCompletesAndSetsTrialSession from './journey/petitionsClerkCompletesAndSetsTrialSession';
 import petitionsClerkLogIn from './journey/petitionsClerkLogIn';
-import petitionsClerkRunsBatchProcess from './journey/petitionsClerkRunsBatchProcess';
-import petitionsClerkSendsCaseToIRSHoldingQueue from './journey/petitionsClerkSendsCaseToIRSHoldingQueue';
+import petitionsClerkSubmitsCaseToIrs from './journey/petitionsClerkSubmitsCaseToIrs';
 import petitionsClerkViewsDocketRecordAfterSettingTrial from './journey/petitionsClerkViewsDocketRecordAfterSettingTrial';
 
 import userSignsOut from './journey/petitionerSignsOut';
@@ -24,6 +23,10 @@ const test = setupTest();
 describe('Generate Notices of Trial Session with Electronically Service', () => {
   beforeAll(() => {
     jest.setTimeout(30000);
+  });
+
+  afterAll(() => {
+    test.closeSocket();
   });
 
   const caseCount = 2;
@@ -49,8 +52,7 @@ describe('Generate Notices of Trial Session with Electronically Service', () => 
     userSignsOut(test);
 
     petitionsClerkLogIn(test);
-    petitionsClerkSendsCaseToIRSHoldingQueue(test);
-    petitionsClerkRunsBatchProcess(test);
+    petitionsClerkSubmitsCaseToIrs(test);
     userSignsOut(test);
 
     docketClerkLogIn(test);
