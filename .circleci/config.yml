@@ -65,38 +65,37 @@ commands:
             ./wait-until.sh http://localhost:3000/api/swagger
             sleep 15
             npm run test:pa11y:<< parameters.config >> --node-flags --max-old-space-size=1024
-
-    runPa11yPublic:
-      describe: "Runs Pa11y on Public"
-      steps:
-        - run:
-          name: Pa11y - Public Site
-          command: |
-            AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:public > /tmp/pa11y/pa11y-server-public.txt &
-            sleep 15
-            npm run test:pa11y:public
+  runPa11yPublic:
+    describe: "Runs Pa11y on Public"
+    steps:
+      - run:
+        name: Pa11y - Public Site
+        command: |
+          AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:public > /tmp/pa11y/pa11y-server-public.txt &
+          sleep 15
+          npm run test:pa11y:public
   sonarQube:
-    description: "Runs SonarQube"
-      parameters:
-        apiKey:
-          type: string
-        token:
-          type: string
-        baseDir:
-          type: string
-      steps:
-        - run:
-          name: SonarQube (<< parameters.baseDir >>)
-          command: |
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            /home/app/sonar_home/bin/sonar-scanner \
-            -Dsonar.projectKey="<< parameters.apiKey >>" \
-            -Dsonar.branch.name="${CIRCLE_BRANCH}" \
-            -Dsonar.organization="${SONAR_ORG}" \
-            -Dsonar.projectBaseDir="<< parameters.baseDir >>" \
-            -Dproject.settings="<< parameters.baseDir >>/sonar-project.properties" \
-            -Dsonar.login="<< parameters.token >>" \
-            -Dsonar.host.url="https://sonarcloud.io"
+    describe: "Runs SonarQube"
+    parameters:
+      apiKey:
+        type: string
+      token:
+        type: string
+      baseDir:
+        type: string
+    steps:
+      - run:
+        name: SonarQube (<< parameters.baseDir >>)
+        command: |
+          export SONAR_SCANNER_OPTS="-Xmx2048m"
+          /home/app/sonar_home/bin/sonar-scanner \
+          -Dsonar.projectKey="<< parameters.apiKey >>" \
+          -Dsonar.branch.name="${CIRCLE_BRANCH}" \
+          -Dsonar.organization="${SONAR_ORG}" \
+          -Dsonar.projectBaseDir="<< parameters.baseDir >>" \
+          -Dproject.settings="<< parameters.baseDir >>/sonar-project.properties" \
+          -Dsonar.login="<< parameters.token >>" \
+          -Dsonar.host.url="https://sonarcloud.io"
 jobs:
   bundle:
     docker:
