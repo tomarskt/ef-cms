@@ -1,5 +1,26 @@
 version: 2.1
 commands:
+  setupEnv:
+    steps:
+      - run:
+          name: Setup Env
+          command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
+  buildDockerImage:
+    description: "Builds the docker image"
+    parameters:
+    steps:
+      - run:
+          name: Build Docker Image
+          command: |
+            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/puppeteer) = "true" ]]; then
+              cd web-api/runtimes/puppeteer && ./build.sh && cd ../../..
+            fi
+
+            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/clamav) = "true" ]]; then
+              cd web-api/runtimes/clamav && ./build.sh && cd ../../..
+            fi
+
+            docker build -t efcms -f Dockerfile .
   deployApiLayerEast:
     description: "A less-verbose means of deploying API Layers to East"
     parameters:
@@ -28,6 +49,28 @@ commands:
       - run:
           name: Deploy - Web API - Layers - << parameters.layerNameCased >> - us-west-1
           command: <<# parameters.deployIf >>docker run -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" -e "EFCMS_DOMAIN=${EFCMS_DOMAIN}" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "./web-api/run-serverless-<< parameters.serverlessRunName >>.sh ${ENV} us-east-1<</ parameters.deployIf >>"
+  sonarQube:
+    description: "Runs SonarQube"
+      parameters:
+        apiKey:
+          type: string
+        token:
+          type: string
+        baseDir:
+          type: string
+      steps:
+        - run:
+          name: SonarQube (<< parameters.baseDir >>)
+          command: |
+            export SONAR_SCANNER_OPTS="-Xmx2048m"
+            /home/app/sonar_home/bin/sonar-scanner \
+            -Dsonar.projectKey="<< parameters.apiKey >>" \
+            -Dsonar.branch.name="${CIRCLE_BRANCH}" \
+            -Dsonar.organization="${SONAR_ORG}" \
+            -Dsonar.projectBaseDir="<< parameters.baseDir >>" \
+            -Dproject.settings="<< parameters.baseDir >>/sonar-project.properties" \
+            -Dsonar.login="<< parameters.token >>" \
+            -Dsonar.host.url="https://sonarcloud.io"
 jobs:
   bundle:
     docker:
@@ -76,18 +119,10 @@ jobs:
       - run:
           name: Web API - Test
           command: npm run test:api
-      - run:
-          name: Web API - SonarQube
-          command: |
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            /home/app/sonar_home/bin/sonar-scanner \
-            -Dsonar.projectKey="${API_SONAR_KEY}" \
-            -Dsonar.branch.name="${CIRCLE_BRANCH}" \
-            -Dsonar.organization="${SONAR_ORG}" \
-            -Dsonar.projectBaseDir="web-api" \
-            -Dproject.settings="web-api/sonar-project.properties" \
-            -Dsonar.login="${API_SONAR_TOKEN}" \
-            -Dsonar.host.url="https://sonarcloud.io"
+      - sonarQube:
+        - apiKey: "${API_SONAR_KEY}"
+        - baseDir: "web-api"
+        - token: "${API_SONAR_TOKEN}"
 
   build-shared:
     docker:
@@ -103,18 +138,10 @@ jobs:
       - run:
           name: Shared - Test
           command: npm run test:shared
-      - run:
-          name: Shared - SonarQube
-          command: |
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            /home/app/sonar_home/bin/sonar-scanner \
-            -Dsonar.projectKey="${SHARED_SONAR_KEY}" \
-            -Dsonar.branch.name="${CIRCLE_BRANCH}" \
-            -Dsonar.organization="${SONAR_ORG}" \
-            -Dsonar.projectBaseDir="shared" \
-            -Dproject.settings="shared/sonar-project.properties" \
-            -Dsonar.login="${SHARED_SONAR_TOKEN}" \
-            -Dsonar.host.url="https://sonarcloud.io"
+      - sonarQube:
+        - apiKey: "${SHARED_SONAR_KEY}"
+        - baseDir: "shared"
+        - token: "${SHARED_SONAR_TOKEN}"
 
   build-client:
     docker:
@@ -134,18 +161,10 @@ jobs:
             AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npm run start:api:ci > /dev/null &
             ./wait-until.sh http://localhost:3000/api/swagger
             AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npm run test:client
-      - run:
-          name: Web Client - SonarQube
-          command: |
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            /home/app/sonar_home/bin/sonar-scanner \
-            -Dsonar.projectKey="${UI_SONAR_KEY}" \
-            -Dsonar.branch.name="${CIRCLE_BRANCH}" \
-            -Dsonar.organization="${SONAR_ORG}" \
-            -Dsonar.projectBaseDir="web-client" \
-            -Dproject.settings="web-client/sonar-project.properties" \
-            -Dsonar.login="${UI_SONAR_TOKEN}" \
-            -Dsonar.host.url="https://sonarcloud.io"
+      - sonarQube:
+        - apiKey: "${UI_SONAR_KEY}"
+        - baseDir: "web-client"
+        - token: "${UI_SONAR_TOKEN}"
 
   e2e-pa11y:
     docker:
@@ -236,21 +255,8 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
-      - run:
-          name: Setup Env
-          command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
-      - run:
-          name: Build Docker Image
-          command: |
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/puppeteer) = "true" ]]; then
-              cd web-api/runtimes/puppeteer && ./build.sh && cd ../../..
-            fi
-
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/clamav) = "true" ]]; then
-              cd web-api/runtimes/clamav && ./build.sh && cd ../../..
-            fi
-
-            docker build -t efcms -f Dockerfile .
+      - setupEnv
+      - buildDockerImage
       - run:
           name: Setup Post Confirmation Arn
           command: echo "export POST_CONFIRMATION_ROLE_ARN=$(./get-post-confirmation-role-arn.sh $CIRCLE_BRANCH)" >> $BASH_ENV
@@ -278,21 +284,8 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
-      - run:
-          name: Setup Env
-          command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
-      - run:
-          name: Build Docker Image
-          command: |
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/puppeteer) = "true" ]]; then
-              cd web-api/runtimes/puppeteer && ./build.sh && cd ../../..
-            fi
-
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/clamav) = "true" ]]; then
-              cd web-api/runtimes/clamav && ./build.sh && cd ../../..
-            fi
-
-            docker build -t efcms -f Dockerfile .
+      - setupEnv
+      - buildDockerImage
       - deployApiLayerEast:
           layerNameCased: Public Puppeteer
           serverlessRunName: puppeteer
@@ -355,21 +348,8 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
-      - run:
-          name: Setup Env
-          command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
-      - run:
-          name: Build Docker Image
-          command: |
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/puppeteer) = "true" ]]; then
-              cd web-api/runtimes/puppeteer && ./build.sh && cd ../../..
-            fi
-
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/clamav) = "true" ]]; then
-              cd web-api/runtimes/clamav && ./build.sh && cd ../../..
-            fi
-
-            docker build -t efcms -f Dockerfile .
+      - setupEnv
+      - buildDockerImage
       - deployApiLayerWest:
           layerNameCased: Public Puppeteer
           serverlessRunName: puppeteer
@@ -432,21 +412,8 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
-      - run:
-          name: Setup Env
-          command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
-      - run:
-          name: Build Docker Image
-          command: |
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/puppeteer) = "true" ]]; then
-              cd web-api/runtimes/puppeteer && ./build.sh && cd ../../..
-            fi
-
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/clamav) = "true" ]]; then
-              cd web-api/runtimes/clamav && ./build.sh && cd ../../..
-            fi
-
-            docker build -t efcms -f Dockerfile .
+      - setupEnv
+      - buildDockerImage
       - run:
           name: 'Deploy - Switch environment color'
           command: docker run -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" -e "EFCMS_DOMAIN=${EFCMS_DOMAIN}" --rm efcms /bin/sh -c "cd web-api && ./switch-environment-color.sh ${ENV}"
@@ -465,9 +432,7 @@ jobs:
       - run:
           name: Build Docker Image
           command: docker build -t efcms -f Dockerfile .
-      - run:
-          name: Setup Env
-          command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
+      - setupEnv
       - run:
           name: 'Deploy - Web API - Route53'
           command: docker run -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" -e "EFCMS_DOMAIN=${EFCMS_DOMAIN}" --rm efcms /bin/sh -c "cd web-api && ./setup-regional-route53.sh ${ENV}"
