@@ -49,6 +49,32 @@ commands:
       - run:
           name: Deploy - Web API - Layers - << parameters.layerNameCased >> - us-west-1
           command: <<# parameters.deployIf >>docker run -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" -e "EFCMS_DOMAIN=${EFCMS_DOMAIN}" -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "./web-api/run-serverless-<< parameters.serverlessRunName >>.sh ${ENV} us-east-1<</ parameters.deployIf >>"
+  runPa11y:
+    describe: "Runs Pa11y"
+    parameters:
+      config:
+        type: string
+    steps:
+      - run:
+          name: Pa11y - Web Client << parameters.config >>
+          command: |
+            npm run build:all
+            SLS_DEBUG="*" RUN_DIR=dist AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:api:ci start:client:ci > /tmp/pa11y/pa11y-server-<< parameters.config >>.txt &
+            ./wait-until-services.sh
+            ./wait-until.sh http://localhost:9000
+            ./wait-until.sh http://localhost:3000/api/swagger
+            sleep 15
+            npm run test:pa11y:<< parameters.config >> --node-flags --max-old-space-size=1024
+
+    runPa11yPublic:
+      describe: "Runs Pa11y on Public"
+      steps:
+        - run:
+          name: Pa11y - Public Site
+          command: |
+            AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:public > /tmp/pa11y/pa11y-server-public.txt &
+            sleep 15
+            npm run test:pa11y:public
   sonarQube:
     description: "Runs SonarQube"
       parameters:
@@ -181,44 +207,13 @@ jobs:
       - run:
           name: Create Pa11y Artifacts Directory
           command: mkdir /tmp/pa11y
-      - run:
-          name: Pa11y - Web Client 1
-          command: |
-            npm run build:all
-            SLS_DEBUG="*" RUN_DIR=dist AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:api:ci start:client:ci > /tmp/pa11y/pa11y-server-1.txt &
-            ./wait-until-services.sh
-            ./wait-until.sh http://localhost:9000
-            ./wait-until.sh http://localhost:3000/api/swagger
-            sleep 15
-            npm run test:pa11y:1 --node-flags --max-old-space-size=1024
-      - run:
-          name: Pa11y - Web Client 2
-          command: |
-            npm run build:all
-            SLS_DEBUG="*" RUN_DIR=dist AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:api:ci start:client:ci > /tmp/pa11y/pa11y-server-2.txt &
-            ./wait-until-services.sh
-            ./wait-until.sh http://localhost:9000
-            ./wait-until.sh http://localhost:3000/api/swagger
-            sleep 15
-            npm run test:pa11y:2 --node-flags --max-old-space-size=1024
-      - run:
-          name: Pa11y - Web Client 3
-          command: |
-            npm run build:all
-            SLS_DEBUG="*" RUN_DIR=dist AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:api:ci start:client:ci > /tmp/pa11y/pa11y-server-2.txt &
-            ./wait-until-services.sh
-            ./wait-until.sh http://localhost:9000
-            ./wait-until.sh http://localhost:3000/api/swagger
-            sleep 15
-            npm run test:pa11y:3 --node-flags --max-old-space-size=1024
-      - run:
-          name: Pa11y - Public Site
-          command: |
-            AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:public > /tmp/pa11y/pa11y-server-public.txt &
-            sleep 15
-            npm run test:pa11y:public
-      - store_artifacts:
-          path: /tmp/pa11y
+      - runPa11y:
+          config: "1"
+      - runPa11y:
+          config: "2"
+      - runPa11y:
+          config: "3"
+      - runPa11yPublic
 
   e2e-cypress:
     docker:
