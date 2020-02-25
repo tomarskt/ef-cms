@@ -1,5 +1,4 @@
 import { CaseLink } from '../../ustc-ui/CaseLink/CaseLink';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { connect } from '@cerebral/react';
 import { state } from 'cerebral';
 import React from 'react';
@@ -28,11 +27,10 @@ export const IndividualWorkQueueOutbox = connect(
                 <th className="small">Sent</th>
               )}
               <th>Case title</th>
-              <th aria-label="Status Icon" className="padding-right-0">
-                &nbsp;
-              </th>
               <th>Document</th>
-              {!workQueueHelper.hideFiledByColumn && <th>Filed by</th>}
+              {!workQueueHelper.hideFiledByColumn && (
+                <th>{workQueueHelper.outboxFiledByColumnLabel} by</th>
+              )}
               {!workQueueHelper.hideCaseStatusColumn && <th>Case status</th>}
               {workQueueHelper.showAssignedToColumn && (
                 <th className="max-width-7">
@@ -64,17 +62,6 @@ export const IndividualWorkQueueOutbox = connect(
                 )}
                 <td className="message-queue-row message-queue-case-title">
                   {item.caseTitle}
-                </td>
-                <td className="message-queue-row has-icon padding-right-0">
-                  {item.showBatchedStatusIcon && (
-                    <FontAwesomeIcon
-                      aria-hidden="false"
-                      aria-label="batched for IRS"
-                      className="iconStatusBatched"
-                      icon={['far', 'clock']}
-                      size="lg"
-                    />
-                  )}
                 </td>
                 <td className="message-queue-row message-queue-document">
                   <div className="message-document-title">

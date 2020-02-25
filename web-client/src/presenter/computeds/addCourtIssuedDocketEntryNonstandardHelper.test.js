@@ -1,12 +1,8 @@
-import { Document } from '../../../../shared/src/business/entities/Document';
 import { addCourtIssuedDocketEntryNonstandardHelper as addCourtIssuedDocketEntryNonstandardHelperComputed } from './addCourtIssuedDocketEntryNonstandardHelper';
 import { runCompute } from 'cerebral/test';
 import { withAppContextDecorator } from '../../withAppContext';
 
 const state = {
-  constants: {
-    COURT_ISSUED_EVENT_CODES: Document.COURT_ISSUED_EVENT_CODES,
-  },
   form: {},
 };
 
@@ -19,17 +15,19 @@ describe('addCourtIssuedDocketEntryNonstandardHelper', () => {
     state.form = {};
   });
 
-  it('returns showFreeText = true when state.form.eventCode is O5 (scenario = Type A)', () => {
-    let testState = { ...state, form: { eventCode: 'O5' } };
+  it('returns showFreeText = true when state.form.eventCode is O (scenario = Type A)', () => {
+    let testState = { ...state, form: { eventCode: 'O' } };
 
     const result = runCompute(addCourtIssuedDocketEntryNonstandardHelper, {
       state: testState,
     });
     expect(result).toMatchObject({
-      showDate: false,
+      showDateFirst: false,
+      showDateLast: false,
       showDocketNumbers: false,
       showFreeText: true,
       showJudge: false,
+      showTrialLocation: false,
     });
   });
 
@@ -40,10 +38,12 @@ describe('addCourtIssuedDocketEntryNonstandardHelper', () => {
       state: testState,
     });
     expect(result).toMatchObject({
-      showDate: false,
+      showDateFirst: false,
+      showDateLast: false,
       showDocketNumbers: false,
       showFreeText: true,
       showJudge: true,
+      showTrialLocation: false,
     });
   });
 
@@ -54,38 +54,96 @@ describe('addCourtIssuedDocketEntryNonstandardHelper', () => {
       state: testState,
     });
     expect(result).toMatchObject({
-      showDate: false,
+      showDateFirst: false,
+      showDateLast: false,
       showDocketNumbers: true,
       showFreeText: false,
       showJudge: false,
+      showTrialLocation: false,
     });
   });
 
-  it('returns showDate = true and showFreeText = true when state.form.eventCode is OAP (scenario = Type D)', () => {
+  it('returns showDateFirst = true and showFreeText = true when state.form.eventCode is OAP (scenario = Type D)', () => {
     let testState = { ...state, form: { eventCode: 'OAP' } };
 
     const result = runCompute(addCourtIssuedDocketEntryNonstandardHelper, {
       state: testState,
     });
     expect(result).toMatchObject({
-      showDate: true,
+      dateLabel: 'Date',
+      showDateFirst: true,
+      showDateLast: false,
       showDocketNumbers: false,
       showFreeText: true,
       showJudge: false,
+      showTrialLocation: false,
     });
   });
 
-  it('returns showDate = true when state.form.eventCode is OFFX (scenario = Type E)', () => {
+  it('returns showDateFirst = true when state.form.eventCode is OFFX (scenario = Type E)', () => {
     let testState = { ...state, form: { eventCode: 'OFFX' } };
 
     const result = runCompute(addCourtIssuedDocketEntryNonstandardHelper, {
       state: testState,
     });
     expect(result).toMatchObject({
-      showDate: true,
+      dateLabel: 'Date',
+      showDateFirst: true,
+      showDateLast: false,
       showDocketNumbers: false,
       showFreeText: false,
       showJudge: false,
+      showTrialLocation: false,
+    });
+  });
+
+  it('returns showJudge = true and showTrialLocation = true when state.form.eventCode is FTRL (scenario = Type F)', () => {
+    let testState = { ...state, form: { eventCode: 'FTRL' } };
+
+    const result = runCompute(addCourtIssuedDocketEntryNonstandardHelper, {
+      state: testState,
+    });
+    expect(result).toMatchObject({
+      showDateFirst: false,
+      showDateLast: false,
+      showDocketNumbers: false,
+      showFreeText: false,
+      showJudge: true,
+      showTrialLocation: true,
+    });
+  });
+
+  it('returns showDateFirst = true and showTrialLocation = true when state.form.eventCode is NTD (scenario = Type G)', () => {
+    let testState = { ...state, form: { eventCode: 'NTD' } };
+
+    const result = runCompute(addCourtIssuedDocketEntryNonstandardHelper, {
+      state: testState,
+    });
+    expect(result).toMatchObject({
+      dateLabel: 'Date',
+      showDateFirst: true,
+      showDateLast: false,
+      showDocketNumbers: false,
+      showFreeText: false,
+      showJudge: false,
+      showTrialLocation: true,
+    });
+  });
+
+  it('returns showDateLast = true and showFreeText = true when state.form.eventCode is TRAN (scenario = Type H)', () => {
+    let testState = { ...state, form: { eventCode: 'TRAN' } };
+
+    const result = runCompute(addCourtIssuedDocketEntryNonstandardHelper, {
+      state: testState,
+    });
+    expect(result).toMatchObject({
+      dateLabel: 'Date of trial/hearing',
+      showDateFirst: false,
+      showDateLast: true,
+      showDocketNumbers: false,
+      showFreeText: true,
+      showJudge: false,
+      showTrialLocation: false,
     });
   });
 
@@ -108,6 +166,17 @@ describe('addCourtIssuedDocketEntryNonstandardHelper', () => {
     });
     expect(result).toMatchObject({
       freeTextLabel: 'What is this notice for?',
+    });
+  });
+
+  it('returns default freeTextLabel if the selected eventCode is not NOT or O', () => {
+    let testState = { ...state, form: { eventCode: 'WRIT' } };
+
+    const result = runCompute(addCourtIssuedDocketEntryNonstandardHelper, {
+      state: testState,
+    });
+    expect(result).toMatchObject({
+      freeTextLabel: 'Enter description',
     });
   });
 });

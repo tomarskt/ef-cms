@@ -1,3 +1,4 @@
+import { ContactFactory } from '../../shared/src/business/entities/contacts/ContactFactory';
 import {
   assignWorkItems,
   findWorkItemByCaseId,
@@ -25,9 +26,9 @@ describe('Create a work item', () => {
   let notificationsBefore;
   let decisionWorkItem;
 
-  it('login as the docketclerk and cache the initial inbox counts', async () => {
-    await loginAs(test, 'docketclerk');
+  loginAs(test, 'docketclerk');
 
+  it('login as the docketclerk and cache the initial inbox counts', async () => {
     await getFormattedDocumentQCMyInbox(test);
     qcMyInboxCountBefore = getInboxCount(test);
 
@@ -37,9 +38,20 @@ describe('Create a work item', () => {
     notificationsBefore = getNotifications(test);
   });
 
+  loginAs(test, 'petitioner');
   it('login as a tax payer and create a case', async () => {
-    await loginAs(test, 'petitioner');
-    caseDetail = await uploadPetition(test);
+    caseDetail = await uploadPetition(test, {
+      contactSecondary: {
+        address1: '734 Cowley Parkway',
+        city: 'Somewhere',
+        countryType: 'domestic',
+        name: 'Secondary Person',
+        phone: '+1 (884) 358-9729',
+        postalCode: '77546',
+        state: 'CT',
+      },
+      partyType: ContactFactory.PARTY_TYPES.petitionerSpouse,
+    });
   });
 
   it('petitioner uploads the external documents', async () => {
@@ -48,9 +60,8 @@ describe('Create a work item', () => {
     await uploadExternalDecisionDocument(test);
   });
 
+  loginAs(test, 'docketclerk');
   it('login as the docketclerk and verify there are 3 document qc section inbox entries', async () => {
-    await loginAs(test, 'docketclerk');
-
     const documentQCSectionInbox = await getFormattedDocumentQCSectionInbox(
       test,
     );
@@ -126,5 +137,24 @@ describe('Create a work item', () => {
       myInboxUnreadCount: notificationsBefore.myInboxUnreadCount,
       qcUnreadCount: notificationsBefore.qcUnreadCount + 2,
     });
+  });
+
+  it('docket clerk QCs a document, updates the document title, and generates a Notice of Docket Change', async () => {
+    await test.runSequence('gotoEditDocketEntrySequence', {
+      docketNumber: caseDetail.docketNumber,
+      documentId: decisionWorkItem.document.documentId,
+    });
+
+    await test.runSequence('updateDocketEntryFormValueSequence', {
+      key: 'eventCode',
+      value: 'A',
+    });
+
+    await test.runSequence('completeDocketEntryQCSequence');
+
+    const noticeDocument = test.getState('caseDetail.documents.5');
+    expect(noticeDocument.documentType).toEqual('Notice of Docket Change');
+    expect(noticeDocument.servedAt).toBeDefined();
+    expect(test.getState('showModal')).toEqual('PaperServiceConfirmModal');
   });
 });

@@ -3,20 +3,18 @@ const { coverLogo } = require('../assets/coverLogo');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 /**
- * a helper function which creates a coversheet, prepends it to a pdf, and returns the new pdf
+ * a helper function which assembles the correct data to be used in the generation of a PDF
  *
  * @param {object} options the providers object
  * @param {object} options.applicationContext the application context
  * @param {string} options.caseEntity the case entity associated with the document we are creating the cover for
  * @param {object} options.documentEntity the document entity we are creating the cover for
- * @param {object} options.pdfData the original document pdf data
- * @returns {object} the new pdf with a coversheet attached
+ * @returns {object} the key/value pairs of computed strings
  */
-exports.addCoverToPdf = async ({
+exports.generateCoverSheetData = ({
   applicationContext,
   caseEntity,
   documentEntity,
-  pdfData,
 }) => {
   const isLodged = documentEntity.lodged;
   const { isPaper } = documentEntity;
@@ -48,14 +46,19 @@ exports.addCoverToPdf = async ({
   }
 
   const dateFiledFormatted =
-    (documentEntity.createdAt &&
+    (documentEntity.filingDate &&
       applicationContext
         .getUtilities()
-        .formatDateString(documentEntity.createdAt, 'MMDDYYYY')) ||
+        .formatDateString(documentEntity.filingDate, 'MMDDYYYY')) ||
     null;
 
   const caseCaption = caseEntity.caseCaption || Case.getCaseCaption(caseEntity);
-  const caseCaptionNames = Case.getCaseCaptionNames(caseCaption);
+  let caseCaptionNames = applicationContext.getCaseCaptionNames(caseCaption);
+  let caseCaptionPostfix = '';
+  if (caseCaptionNames !== caseCaption) {
+    caseCaptionNames += ', ';
+    caseCaptionPostfix = caseCaption.replace(caseCaptionNames, '');
+  }
 
   let documentTitle =
     documentEntity.documentTitle || documentEntity.documentType;
@@ -65,6 +68,7 @@ exports.addCoverToPdf = async ({
 
   const coverSheetData = {
     caseCaptionPetitioner: caseCaptionNames,
+    caseCaptionPostfix,
     caseCaptionRespondent: 'Commissioner of Internal Revenue',
     dateFiled: isLodged ? '' : dateFiledFormatted,
     dateLodged: isLodged ? dateFiledFormatted : '',
@@ -78,19 +82,41 @@ exports.addCoverToPdf = async ({
     mailingDate: documentEntity.mailingDate || '',
     originallyFiledElectronically: !documentEntity.isPaper,
   };
+  return coverSheetData;
+};
+/**
+ * a helper function which creates a coversheet, prepends it to a pdf, and returns the new pdf
+ *
+ * @param {object} options the providers object
+ * @param {object} options.applicationContext the application context
+ * @param {string} options.caseEntity the case entity associated with the document we are creating the cover for
+ * @param {object} options.documentEntity the document entity we are creating the cover for
+ * @param {object} options.pdfData the original document pdf data
+ * @returns {object} the new pdf with a coversheet attached
+ */
+exports.addCoverToPdf = async ({
+  applicationContext,
+  caseEntity,
+  documentEntity,
+  pdfData,
+}) => {
+  const isLodged = documentEntity.lodged;
+  const { isPaper } = documentEntity;
+
+  const coverSheetData = exports.generateCoverSheetData({
+    applicationContext,
+    caseEntity,
+    documentEntity,
+  });
 
   // create pdfDoc object from file data
-  applicationContext.logger.time('Loading the PDF');
   const pdfDoc = await PDFDocument.load(pdfData);
-  applicationContext.logger.timeEnd('Loading the PDF');
 
   // Embed font to use for cover page generation
-  applicationContext.logger.time('Embed Font');
   const helveticaFont = pdfDoc.embedStandardFont(StandardFonts.Helvetica);
   const helveticaBoldFont = pdfDoc.embedStandardFont(
     StandardFonts.HelveticaBold,
   );
-  applicationContext.logger.timeEnd('Embed Font');
 
   // Dimensions of cover page - 8.5"x11" @ 300dpi
   const dimensionsX = 2550;
@@ -125,18 +151,14 @@ exports.addCoverToPdf = async ({
       : minimumAcceptableWidth;
 
   // USTC Seal (png) to embed in header
-  applicationContext.logger.time('Embed PNG');
   const ustcSealBytes = new Uint8Array(coverLogo);
   const pngSeal = await pdfDoc.embedPng(ustcSealBytes);
-  applicationContext.logger.timeEnd('Embed PNG');
 
   // Generate cover page
-  applicationContext.logger.time('Generate Cover Page');
   const coverPage = pdfDoc.insertPage(
     0,
     coverPageDimensions.map(dim => pageScaler(dim)),
   );
-  applicationContext.logger.timeEnd('Generate Cover Page');
 
   const paddedLineHeight = (fontSize = defaultFontSize) => {
     return fontSize * 0.25 + fontSize;
@@ -296,7 +318,7 @@ exports.addCoverToPdf = async ({
   };
 
   const contentPetitionerLabel = {
-    content: 'Petitioner(s)',
+    content: getContentByKey('caseCaptionPostfix'),
     fontSize: fontSizeCaption,
     xPos: 531,
     yPos: getYOffsetFromPreviousContentArea(
@@ -515,14 +537,12 @@ exports.addCoversheetInteractor = async ({
   caseId,
   documentId,
 }) => {
-  applicationContext.logger.time('Fetching the Case');
   const caseRecord = await applicationContext
     .getPersistenceGateway()
     .getCaseByCaseId({
       applicationContext,
       caseId,
     });
-  applicationContext.logger.timeEnd('Fetching the Case');
 
   const caseEntity = new Case(caseRecord, { applicationContext });
 
@@ -534,7 +554,6 @@ exports.addCoversheetInteractor = async ({
     document => document.documentId === documentId,
   );
 
-  applicationContext.logger.time('Fetching S3 File');
   const { Body: pdfData } = await applicationContext
     .getStorageClient()
     .getObject({
@@ -542,7 +561,6 @@ exports.addCoversheetInteractor = async ({
       Key: documentId,
     })
     .promise();
-  applicationContext.logger.timeEnd('Fetching S3 File');
 
   const newPdfData = await exports.addCoverToPdf({
     applicationContext,
@@ -553,7 +571,6 @@ exports.addCoversheetInteractor = async ({
 
   documentEntity.setAsProcessingStatusAsCompleted();
 
-  applicationContext.logger.time('Updating Document Status');
   await applicationContext
     .getPersistenceGateway()
     .updateDocumentProcessingStatus({
@@ -561,13 +578,12 @@ exports.addCoversheetInteractor = async ({
       caseId,
       documentIndex,
     });
-  applicationContext.logger.timeEnd('Updating Document Status');
 
-  applicationContext.logger.time('Saving S3 Document');
-  await applicationContext
-    .getPersistenceGateway()
-    .saveDocument({ applicationContext, document: newPdfData, documentId });
-  applicationContext.logger.timeEnd('Saving S3 Document');
+  await applicationContext.getPersistenceGateway().saveDocumentFromLambda({
+    applicationContext,
+    document: newPdfData,
+    documentId,
+  });
 
   return newPdfData;
 };

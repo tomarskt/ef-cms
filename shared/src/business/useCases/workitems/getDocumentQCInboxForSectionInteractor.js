@@ -1,6 +1,5 @@
 const {
   DOCKET_SECTION,
-  IRS_BATCH_SYSTEM_SECTION,
   PETITIONS_SECTION,
 } = require('../../entities/WorkQueue');
 const {
@@ -8,6 +7,7 @@ const {
   ROLE_PERMISSIONS,
 } = require('../../../authorization/authorizationClientService');
 const { UnauthorizedError } = require('../../../errors/errors');
+const { WorkItem } = require('../../entities/WorkItem');
 
 /**
  *
@@ -29,7 +29,7 @@ exports.getDocumentQCInboxForSectionInteractor = async ({
   }
 
   let sectionToShow = section;
-  if (section !== IRS_BATCH_SYSTEM_SECTION && section !== PETITIONS_SECTION) {
+  if (section !== PETITIONS_SECTION) {
     sectionToShow = DOCKET_SECTION;
   }
 
@@ -40,5 +40,5 @@ exports.getDocumentQCInboxForSectionInteractor = async ({
       section: sectionToShow,
     });
 
-  return workItems;
+  return WorkItem.validateRawCollection(workItems, { applicationContext });
 };

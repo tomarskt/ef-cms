@@ -1,4 +1,4 @@
-const joi = require('joi-browser');
+const joi = require('@hapi/joi');
 const {
   ExternalDocumentFactory,
 } = require('../externalDocument/ExternalDocumentFactory');
@@ -12,7 +12,7 @@ const {
 const {
   VALIDATION_ERROR_MESSAGES,
 } = require('../externalDocument/ExternalDocumentInformationFactory');
-const { includes, omit } = require('lodash');
+const { Document } = require('../Document');
 
 DocketEntryFactory.VALIDATION_ERROR_MESSAGES = {
   ...VALIDATION_ERROR_MESSAGES,
@@ -71,7 +71,7 @@ function DocketEntryFactory(rawProps) {
     }
   };
 
-  let schema = {
+  let schema = joi.object().keys({
     addToCoversheet: joi.boolean(),
     additionalInfo: joi.string(),
     additionalInfo2: joi.string(),
@@ -88,7 +88,7 @@ function DocketEntryFactory(rawProps) {
     hasSupportingDocuments: joi.boolean(),
     lodged: joi.boolean(),
     ordinalValue: joi.string().optional(),
-    previousDocument: joi.string().optional(),
+    previousDocument: joi.object().optional(),
     primaryDocumentFile: joi.object().optional(),
     primaryDocumentFileSize: joi.when('primaryDocumentFile', {
       is: joi.exist().not(null),
@@ -106,7 +106,7 @@ function DocketEntryFactory(rawProps) {
       .max('now')
       .optional(),
     trialLocation: joi.string().optional(),
-  };
+  });
 
   let schemaOptionalItems = {
     certificateOfServiceDate: joi
@@ -127,33 +127,37 @@ function DocketEntryFactory(rawProps) {
   let customValidate;
 
   const addToSchema = itemName => {
-    schema[itemName] = schemaOptionalItems[itemName];
+    schema = schema.keys({
+      [itemName]: schemaOptionalItems[itemName],
+    });
   };
 
   const exDoc = ExternalDocumentFactory.get(rawProps);
+  const docketEntryExternalDocumentSchema = exDoc.getSchema();
 
-  const externalDocumentOmit = ['category'];
-
-  const docketEntryExternalDocumentSchema = omit(
-    exDoc.getSchema(),
-    externalDocumentOmit,
+  schema = schema.concat(docketEntryExternalDocumentSchema).concat(
+    joi.object({
+      category: joi.string().optional(), // omitting category
+    }),
   );
-  schema = { ...schema, ...docketEntryExternalDocumentSchema };
 
   if (rawProps.certificateOfService === true) {
     addToSchema('certificateOfServiceDate');
   }
 
+  const objectionDocumentTypes = [
+    ...Document.CATEGORY_MAP['Motion'].map(entry => {
+      return entry.documentType;
+    }),
+    'Motion to Withdraw Counsel (filed by petitioner)',
+    'Motion to Withdraw as Counsel',
+    'Application to Take Deposition',
+  ];
+
   if (
-    rawProps.category === 'Motion' ||
-    includes(
-      [
-        'Motion to Withdraw Counsel',
-        'Motion to Withdraw As Counsel',
-        'Application to Take Deposition',
-      ],
-      rawProps.documentType,
-    )
+    objectionDocumentTypes.includes(rawProps.documentType) ||
+    (['AMAT', 'ADMT'].includes(rawProps.eventCode) &&
+      objectionDocumentTypes.includes(rawProps.previousDocument.documentType))
   ) {
     addToSchema('objections');
   }

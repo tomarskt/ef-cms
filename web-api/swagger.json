@@ -532,6 +532,58 @@
         }
       }
     },
+    "/case-parties/{caseId}/contact-secondary": {
+      "parameters": [
+        {
+          "name": "caseId",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "put": {
+        "tags": ["cases"],
+        "summary": "Updates the secondary contact info on a case",
+        "description": "Updates the secondary contact info on a case.\n",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/case"
+            }
+          }
+        },
+        "security": [
+          {
+            "CognitoUserPool": []
+          }
+        ]
+      },
+      "options": {
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Methods": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Credentials": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Headers": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
     "/cases/paper": {
       "post": {
         "tags": ["cases"],
@@ -893,7 +945,7 @@
         }
       }
     },
-    "/cases/{caseId}/block": {
+    "/case-meta/{caseId}/block": {
       "parameters": [
         {
           "name": "caseId",
@@ -964,7 +1016,65 @@
         }
       }
     },
-    "/cases/{caseId}/high-priority": {
+    "/cases/{caseId}/remove-pending/{documentId}": {
+      "parameters": [
+        {
+          "name": "caseId",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "documentId",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "delete": {
+        "tags": ["cases"],
+        "summary": "removes a pending item from a case",
+        "description": "removes a pending item from a case.\n",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/case"
+            }
+          }
+        },
+        "security": [
+          {
+            "CognitoUserPool": []
+          }
+        ]
+      },
+      "options": {
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Methods": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Credentials": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Headers": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/case-meta/{caseId}/high-priority": {
       "parameters": [
         {
           "name": "caseId",
@@ -1035,7 +1145,7 @@
         }
       }
     },
-    "/cases/{caseId}/case-context": {
+    "/case-meta/{caseId}/case-context": {
       "parameters": [
         {
           "name": "caseId",
@@ -1088,7 +1198,7 @@
         }
       }
     },
-    "/cases/{caseId}/consolidate-case": {
+    "/case-meta/{caseId}/consolidate-case": {
       "parameters": [
         {
           "name": "caseId",
@@ -1101,6 +1211,34 @@
         "tags": ["cases"],
         "summary": "Consolidates two or more cases associated with the given case ids.",
         "description": "Consolidates two or more cases associated with the given case ids.\n",
+        "produces": ["application/json"],
+        "consumes": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/case"
+            }
+          }
+        },
+        "security": [
+          {
+            "CognitoUserPool": []
+          }
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "caseIdsToRemove",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": ["cases"],
+        "summary": "Unconsolidates the cases passed in the query string.",
+        "description": "Unconsolidates the cases passed in the query string.\n",
         "produces": ["application/json"],
         "consumes": ["application/json"],
         "responses": {
@@ -1278,6 +1416,58 @@
         "tags": ["documents"],
         "summary": "updates a current docket entry on a case",
         "description": "Updates a docket entry/document and attaches it to a case.\n",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/case"
+            }
+          }
+        },
+        "security": [
+          {
+            "CognitoUserPool": []
+          }
+        ]
+      },
+      "options": {
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Methods": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Credentials": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Headers": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/case-documents/{caseId}/docket-entry-meta": {
+      "parameters": [
+        {
+          "name": "caseId",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "put": {
+        "tags": ["documents", "docket record"],
+        "summary": "Updates the docket entry meta data on a case",
+        "description": "Updates the docket entry meta on a case.\n",
         "produces": ["application/json"],
         "responses": {
           "200": {
@@ -1974,58 +2164,6 @@
         }
       }
     },
-    "/sections/{section}/document-qc/batched": {
-      "parameters": [
-        {
-          "name": "section",
-          "in": "path",
-          "required": true,
-          "type": "string"
-        }
-      ],
-      "get": {
-        "tags": ["workitems"],
-        "summary": "get the section document qc batched work items",
-        "description": "get the section document qc batched work items.\n",
-        "produces": ["application/json"],
-        "responses": {
-          "200": {
-            "description": "200 response",
-            "schema": {
-              "$ref": "#/definitions/workItem"
-            }
-          }
-        },
-        "security": [
-          {
-            "CognitoUserPool": []
-          }
-        ]
-      },
-      "options": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "responses": {
-          "200": {
-            "description": "200 response",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "type": "string"
-              },
-              "Access-Control-Allow-Methods": {
-                "type": "string"
-              },
-              "Access-Control-Allow-Credentials": {
-                "type": "string"
-              },
-              "Access-Control-Allow-Headers": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
     "/sections/{section}/document-qc/served": {
       "parameters": [
         {
@@ -2534,7 +2672,7 @@
         }
       }
     },
-    "/users/{userId}/document-qc/inbox": {
+    "/users/{userId}/contact-info": {
       "parameters": [
         {
           "name": "userId",
@@ -2543,16 +2681,16 @@
           "type": "string"
         }
       ],
-      "get": {
-        "tags": ["workitems"],
-        "summary": "get the inbox items from the users document qc section",
-        "description": "get the inbox items from the users document qc section\n",
+      "put": {
+        "tags": ["user"],
+        "summary": "updates a user's contact information",
+        "description": "updates a user's contact information.\n",
         "produces": ["application/json"],
         "responses": {
           "200": {
             "description": "200 response",
             "schema": {
-              "$ref": "#/definitions/workItem"
+              "$ref": "#/definitions/user"
             }
           }
         },
@@ -2586,7 +2724,7 @@
         }
       }
     },
-    "/users/{userId}/document-qc/batched": {
+    "/users/{userId}/document-qc/inbox": {
       "parameters": [
         {
           "name": "userId",
@@ -2597,8 +2735,8 @@
       ],
       "get": {
         "tags": ["workitems"],
-        "summary": "get the batched items from the users document qc section",
-        "description": "get the batched items from the users document qc section\n",
+        "summary": "get the inbox items from the users document qc section",
+        "description": "get the inbox items from the users document qc section\n",
         "produces": ["application/json"],
         "responses": {
           "200": {
@@ -3424,8 +3562,8 @@
       ],
       "post": {
         "tags": ["trialsessions"],
-        "summary": "generates notices of trial for cases within a given trial session and returns a PDF if a paper case is in trial session",
-        "description": "generates notices of trial for cases within a given trial session and returns a PDF if a paper case is in trial session.\n",
+        "summary": "generates notices of trial and standing pretrial document for cases within a given trial session and returns a PDF for any paper service parties associated",
+        "description": "generates notices of trial and standing pretrial document for cases within a given trial session and returns a PDF for any paper service parties associated.\n",
         "produces": ["application/pdf"],
         "responses": {
           "200": {
@@ -4206,7 +4344,7 @@
         }
       }
     },
-    "/cases/{caseId}/qc-complete": {
+    "/case-meta/{caseId}/qc-complete": {
       "parameters": [
         {
           "name": "caseId",
@@ -4241,6 +4379,58 @@
             "description": "200 response",
             "schema": {
               "$ref": "#/definitions/user"
+            }
+          }
+        },
+        "security": [
+          {
+            "CognitoUserPool": []
+          }
+        ]
+      },
+      "options": {
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Methods": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Credentials": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Headers": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/case-meta/{caseId}/seal": {
+      "parameters": [
+        {
+          "name": "caseId",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "put": {
+        "tags": ["cases"],
+        "summary": "updates the case as sealed",
+        "description": "updates the case as sealed.\n",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/case"
             }
           }
         },
@@ -4449,7 +4639,7 @@
         }
       }
     },
-    "/case-notes/judges/{caseId}": {
+    "/case-notes/{caseId}/user-notes": {
       "parameters": [
         {
           "name": "caseId",
@@ -4460,14 +4650,14 @@
       ],
       "get": {
         "tags": ["caseNotes"],
-        "summary": "gets the logged in user's judge's note for a case",
-        "description": "gets the logged in user's judge's note for a case.\n",
+        "summary": "gets the logged in user's note for a case",
+        "description": "gets the logged in user's note for a case.\n",
         "produces": ["application/json"],
         "responses": {
           "200": {
             "description": "200 response",
             "schema": {
-              "$ref": "#/definitions/judgeNote"
+              "$ref": "#/definitions/userNote"
             }
           }
         },
@@ -4479,14 +4669,14 @@
       },
       "post": {
         "tags": ["caseNotes"],
-        "summary": "create and associate a judge's note to a case for the logged in user",
-        "description": "create and associate a judge's note to a case for the logged in user.\n",
+        "summary": "create and associate a note to a case for the logged in user",
+        "description": "create and associate a note to a case for the logged in user.\n",
         "produces": ["application/json"],
         "responses": {
           "200": {
             "description": "200 response",
             "schema": {
-              "$ref": "#/definitions/judgeNote"
+              "$ref": "#/definitions/userNote"
             }
           }
         },
@@ -4498,14 +4688,14 @@
       },
       "put": {
         "tags": ["caseNotes"],
-        "summary": "update a judge's note for the logged in user",
-        "description": "update a judge's note for the logged in user.\n",
+        "summary": "update a user's note for the logged in user",
+        "description": "update a user's note for the logged in user.\n",
         "produces": ["application/json"],
         "responses": {
           "200": {
             "description": "200 response",
             "schema": {
-              "$ref": "#/definitions/judgeNote"
+              "$ref": "#/definitions/userNote"
             }
           }
         },
@@ -4517,14 +4707,14 @@
       },
       "delete": {
         "tags": ["caseNotes"],
-        "summary": "delete the judge's note for the logged in user",
-        "description": "delete the judge's note for the logged in user.\n",
+        "summary": "delete the user's note for the logged in user",
+        "description": "delete the user's note for the logged in user.\n",
         "produces": ["application/json"],
         "responses": {
           "200": {
             "description": "200 response",
             "schema": {
-              "$ref": "#/definitions/judgeNote"
+              "$ref": "#/definitions/userNote"
             }
           }
         },
@@ -4966,7 +5156,7 @@
       },
       "description": "a case deadline"
     },
-    "judgeNote": {
+    "userNote": {
       "type": "object",
       "properties": {
         "caseId": {
@@ -4975,14 +5165,14 @@
         },
         "userId": {
           "type": "string",
-          "description": "id of the judge user who owns the note"
+          "description": "id of the user who owns the note"
         },
         "notes": {
           "type": "string",
-          "description": "judge's notes for the case"
+          "description": "user's notes for the case"
         }
       },
-      "description": "a case judge's note"
+      "description": "a case user's note"
     },
     "caseNote": {
       "type": "object",

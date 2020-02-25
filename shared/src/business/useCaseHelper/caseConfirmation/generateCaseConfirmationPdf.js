@@ -14,7 +14,7 @@ const { UnauthorizedError } = require('../../../errors/errors');
 const formattedCaseInfo = caseInfo => {
   const { servedAt } = caseInfo.documents.find(doc => doc.servedAt);
   const countryName =
-    caseInfo.contactPrimary.countryType != 'domestic'
+    caseInfo.contactPrimary.countryType !== 'domestic'
       ? caseInfo.contactPrimary.country
       : '';
   const formattedInfo = Object.assign(
@@ -110,7 +110,7 @@ exports.generateCaseConfirmationPdf = async ({
     }
   }
 
-  const documentId = `case-${caseEntity.docketNumber}-confirmation.pdf`;
+  const caseConfirmationPdfName = caseEntity.getCaseConfirmationGeneratedPdfFileName();
 
   await new Promise(resolve => {
     const documentsBucket = applicationContext.getDocumentsBucketName();
@@ -120,9 +120,10 @@ exports.generateCaseConfirmationPdf = async ({
       Body: result,
       Bucket: documentsBucket,
       ContentType: 'application/pdf',
-      Key: documentId,
+      Key: caseConfirmationPdfName,
     };
 
     s3Client.upload(params, resolve);
   });
+  return result;
 };

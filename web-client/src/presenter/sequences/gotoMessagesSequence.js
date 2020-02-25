@@ -26,11 +26,12 @@ const goToMessages = [
   {
     ...takePathForRoles(
       [
+        'admin',
         'adc',
         'admissionsclerk',
-        'calendarclerk',
         'chambers',
         'clerkofcourt',
+        'floater',
         'trialclerk',
       ],
       [],
@@ -50,7 +51,7 @@ const goToMessages = [
     ],
   },
   setCurrentPageAction('Messages'),
-  ...chooseWorkQueueSequence,
+  chooseWorkQueueSequence,
 ];
 
 export const gotoMessagesSequence = [

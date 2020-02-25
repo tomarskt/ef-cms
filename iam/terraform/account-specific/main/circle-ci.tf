@@ -16,7 +16,8 @@ resource "aws_iam_policy" "circle_ci_policy" {
         "route53:GetHostedZone",
         "route53:ListResourceRecordSets",
         "route53:ListHostedZones",
-        "route53:ChangeResourceRecordSets"
+        "route53:ChangeResourceRecordSets",
+        "route53:ListTagsForResource"
       ],
       "Resource": "*"
     },
@@ -77,7 +78,8 @@ resource "aws_iam_policy" "circle_ci_policy" {
         "acm:ListCertificates",
         "acm:AddTagsToCertificate",
         "acm:ListTagsForCertificate",
-        "acm:DescribeCertificate"
+        "acm:DescribeCertificate",
+        "acm:DeleteCertificate"
       ],
       "Resource": "*"
     },

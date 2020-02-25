@@ -254,4 +254,50 @@ describe('case detail edit computed', () => {
     });
     expect(result.showOwnershipDisclosureStatement).toBeFalsy();
   });
+
+  it('sets showOrderForFilingFee true if petitionPaymentStatus is unpaid', () => {
+    const result = runCompute(startCaseInternalHelper, {
+      state: {
+        form: {
+          petitionPaymentStatus: applicationContext.getConstants()
+            .PAYMENT_STATUS.UNPAID,
+        },
+      },
+    });
+    expect(result.showOrderForFilingFee).toBeTruthy();
+  });
+
+  it('sets showOrderForFilingFee false if petitionPaymentStatus is NOT unpaid', () => {
+    const result = runCompute(startCaseInternalHelper, {
+      state: {
+        form: {
+          petitionPaymentStatus: applicationContext.getConstants()
+            .PAYMENT_STATUS.PAID,
+        },
+      },
+    });
+    expect(result.showOrderForFilingFee).toBeFalsy();
+  });
+
+  it('sets showOrderForRequestedTrialLocation true if Requested Trial Location is not specified', () => {
+    const result = runCompute(startCaseInternalHelper, {
+      state: {
+        form: {
+          preferredTrialCity: undefined,
+        },
+      },
+    });
+    expect(result.showOrderForRequestedTrialLocation).toBe(true);
+  });
+
+  it('sets showOrderForRequestedTrialLocation true if Requested Trial Location is not specified', () => {
+    const result = runCompute(startCaseInternalHelper, {
+      state: {
+        form: {
+          preferredTrialCity: 'FlavorTown',
+        },
+      },
+    });
+    expect(result.showOrderForRequestedTrialLocation).toBe(false);
+  });
 });

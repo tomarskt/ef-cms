@@ -1,11 +1,6 @@
 const {
   aggregatePartiesForService,
 } = require('../../utilities/aggregatePartiesForService');
-
-const {
-  sendServedPartiesEmails,
-} = require('../../utilities/sendServedPartiesEmails');
-
 const {
   isAuthorized,
   ROLE_PERMISSIONS,
@@ -176,6 +171,7 @@ exports.fileExternalDocumentForConsolidatedInteractor = async ({
               {
                 assigneeId: null,
                 assigneeName: null,
+                associatedJudge: caseEntity.associatedJudge,
                 caseId: caseEntity.caseId,
                 caseStatus: caseEntity.status,
                 caseTitle: Case.getCaseCaptionNames(
@@ -239,20 +235,26 @@ exports.fileExternalDocumentForConsolidatedInteractor = async ({
           if (documentEntity.isAutoServed()) {
             documentEntity.setAsServed(servedParties.all);
 
-            await sendServedPartiesEmails({
-              applicationContext,
-              caseEntity,
-              documentEntity,
-              servedParties,
-            });
+            await applicationContext
+              .getUseCaseHelpers()
+              .sendServedPartiesEmails({
+                applicationContext,
+                caseEntity,
+                documentEntity,
+                servedParties,
+              });
           }
         }
 
-        const docketRecordEntity = new DocketRecord({
-          description: metadata.documentTitle,
-          documentId: documentEntity.documentId,
-          filingDate: documentEntity.receivedAt,
-        });
+        const docketRecordEntity = new DocketRecord(
+          {
+            description: metadata.documentTitle,
+            documentId: documentEntity.documentId,
+            eventCode: documentEntity.eventCode,
+            filingDate: documentEntity.receivedAt,
+          },
+          { applicationContext },
+        );
 
         caseEntity.addDocketRecord(docketRecordEntity);
 

@@ -20,7 +20,7 @@ exports.saveCaseNoteInteractor = async ({
   caseNote,
 }) => {
   const user = applicationContext.getCurrentUser();
-  if (!isAuthorized(user, ROLE_PERMISSIONS.PROCEDURAL_NOTES)) {
+  if (!isAuthorized(user, ROLE_PERMISSIONS.CASE_NOTES)) {
     throw new UnauthorizedError('Unauthorized');
   }
 
@@ -45,5 +45,5 @@ exports.saveCaseNoteInteractor = async ({
     caseToUpdate,
   });
 
-  return result;
+  return new Case(result, { applicationContext }).validate().toRawObject();
 };

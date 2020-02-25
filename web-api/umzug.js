@@ -1,16 +1,14 @@
-const AWS = require('aws-sdk');
+const createApplicationContext = require('./src/applicationContext');
 const path = require('path');
 const Umzug = require('umzug');
+const applicationContext = createApplicationContext({});
 
-const { DynamoDB } = AWS;
+const { forAllRecords } = require('./migrations/utilities');
 
 const ENV = process.argv[2];
 const TABLE_NAME = `efcms-${ENV}`;
 
-const documentClient = new DynamoDB.DocumentClient({
-  endpoint: 'dynamodb.us-east-1.amazonaws.com',
-  region: 'us-east-1',
-});
+const documentClient = applicationContext.getDocumentClient();
 
 const getMigrations = async () => {
   let migrations = await documentClient
@@ -79,7 +77,7 @@ const storage = {
 async function run() {
   const umzug = new Umzug({
     migrations: {
-      params: [documentClient, TABLE_NAME],
+      params: [documentClient, TABLE_NAME, forAllRecords],
       path: path.join(__dirname, '/migrations'),
       pattern: /^\d+[\w-]+\.js$/,
     },

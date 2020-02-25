@@ -16,13 +16,10 @@ export const extractedPendingMessagesFromCaseDetail = (
       const editLink = getWorkItemDocumentLink({
         applicationContext,
         permissions,
-        workItem,
+        workItem: result,
       });
       return { ...result, editLink };
     })
-    .filter(
-      workItem => !workItem.currentMessage.message.includes('batched for IRS'),
-    )
     .filter(workItem => !workItem.hideFromPendingMessages);
   workQueue = orderBy(workQueue, 'currentMessage.createdAt', 'desc');
   return workQueue;

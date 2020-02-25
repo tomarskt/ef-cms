@@ -16,7 +16,16 @@ for (let [key, value] of Object.entries(alias)) {
 }
 
 module.exports = {
-  collectCoverage: false,
+  collectCoverage: false, // so that singly-run tests don't output coverage
+  coverageDirectory: './coverage',
+  coverageThreshold: {
+    global: {
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+  },
   moduleNameMapper,
-  verbose: true,
+  verbose: true, // for singly-run tests
 };

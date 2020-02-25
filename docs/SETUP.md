@@ -67,7 +67,7 @@
 
 ## Setting up a new environment
 1. Choose a name for the branch which will be used for deployments (henceforth `$BRANCH`). Examples are 'master', 'develop', 'staging'.
-2. Choose a name for this environment (henceforth `$ENVIRONMENT`), name limited to 4 characters. Examples are 'prod', 'dev', 'stg'.
+2. Choose a name for this environment (henceforth `$ENVIRONMENT`). Examples are 'prod', 'dev', 'stg'.
 3. Add CircleCI badge link to the README.md according to `$BRANCH`
 4. Edit `get-es-instance-count.sh`, adding a new `elif` statement for your `$BRANCH` which returns the appropriate number of ElasticSearch instances.
 5. Edit `get-keys.sh`, adding a new `elif` statement for your `$BRANCH` which echoes the `$ENVIRONMENT`-specific Dynamsoft licensing keys; licensing requires that each environment use their own unique keys.
@@ -81,3 +81,6 @@
     - mention your `POST_CONFIRMATION_ROLE_ARN_$ENVIRONMENT`
 10. Mention your `$ENVIRONMENT`, if necessary, in `web-api/deploy-sandbox.sh` within the `run_development` function
 11. For all files matching `web-api/serverless-*yml`, include your `$ENVIRONMENT` within the list of `custom.alerts.stages` if you want your `$ENVIRONMENT` to be included in those which are monitored & emails delivered upon alarm.
+12. Update circle CI to have all the new environment variables needed:
+     - DYNAMSOFT_PRODUCT_KEYS_`$ENVIRONMENT`
+     - POST_CONFIRMATION_ROLE_ARN_`$ENVIRONMENT`

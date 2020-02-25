@@ -1,10 +1,9 @@
 import { setupTest, uploadPetition } from './helpers';
-import calendarClerkLogIn from './journey/calendarClerkLogIn';
 import captureCreatedCase from './journey/captureCreatedCase';
 import docketClerkCreatesATrialSession from './journey/docketClerkCreatesATrialSession';
 import docketClerkLogIn from './journey/docketClerkLogIn';
 import docketClerkSetsCaseReadyForTrial from './journey/docketClerkSetsCaseReadyForTrial';
-import docketClerkViewsAnUpcomingTrialSession from './journey/docketClerkViewsAnUpcomingTrialSession';
+import docketClerkViewsNewTrialSession from './journey/docketClerkViewsNewTrialSession';
 import docketClerkViewsTrialSessionList from './journey/docketClerkViewsTrialSessionList';
 import judgeAddsNotesFromWorkingCopyCaseList from './journey/judgeAddsNotesFromWorkingCopyCaseList';
 import judgeLogIn from './journey/judgeLogIn';
@@ -15,9 +14,8 @@ import markAllCasesAsQCed from './journey/markAllCasesAsQCed';
 import petitionerLogin from './journey/petitionerLogIn';
 import petitionerViewsDashboard from './journey/petitionerViewsDashboard';
 import petitionsClerkLogIn from './journey/petitionsClerkLogIn';
-import petitionsClerkRunsBatchProcess from './journey/petitionsClerkRunsBatchProcess';
-import petitionsClerkSendsCaseToIRSHoldingQueue from './journey/petitionsClerkSendsCaseToIRSHoldingQueue';
 import petitionsClerkSetsATrialSessionsSchedule from './journey/petitionsClerkSetsATrialSessionsSchedule';
+import petitionsClerkSubmitsCaseToIrs from './journey/petitionsClerkSubmitsCaseToIrs';
 import petitionsClerkUpdatesFiledBy from './journey/petitionsClerkUpdatesFiledBy';
 import userSignsOut from './journey/petitionerSignsOut';
 
@@ -28,6 +26,9 @@ describe('Trial Session Eligible Cases Journey (judge)', () => {
     jest.setTimeout(30000);
   });
 
+  afterAll(() => {
+    test.closeSocket();
+  });
   const trialLocation = `Boise, Idaho, ${Date.now()}`;
   const overrides = {
     maxCases: 3,
@@ -41,7 +42,7 @@ describe('Trial Session Eligible Cases Journey (judge)', () => {
   docketClerkLogIn(test);
   docketClerkCreatesATrialSession(test, overrides);
   docketClerkViewsTrialSessionList(test, overrides);
-  docketClerkViewsAnUpcomingTrialSession(test);
+  docketClerkViewsNewTrialSession(test);
   userSignsOut(test);
 
   const caseOverrides = {
@@ -61,19 +62,15 @@ describe('Trial Session Eligible Cases Journey (judge)', () => {
   userSignsOut(test);
   petitionsClerkLogIn(test);
   petitionsClerkUpdatesFiledBy(test, caseOverrides);
-  petitionsClerkSendsCaseToIRSHoldingQueue(test);
-  petitionsClerkRunsBatchProcess(test);
+  petitionsClerkSubmitsCaseToIrs(test);
   userSignsOut(test);
 
   docketClerkLogIn(test);
   docketClerkSetsCaseReadyForTrial(test);
   userSignsOut(test);
 
-  calendarClerkLogIn(test);
-  markAllCasesAsQCed(test, () => createdCases);
-  userSignsOut(test);
-
   petitionsClerkLogIn(test);
+  markAllCasesAsQCed(test, () => createdCases);
   petitionsClerkSetsATrialSessionsSchedule(test);
   userSignsOut(test);
 

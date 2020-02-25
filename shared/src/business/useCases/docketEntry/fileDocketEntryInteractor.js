@@ -49,7 +49,7 @@ exports.fileDocketEntryInteractor = async ({
       caseId,
     });
 
-  const caseEntity = new Case(caseToUpdate, { applicationContext });
+  let caseEntity = new Case(caseToUpdate, { applicationContext });
   const workItems = [];
 
   const {
@@ -116,6 +116,7 @@ exports.fileDocketEntryInteractor = async ({
         {
           assigneeId: null,
           assigneeName: null,
+          associatedJudge: caseToUpdate.associatedJudge,
           caseId: caseId,
           caseStatus: caseToUpdate.status,
           caseTitle: Case.getCaseCaptionNames(Case.getCaseCaption(caseEntity)),
@@ -172,15 +173,26 @@ exports.fileDocketEntryInteractor = async ({
         documentEntity.isFileAttached === false ? documentMetadata : {};
 
       caseEntity.addDocketRecord(
-        new DocketRecord({
-          description: metadata.documentTitle,
-          documentId: documentEntity.documentId,
-          editState: JSON.stringify(docketRecordEditState),
-          filingDate: documentEntity.receivedAt,
-        }),
+        new DocketRecord(
+          {
+            description: metadata.documentTitle,
+            documentId: documentEntity.documentId,
+            editState: JSON.stringify(docketRecordEditState),
+            eventCode: documentEntity.eventCode,
+            filingDate: documentEntity.receivedAt,
+          },
+          { applicationContext },
+        ),
       );
     }
   });
+
+  caseEntity = await applicationContext
+    .getUseCaseHelpers()
+    .updateCaseAutomaticBlock({
+      applicationContext,
+      caseEntity,
+    });
 
   await applicationContext.getPersistenceGateway().updateCase({
     applicationContext,

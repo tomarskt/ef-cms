@@ -1,4 +1,4 @@
-const joi = require('joi-browser');
+const joi = require('@hapi/joi');
 const {
   JoiValidationConstants,
 } = require('../../../utilities/JoiValidationConstants');
@@ -95,7 +95,11 @@ TrialSession.TRIAL_CITIES = {
   SMALL: SMALL_CITIES,
 };
 
-TrialSession.SESSION_TERMS = ['Winter', 'Fall', 'Spring'];
+TrialSession.TRIAL_CITY_STRINGS = SMALL_CITIES.map(
+  location => `${location.city}, ${location.state}`,
+);
+
+TrialSession.SESSION_TERMS = ['Winter', 'Fall', 'Spring', 'Summer'];
 
 TrialSession.SESSION_TYPES = [
   'Regular',
@@ -105,10 +109,20 @@ TrialSession.SESSION_TYPES = [
   'Motion/Hearing',
 ];
 
-TrialSession.STATUS_TYPES = {
+TrialSession.SESSION_STATUS_GROUPS = {
+  all: 'All',
   closed: 'Closed',
-  upcoming: 'Upcoming',
+  new: 'New',
+  open: 'Open',
 };
+
+TrialSession.PROPERTIES_REQUIRED_FOR_CALENDARING = [
+  'address1',
+  'city',
+  'state',
+  'postalCode',
+  'judge',
+];
 
 TrialSession.validationName = 'TrialSession';
 
@@ -150,7 +164,6 @@ TrialSession.prototype.init = function(rawSession, { applicationContext }) {
   this.startDate = rawSession.startDate;
   this.startTime = rawSession.startTime || '10:00';
   this.state = rawSession.state;
-  this.status = rawSession.status || TrialSession.STATUS_TYPES.upcoming;
   this.swingSession = rawSession.swingSession;
   this.swingSessionId = rawSession.swingSessionId;
   this.term = rawSession.term;
@@ -226,7 +239,7 @@ TrialSession.validationRules = {
     postalCode: JoiValidationConstants.US_POSTAL_CODE.optional(),
     sessionType: joi
       .string()
-      .valid(TrialSession.SESSION_TYPES)
+      .valid(...TrialSession.SESSION_TYPES)
       .required(),
     startDate: joi
       .date()
@@ -237,13 +250,6 @@ TrialSession.validationRules = {
       .string()
       .allow('')
       .optional(),
-    status: joi
-      .string()
-      .valid(
-        Object.keys(TrialSession.STATUS_TYPES).map(
-          key => TrialSession.STATUS_TYPES[key],
-        ),
-      ),
     swingSession: joi.boolean().optional(),
     swingSessionId: joi.when('swingSession', {
       is: true,
@@ -257,7 +263,7 @@ TrialSession.validationRules = {
     }),
     term: joi
       .string()
-      .valid(TrialSession.SESSION_TERMS)
+      .valid(...TrialSession.SESSION_TERMS)
       .required(),
     termYear: joi.string().required(),
     trialClerk: joi.object().optional(),
@@ -298,13 +304,6 @@ joiValidationDecorator(
       }),
     ),
     isCalendared: joi.boolean().required(),
-    status: joi
-      .string()
-      .valid(
-        Object.keys(TrialSession.STATUS_TYPES).map(
-          key => TrialSession.STATUS_TYPES[key],
-        ),
-      ),
   }),
   function() {
     return !this.getFormattedValidationErrors();
@@ -436,13 +435,20 @@ TrialSession.prototype.deleteCaseFromCalendar = function({ caseId }) {
  * @returns {boolean} TRUE if can set as calendared (properties were all not empty), FALSE otherwise
  */
 TrialSession.prototype.canSetAsCalendared = function() {
-  return ![
-    this.address1,
-    this.judge,
-    this.city,
-    this.state,
-    this.postalCode,
-  ].some(property => isEmpty(property));
+  return isEmpty(this.getEmptyFields());
+};
+
+/**
+ * Returns certain properties of the trial session that are empty as a list.
+ *
+ * @returns {Array} A list of property names of the trial session that are empty
+ */
+TrialSession.prototype.getEmptyFields = function() {
+  const missingProperties = TrialSession.PROPERTIES_REQUIRED_FOR_CALENDARING.filter(
+    property => isEmpty(this[property]),
+  );
+
+  return missingProperties;
 };
 
 /**

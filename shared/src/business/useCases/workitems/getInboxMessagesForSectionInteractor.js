@@ -22,6 +22,8 @@ exports.getInboxMessagesForSectionInteractor = async ({
     throw new UnauthorizedError('Unauthorized');
   }
 
+  const { WorkItem } = applicationContext.getEntityConstructors();
+
   const workItems = await applicationContext
     .getPersistenceGateway()
     .getInboxMessagesForSection({
@@ -29,5 +31,5 @@ exports.getInboxMessagesForSectionInteractor = async ({
       section,
     });
 
-  return workItems;
+  return WorkItem.validateRawCollection(workItems, { applicationContext });
 };

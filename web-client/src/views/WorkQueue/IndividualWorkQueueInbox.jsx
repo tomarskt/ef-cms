@@ -1,5 +1,5 @@
 import { CaseLink } from '../../ustc-ui/CaseLink/CaseLink';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Icon } from '../../ustc-ui/Icon/Icon';
 import { connect } from '@cerebral/react';
 import { state } from 'cerebral';
 import React from 'react';
@@ -51,30 +51,19 @@ export const IndividualWorkQueueInbox = connect(
                     {item.caseTitle}
                   </td>
                   <td className="message-queue-row has-icon padding-right-0">
-                    {item.showBatchedStatusIcon && (
-                      <FontAwesomeIcon
-                        aria-hidden="false"
-                        aria-label="batched for IRS"
-                        className="iconStatusBatched"
-                        icon={['far', 'clock']}
-                        size="lg"
-                      />
-                    )}
-                    {item.showRecalledStatusIcon && (
-                      <FontAwesomeIcon
-                        aria-hidden="false"
-                        aria-label="recalled from IRS"
-                        className="iconStatusRecalled"
-                        icon={['far', 'clock']}
-                        size="lg"
-                      />
-                    )}
                     {item.showUnreadStatusIcon && (
-                      <FontAwesomeIcon
-                        aria-hidden="false"
+                      <Icon
                         aria-label="unread message"
                         className="iconStatusUnread"
                         icon={['fas', 'envelope']}
+                        size="lg"
+                      />
+                    )}
+                    {item.showHighPriorityIcon && (
+                      <Icon
+                        aria-label="high priority"
+                        className="iconHighPriority"
+                        icon={['fas', 'exclamation-circle']}
                         size="lg"
                       />
                     )}

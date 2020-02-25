@@ -7,8 +7,7 @@ import petitionerNavigatesToCreateCase from './journey/petitionerCancelsCreateCa
 import petitionsClerkCreatesNewCase from './journey/petitionsClerkCreatesNewCase';
 import petitionsClerkGetsMyMessagesInboxCount from './journey/petitionsClerkGetsMyMessagesInboxCount';
 import petitionsClerkLogIn from './journey/petitionsClerkLogIn';
-import petitionsClerkRunsBatchProcess from './journey/petitionsClerkRunsBatchProcess';
-import petitionsClerkSendsCaseToIRSHoldingQueue from './journey/petitionsClerkSendsCaseToIRSHoldingQueue';
+import petitionsClerkSubmitsCaseToIrs from './journey/petitionsClerkSubmitsCaseToIrs';
 import petitionsClerkViewsMyMessagesInbox from './journey/petitionsClerkViewsMyMessagesInbox';
 import userNavigatesToCreateCaseConfirmation from './journey/userNavigatesToCreateCaseConfirmation';
 import userSignsOut from './journey/petitionerSignsOut';
@@ -20,7 +19,7 @@ describe('Case Confirmation', () => {
     jest.setTimeout(30000);
   });
 
-  describe('Petitoner creates a case / Petitionsclerk Sends to Holding Queue / User then has access to case confirmation', () => {
+  describe('Petitioner creates a case / Petitionsclerk Sends to Holding Queue / Petitionsclerk then has access to case confirmation', () => {
     petitionerLogin(test);
     petitionerNavigatesToCreateCase(test);
     petitionerChoosesProcedureType(test);
@@ -28,7 +27,22 @@ describe('Case Confirmation', () => {
     petitionerCreatesNewCase(test, fakeFile);
     userSignsOut(test);
     petitionsClerkLogIn(test);
-    petitionsClerkSendsCaseToIRSHoldingQueue(test);
+    petitionsClerkSubmitsCaseToIrs(test);
+    userNavigatesToCreateCaseConfirmation(test);
+    userSignsOut(test);
+  });
+
+  describe('Petitioner creates a case / Petitionsclerk Sends to Holding Queue / Petitioner then has access to case confirmation', () => {
+    petitionerLogin(test);
+    petitionerNavigatesToCreateCase(test);
+    petitionerChoosesProcedureType(test);
+    petitionerChoosesCaseType(test);
+    petitionerCreatesNewCase(test, fakeFile);
+    userSignsOut(test);
+    petitionsClerkLogIn(test);
+    petitionsClerkSubmitsCaseToIrs(test);
+    userSignsOut(test);
+    petitionerLogin(test);
     userNavigatesToCreateCaseConfirmation(test);
     userSignsOut(test);
   });
@@ -38,10 +52,6 @@ describe('Case Confirmation', () => {
     petitionsClerkCreatesNewCase(test, fakeFile);
     petitionsClerkViewsMyMessagesInbox(test, true);
     petitionsClerkGetsMyMessagesInboxCount(test);
-    petitionsClerkSendsCaseToIRSHoldingQueue(test);
-    petitionsClerkRunsBatchProcess(test);
-    petitionsClerkViewsMyMessagesInbox(test);
-    petitionsClerkGetsMyMessagesInboxCount(test, 1);
     userNavigatesToCreateCaseConfirmation(test);
     userSignsOut(test);
   });

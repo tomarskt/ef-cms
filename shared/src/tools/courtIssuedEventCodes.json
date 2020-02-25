@@ -2,25 +2,19 @@
   {
     "eventCode": "O",
     "documentType": "O - Order",
-    "documentTitle": "Order [Anything]",
-    "scenario": "Type A"
-  },
-  {
-    "eventCode": "O5",
-    "documentType": "O5 - Order",
-    "documentTitle": "Order [Anything]",
+    "documentTitle": "[Anything]",
     "scenario": "Type A"
   },
   {
     "eventCode": "OAJ",
     "documentType": "OAJ - Order that case is assigned",
-    "documentTitle": "Order [Judge Name] [Anything]",
+    "documentTitle": "Order [Judge name] [Anything]",
     "scenario": "Type B"
   },
   {
     "eventCode": "OAL",
-    "documentType": "OAL - Order that the letter \"L\" is added to Docket Number",
-    "documentTitle": "Order that the letter \"L\" is added to Docket Number [Anything]",
+    "documentType": "OAL - Order that the letter \"L\" is added to Docket number",
+    "documentTitle": "Order that the letter \"L\" is added to Docket number [Anything]",
     "scenario": "Type C"
   },
   {
@@ -36,51 +30,39 @@
     "scenario": "Type D"
   },
   {
-    "eventCode": "OAPW",
-    "documentType": "OAPW - Order for Amended Petition and Filing Fee",
-    "documentTitle": "Order for Amended Petition and Filing Fee on [Date] [Anything]",
-    "scenario": "Type D"
-  },
-  {
     "eventCode": "OAR",
-    "documentType": "OAR - Order that the letter \"R\" is added to the Docket Number",
-    "documentTitle": "Order that the letter \"R\" is added to the Docket Number [Docket Number]",
+    "documentType": "OAR - Order that the letter \"R\" is added to the Docket number",
+    "documentTitle": "Order that the letter \"R\" is added to the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "OAS",
-    "documentType": "OAS - Order that the letter \"S\" is added to the Docket Number",
-    "documentTitle": "Order that the letter \"S\" is added to the Docket Number [Docket Number]",
+    "documentType": "OAS - Order that the letter \"S\" is added to the Docket number",
+    "documentTitle": "Order that the letter \"S\" is added to the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "OASL",
-    "documentType": "OASL - Order that the letters \"SL\" are added to the Docket Number",
-    "documentTitle": "Order that the letters \"SL\" are added to the Docket Number [Docket Number]",
+    "documentType": "OASL - Order that the letters \"SL\" are added to the Docket number",
+    "documentTitle": "Order that the letters \"SL\" are added to the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "OAW",
-    "documentType": "OAW - Order that the letter \"W\" is added to the Docket Number",
-    "documentTitle": "Order that the letter \"W\" is added to the Docket Number [Docket Number]",
+    "documentType": "OAW - Order that the letter \"W\" is added to the Docket number",
+    "documentTitle": "Order that the letter \"W\" is added to the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "OAX",
-    "documentType": "OAX - Order that the letter \"X\" is added to the Docket Number",
-    "documentTitle": "Order that the letter \"X\" is added to the Docket Number [Docket Number]",
+    "documentType": "OAX - Order that the letter \"X\" is added to the Docket number",
+    "documentTitle": "Order that the letter \"X\" is added to the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "OCA",
     "documentType": "OCA - Order that caption of case is amended",
     "documentTitle": "Order that caption of case is amended [Anything]",
-    "scenario": "Type A"
-  },
-  {
-    "eventCode": "OCD",
-    "documentType": "OCD - Order",
-    "documentTitle": "Order [Anything]",
     "scenario": "Type A"
   },
   {
@@ -97,44 +79,44 @@
   },
   {
     "eventCode": "ODL",
-    "documentType": "ODL - Order that the letter \"L\" is deleted from the Docket Number",
-    "documentTitle": "Order that the letter \"L\" is deleted from the Docket Number [Docket Number]",
+    "documentType": "ODL - Order that the letter \"L\" is deleted from the Docket number",
+    "documentTitle": "Order that the letter \"L\" is deleted from the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "ODP",
-    "documentType": "ODP - Order that the letter \"P\" is deleted from the Docket Number",
-    "documentTitle": "Order that the letter \"P\" is deleted from the Docket Number [Docket Number]",
+    "documentType": "ODP - Order that the letter \"P\" is deleted from the Docket number",
+    "documentTitle": "Order that the letter \"P\" is deleted from the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "ODR",
-    "documentType": "ODR - Order that the letter \"R\" is deleted from the Docket Number",
-    "documentTitle": "Order that the letter \"R\" is deleted from the Docket Number [Docket Number]",
+    "documentType": "ODR - Order that the letter \"R\" is deleted from the Docket number",
+    "documentTitle": "Order that the letter \"R\" is deleted from the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "ODS",
-    "documentType": "ODS - Order that the letter \"S\" is deleted from the Docket Number",
-    "documentTitle": "Order that the letter \"S\" is deleted from the Docket Number [Docket Number]",
+    "documentType": "ODS - Order that the letter \"S\" is deleted from the Docket number",
+    "documentTitle": "Order that the letter \"S\" is deleted from the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "ODSL",
-    "documentType": "ODSL - Order that the letters \"SL\" are deleted from the Docket Number",
-    "documentTitle": "Order that the letters \"SL\" are deleted from the Docket Number [Docket Number]",
+    "documentType": "ODSL - Order that the letters \"SL\" are deleted from the Docket number",
+    "documentTitle": "Order that the letters \"SL\" are deleted from the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "ODW",
-    "documentType": "ODW - Order that the letter \"W\" is deleted from the Docket Number",
-    "documentTitle": "Order that the letter \"W\" is deleted from the Docket Number [Docket Number]",
+    "documentType": "ODW - Order that the letter \"W\" is deleted from the Docket number",
+    "documentTitle": "Order that the letter \"W\" is deleted from the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
     "eventCode": "ODX",
-    "documentType": "ODX - Order that the letter \"X\" is deleted from the Docket Number",
-    "documentTitle": "Order that the letter \"X\" is deleted from the Docket Number [Docket Number]",
+    "documentType": "ODX - Order that the letter \"X\" is deleted from the Docket number",
+    "documentTitle": "Order that the letter \"X\" is deleted from the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
@@ -156,12 +138,6 @@
     "scenario": "Type E"
   },
   {
-    "eventCode": "OFW",
-    "documentType": "OFW - Order for Filing Fee",
-    "documentTitle": "Order for Filing Fee on [Date] [Anything]",
-    "scenario": "Type D"
-  },
-  {
     "eventCode": "OFWD",
     "documentType": "OFWD - Order for Filing Fee. Application waiver of Filing Fee is denied.",
     "documentTitle": "Order for Filing Fee on [Date]. Application waiver of Filing Fee is denied.",
@@ -175,8 +151,8 @@
   },
   {
     "eventCode": "OIP",
-    "documentType": "OIP - Order that the letter \"P\" is added to the Docket Number",
-    "documentTitle": "Order that the letter \"P\" is added to the Docket Number [Docket Number]",
+    "documentType": "OIP - Order that the letter \"P\" is added to the Docket number",
+    "documentTitle": "Order that the letter \"P\" is added to the Docket number [Docket number]",
     "scenario": "Type C"
   },
   {
@@ -234,28 +210,10 @@
     "scenario": "Type A"
   },
   {
-    "eventCode": "OST5",
-    "documentType": "OST5 - Order of Service of Transcript (Bench Opinion)",
-    "documentTitle": "Order of Service of Transcript (Bench Opinion) [Anything]",
-    "scenario": "Type A"
-  },
-  {
     "eventCode": "OSUB",
     "documentType": "OSUB - Order that case is submitted",
     "documentTitle": "Order that case is submitted to [Judge Name] [Anything]",
     "scenario": "Type B"
-  },
-  {
-    "eventCode": "OVBA",
-    "documentType": "OVBA - Order",
-    "documentTitle": "Order [Anything]",
-    "scenario": "Type A"
-  },
-  {
-    "eventCode": "OVD",
-    "documentType": "OVD - Order",
-    "documentTitle": "Order [Anything]",
-    "scenario": "Type A"
   },
   {
     "eventCode": "DEC",
@@ -290,7 +248,7 @@
   {
     "eventCode": "NOT",
     "documentType": "NOT - Notice",
-    "documentTitle": "Notice [Anything]",
+    "documentTitle": "[Anything]",
     "scenario": "Type A"
   },
   {
@@ -361,14 +319,20 @@
   },
   {
     "eventCode": "TRAN",
-    "documentType": "Transcript",
-    "documentTitle": "Transcript of [anything]",
-    "scenario": "Type A - NEED LOGIC for MVP"
+    "documentType": "TRAN - Transcript",
+    "documentTitle": "Transcript of [anything] on [date]",
+    "scenario": "Type H"
   },
   {
     "eventCode": "SPTO",
     "documentType": "SPTO - Standing Pre-Trial Order",
     "documentTitle": "Standing Pre-Trial Order",
     "scenario": "HOLD hold (dependent on if we get to automated logic)"
+  },
+  {
+    "eventCode": "MISC",
+    "documentType": "MISC - Miscellaneous",
+    "documentTitle": "[anything]",
+    "scenario": "Type A"
   }
 ]

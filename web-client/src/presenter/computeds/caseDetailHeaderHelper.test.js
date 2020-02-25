@@ -74,6 +74,29 @@ describe('caseDetailHeaderHelper', () => {
     expect(result.showRequestAccessToCaseButton).toEqual(false);
   });
 
+  it('should set showFileFirstDocumentButton and showRequestAccessToCaseButton to false if user role is respondent and the respondent is not associated with the case but the case is sealed', () => {
+    const user = {
+      role: User.ROLES.respondent,
+      userId: '789',
+    };
+    const result = runCompute(caseDetailHeaderHelper, {
+      state: {
+        ...getBaseState(user),
+        caseDetail: {
+          isSealed: true,
+          respondents: [{ userId: '789' }],
+        },
+        currentPage: 'CaseDetail',
+        form: {},
+        screenMetadata: {
+          isAssociated: false,
+        },
+      },
+    });
+    expect(result.showFileFirstDocumentButton).toEqual(false);
+    expect(result.showRequestAccessToCaseButton).toEqual(false);
+  });
+
   it('should set showRequestAccessToCaseButton to true if user role is respondent and the respondent is not associated with the case', () => {
     const user = {
       role: User.ROLES.respondent,
@@ -151,6 +174,25 @@ describe('caseDetailHeaderHelper', () => {
       },
     });
     expect(result.showRequestAccessToCaseButton).toEqual(true);
+  });
+
+  it('should set showRequestAccessToCaseButton to false if user role is practitioner and case is not owned by user and the case is sealed', () => {
+    const user = {
+      role: User.ROLES.practitioner,
+      userId: '123',
+    };
+    const result = runCompute(caseDetailHeaderHelper, {
+      state: {
+        ...getBaseState(user),
+        caseDetail: { isSealed: true },
+        currentPage: 'CaseDetail',
+        form: {},
+        screenMetadata: {
+          isAssociated: false,
+        },
+      },
+    });
+    expect(result.showRequestAccessToCaseButton).toEqual(false);
   });
 
   it('should set showRequestAccessToCaseButton to false if user role is practitioner and case is owned by user', () => {
@@ -253,6 +295,18 @@ describe('caseDetailHeaderHelper', () => {
     expect(result.showCreateOrderButton).toEqual(true);
   });
 
+  it('should show the Sealed Case banner if the case is sealed', () => {
+    const result = runCompute(caseDetailHeaderHelper, {
+      state: {
+        caseDetail: { isSealed: true },
+        currentPage: 'CaseDetail',
+        form: {},
+        permissions: {},
+      },
+    });
+    expect(result.showSealedCaseBanner).toEqual(true);
+  });
+
   it('should show file document button if user has FILE_EXTERNAL_DOCUMENT permission and the user is associated with the case', () => {
     const result = runCompute(caseDetailHeaderHelper, {
       state: {
@@ -296,5 +350,47 @@ describe('caseDetailHeaderHelper', () => {
       },
     });
     expect(result.showFileDocumentButton).toEqual(false);
+  });
+
+  it('should show the Upload PDF button in the action menu if the user is a court user', () => {
+    const user = {
+      role: User.ROLES.docketClerk,
+      userId: '123',
+    };
+    const result = runCompute(caseDetailHeaderHelper, {
+      state: {
+        ...getBaseState(user),
+        caseDetail: {},
+        currentPage: 'CaseDetail',
+        form: {},
+        permissions: {
+          FILE_EXTERNAL_DOCUMENT: true,
+        },
+        screenMetadata: { isAssociated: false },
+      },
+    });
+
+    expect(result.showUploadCourtIssuedDocumentButton).toEqual(true);
+  });
+
+  it('should NOT show the Upload PDF button in the action menu if the user is not a court user', () => {
+    const user = {
+      role: User.ROLES.petitioner,
+      userId: '123',
+    };
+    const result = runCompute(caseDetailHeaderHelper, {
+      state: {
+        ...getBaseState(user),
+        caseDetail: {},
+        currentPage: 'CaseDetail',
+        form: {},
+        permissions: {
+          FILE_EXTERNAL_DOCUMENT: true,
+        },
+        screenMetadata: { isAssociated: false },
+      },
+    });
+
+    expect(result.showUploadCourtIssuedDocumentButton).toEqual(false);
   });
 });

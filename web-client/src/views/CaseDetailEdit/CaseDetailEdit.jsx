@@ -11,32 +11,17 @@ import React from 'react';
 export const CaseDetailEdit = connect(
   {
     navigateBackSequence: sequences.navigateBackSequence,
+    navigateToReviewSavedPetitionSequence:
+      sequences.navigateToReviewSavedPetitionSequence,
     screenMetadata: state.screenMetadata,
-    submitCaseDetailEditSaveSequence:
-      sequences.submitCaseDetailEditSaveSequence,
-    unsetFormSaveSuccessSequence: sequences.unsetFormSaveSuccessSequence,
-    waitingForResponse: state.waitingForResponse,
   },
   ({
     navigateBackSequence,
+    navigateToReviewSavedPetitionSequence,
     screenMetadata,
-    submitCaseDetailEditSaveSequence,
-    unsetFormSaveSuccessSequence,
-    waitingForResponse,
   }) => {
     return (
-      <form
-        noValidate
-        id="case-edit-form"
-        role="form"
-        onFocus={() => {
-          unsetFormSaveSuccessSequence();
-        }}
-        onSubmit={e => {
-          e.preventDefault();
-          submitCaseDetailEditSaveSequence();
-        }}
-      >
+      <div noValidate id="case-edit-form" role="form">
         <Tabs
           boxed
           bind="documentDetail.tab"
@@ -55,13 +40,13 @@ export const CaseDetailEdit = connect(
         </Tabs>
 
         <Button
-          aria-disabled={waitingForResponse ? 'true' : 'false'}
-          disabled={waitingForResponse}
-          secondary={!waitingForResponse}
-          type="submit"
+          id="submit-case"
+          type="button"
+          onClick={() => {
+            navigateToReviewSavedPetitionSequence();
+          }}
         >
-          {waitingForResponse && <div className="spinner" />}
-          Save
+          Review Petition
         </Button>
         <Button link onClick={() => navigateBackSequence()}>
           Cancel
@@ -72,7 +57,7 @@ export const CaseDetailEdit = connect(
             Your changes have been saved.
           </span>
         )}
-      </form>
+      </div>
     );
   },
 );

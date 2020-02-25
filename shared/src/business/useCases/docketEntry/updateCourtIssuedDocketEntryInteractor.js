@@ -52,6 +52,11 @@ exports.updateCourtIssuedDocketEntryInteractor = async ({
     .getPersistenceGateway()
     .getUserById({ applicationContext, userId: authorizedUser.userId });
 
+  let secondaryDate;
+  if (documentMeta.eventCode === Document.TRANSCRIPT_EVENT_CODE) {
+    secondaryDate = documentMeta.date;
+  }
+
   const documentEntity = new Document(
     {
       ...currentDocument,
@@ -61,18 +66,23 @@ exports.updateCourtIssuedDocketEntryInteractor = async ({
       eventCode: documentMeta.eventCode,
       freeText: documentMeta.freeText,
       scenario: documentMeta.scenario,
+      secondaryDate,
       serviceStamp: documentMeta.serviceStamp,
       userId: user.userId,
     },
     { applicationContext },
   );
 
-  const docketRecordEntry = new DocketRecord({
-    description: documentMeta.generatedDocumentTitle,
-    documentId: documentEntity.documentId,
-    editState: JSON.stringify(documentMeta),
-    filingDate: documentEntity.receivedAt,
-  });
+  const docketRecordEntry = new DocketRecord(
+    {
+      description: documentMeta.generatedDocumentTitle,
+      documentId: documentEntity.documentId,
+      editState: JSON.stringify(documentMeta),
+      eventCode: documentEntity.eventCode,
+      filingDate: documentEntity.receivedAt,
+    },
+    { applicationContext },
+  );
 
   caseEntity.updateDocketRecordEntry(omit(docketRecordEntry, 'index'));
   caseEntity.updateDocument(documentEntity);

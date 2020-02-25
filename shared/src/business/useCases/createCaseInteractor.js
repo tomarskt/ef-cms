@@ -1,4 +1,7 @@
 const {
+  CaseExternalIncomplete,
+} = require('../entities/cases/CaseExternalIncomplete');
+const {
   isAuthorized,
   ROLE_PERMISSIONS,
 } = require('../../authorization/authorizationClientService');
@@ -21,6 +24,7 @@ const addPetitionDocumentToCase = ({
     {
       assigneeId: null,
       assigneeName: null,
+      associatedJudge: caseToAdd.associatedJudge,
       caseId: caseToAdd.caseId,
       caseStatus: caseToAdd.status,
       caseTitle: Case.getCaseCaptionNames(Case.getCaseCaption(caseToAdd)),
@@ -30,7 +34,7 @@ const addPetitionDocumentToCase = ({
         ...documentEntity.toRawObject(),
         createdAt: documentEntity.createdAt,
       },
-      isInitializeCase: documentEntity.isPetitionDocument() ? true : false,
+      isInitializeCase: true,
       isQC: true,
       section: PETITIONS_SECTION,
       sentBy: user.userId,
@@ -55,7 +59,7 @@ const addPetitionDocumentToCase = ({
   );
 
   documentEntity.addWorkItem(workItemEntity);
-  caseToAdd.addDocument(documentEntity);
+  caseToAdd.addDocument(documentEntity, { applicationContext });
 
   return workItemEntity;
 };
@@ -87,8 +91,9 @@ exports.createCaseInteractor = async ({
     .getPersistenceGateway()
     .getUserById({ applicationContext, userId: authorizedUser.userId });
 
-  const { CaseExternal } = applicationContext.getEntityConstructors();
-  const petitionEntity = new CaseExternal(petitionMetadata).validate();
+  const petitionEntity = new CaseExternalIncomplete(
+    petitionMetadata,
+  ).validate();
 
   // invoke the createCase interactor
   const docketNumber = await applicationContext.docketNumberGenerator.createDocketNumber(
@@ -145,6 +150,7 @@ exports.createCaseInteractor = async ({
       documentId: petitionFileId,
       documentType: Document.INITIAL_DOCUMENT_TYPES.petition.documentType,
       eventCode: Document.INITIAL_DOCUMENT_TYPES.petition.eventCode,
+      filingDate: caseToAdd.createdAt,
       partyPrimary: true,
       partySecondary,
       practitioner: practitioners,
@@ -165,12 +171,15 @@ exports.createCaseInteractor = async ({
   });
 
   caseToAdd.addDocketRecord(
-    new DocketRecord({
-      description: `Request for Place of Trial at ${caseToAdd.preferredTrialCity}`,
-      eventCode:
-        Document.INITIAL_DOCUMENT_TYPES.requestForPlaceOfTrial.eventCode,
-      filingDate: caseToAdd.receivedAt || caseToAdd.createdAt,
-    }),
+    new DocketRecord(
+      {
+        description: `Request for Place of Trial at ${caseToAdd.preferredTrialCity}`,
+        eventCode:
+          Document.INITIAL_DOCUMENT_TYPES.requestForPlaceOfTrial.eventCode,
+        filingDate: caseToAdd.createdAt,
+      },
+      { applicationContext },
+    ),
   );
 
   const stinDocumentEntity = new Document(
@@ -178,6 +187,7 @@ exports.createCaseInteractor = async ({
       documentId: stinFileId,
       documentType: Document.INITIAL_DOCUMENT_TYPES.stin.documentType,
       eventCode: Document.INITIAL_DOCUMENT_TYPES.stin.eventCode,
+      filingDate: caseToAdd.createdAt,
       partyPrimary: true,
       partySecondary,
       practitioner: practitioners,
@@ -200,6 +210,7 @@ exports.createCaseInteractor = async ({
           Document.INITIAL_DOCUMENT_TYPES.ownershipDisclosure.documentType,
         eventCode:
           Document.INITIAL_DOCUMENT_TYPES.ownershipDisclosure.eventCode,
+        filingDate: caseToAdd.createdAt,
         partyPrimary: true,
         partySecondary,
         practitioner: practitioners,
@@ -212,7 +223,7 @@ exports.createCaseInteractor = async ({
       { applicationContext },
     );
 
-    caseToAdd.addDocument(odsDocumentEntity);
+    caseToAdd.addDocument(odsDocumentEntity, { applicationContext });
   }
 
   await applicationContext.getPersistenceGateway().createCase({

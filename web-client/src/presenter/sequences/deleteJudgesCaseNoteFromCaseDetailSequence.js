@@ -1,17 +1,16 @@
 import { clearModalAction } from '../actions/clearModalAction';
 import { clearModalStateAction } from '../actions/clearModalStateAction';
-import { deleteJudgesCaseNoteAction } from '../actions/TrialSession/deleteJudgesCaseNoteAction';
+import { deleteUserCaseNoteAction } from '../actions/TrialSession/deleteUserCaseNoteAction';
 import { setJudgesCaseNoteOnCaseDetailAction } from '../actions/TrialSession/setJudgesCaseNoteOnCaseDetailAction';
-import { setWaitingForResponseAction } from '../actions/setWaitingForResponseAction';
-import { unsetWaitingForResponseAction } from '../actions/unsetWaitingForResponseAction';
-import { updateDeleteJudgesCaseNotePropsFromModalStateAction } from '../actions/TrialSessionWorkingCopy/updateDeleteJudgesCaseNotePropsFromModalStateAction';
+import { showProgressSequenceDecorator } from '../utilities/sequenceHelpers';
+import { updateDeleteUserCaseNotePropsFromModalStateAction } from '../actions/TrialSessionWorkingCopy/updateDeleteUserCaseNotePropsFromModalStateAction';
 
-export const deleteJudgesCaseNoteFromCaseDetailSequence = [
-  setWaitingForResponseAction,
-  updateDeleteJudgesCaseNotePropsFromModalStateAction,
-  deleteJudgesCaseNoteAction,
-  setJudgesCaseNoteOnCaseDetailAction,
-  clearModalAction,
-  clearModalStateAction,
-  unsetWaitingForResponseAction,
-];
+export const deleteJudgesCaseNoteFromCaseDetailSequence = showProgressSequenceDecorator(
+  [
+    updateDeleteUserCaseNotePropsFromModalStateAction,
+    deleteUserCaseNoteAction,
+    setJudgesCaseNoteOnCaseDetailAction,
+    clearModalAction,
+    clearModalStateAction,
+  ],
+);

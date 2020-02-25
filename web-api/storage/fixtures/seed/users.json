@@ -1,5 +1,12 @@
 [
   {
+    "role": "admin",
+    "name": "Test Admin",
+    "section": "admin",
+    "userId": "86c3f87b-350b-477d-92c3-43bd095cb006",
+    "email": "admin"
+  },
+  {
     "role": "docketclerk",
     "name": "Test Docketclerk",
     "section": "docket",
@@ -297,13 +304,6 @@
     "email": "admissionsclerk"
   },
   {
-    "role": "calendarclerk",
-    "name": "Test Calendar Clerk",
-    "section": "calendar",
-    "userId": "106249e9-ded0-4baa-9a35-c0073712c3d1",
-    "email": "calendarclerk"
-  },
-  {
     "role": "clerkofcourt",
     "name": "Test Clerk of Court",
     "section": "clerkofcourt",
@@ -372,5 +372,12 @@
     "section": "urdasChambers",
     "userId": "44f02385-e4c6-49f9-a554-ecf93531d8a3",
     "email": "urdasChambers"
+  },
+  {
+    "role": "floater",
+    "name": "Test Floater",
+    "section": "floater",
+    "userId": "9ef02385-e4c6-49f9-a554-ecf93531d8a4",
+    "email": "testFloater"
   }
 ]

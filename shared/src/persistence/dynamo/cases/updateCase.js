@@ -1,5 +1,8 @@
 const client = require('../../dynamodbClientService');
 const {
+  updateWorkItemAssociatedJudge,
+} = require('../workitems/updateWorkItemAssociatedJudge');
+const {
   updateWorkItemCaseStatus,
 } = require('../workitems/updateWorkItemCaseStatus');
 const {
@@ -8,6 +11,9 @@ const {
 const {
   updateWorkItemDocketNumberSuffix,
 } = require('../workitems/updateWorkItemDocketNumberSuffix');
+const {
+  updateWorkItemTrialDate,
+} = require('../workitems/updateWorkItemTrialDate');
 
 /**
  * updateCase
@@ -30,7 +36,9 @@ exports.updateCase = async ({ applicationContext, caseToUpdate }) => {
   if (
     oldCase.status !== caseToUpdate.status ||
     oldCase.docketNumberSuffix !== caseToUpdate.docketNumberSuffix ||
-    oldCase.caseCaption !== caseToUpdate.caseCaption
+    oldCase.caseCaption !== caseToUpdate.caseCaption ||
+    oldCase.trialDate !== caseToUpdate.trialDate ||
+    oldCase.associatedJudge !== caseToUpdate.associatedJudge
   ) {
     const workItemMappings = await client.query({
       ExpressionAttributeNames: {
@@ -44,27 +52,51 @@ exports.updateCase = async ({ applicationContext, caseToUpdate }) => {
     });
 
     for (let mapping of workItemMappings) {
-      requests.push(
-        updateWorkItemCaseStatus({
-          applicationContext,
-          caseStatus: caseToUpdate.status,
-          workItemId: mapping.sk,
-        }),
-      );
-      requests.push(
-        updateWorkItemCaseTitle({
-          applicationContext,
-          caseTitle: caseToUpdate.caseCaption,
-          workItemId: mapping.sk,
-        }),
-      );
-      requests.push(
-        updateWorkItemDocketNumberSuffix({
-          applicationContext,
-          docketNumberSuffix: caseToUpdate.docketNumberSuffix,
-          workItemId: mapping.sk,
-        }),
-      );
+      if (oldCase.status !== caseToUpdate.status) {
+        requests.push(
+          updateWorkItemCaseStatus({
+            applicationContext,
+            caseStatus: caseToUpdate.status,
+            workItemId: mapping.sk,
+          }),
+        );
+      }
+      if (oldCase.caseCaption !== caseToUpdate.caseCaption) {
+        requests.push(
+          updateWorkItemCaseTitle({
+            applicationContext,
+            caseTitle: caseToUpdate.caseCaption,
+            workItemId: mapping.sk,
+          }),
+        );
+      }
+      if (oldCase.docketNumberSuffix !== caseToUpdate.docketNumberSuffix) {
+        requests.push(
+          updateWorkItemDocketNumberSuffix({
+            applicationContext,
+            docketNumberSuffix: caseToUpdate.docketNumberSuffix || null,
+            workItemId: mapping.sk,
+          }),
+        );
+      }
+      if (oldCase.trialDate !== caseToUpdate.trialDate) {
+        requests.push(
+          updateWorkItemTrialDate({
+            applicationContext,
+            trialDate: caseToUpdate.trialDate || null,
+            workItemId: mapping.sk,
+          }),
+        );
+      }
+      if (oldCase.associatedJudge !== caseToUpdate.associatedJudge) {
+        requests.push(
+          updateWorkItemAssociatedJudge({
+            applicationContext,
+            associatedJudge: caseToUpdate.associatedJudge,
+            workItemId: mapping.sk,
+          }),
+        );
+      }
     }
   }
 

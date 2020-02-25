@@ -6,6 +6,7 @@ import {
 import { addCourtIssuedDocketEntryHelper } from './computeds/addCourtIssuedDocketEntryHelper';
 import { addCourtIssuedDocketEntryNonstandardHelper } from './computeds/addCourtIssuedDocketEntryNonstandardHelper';
 import { addDocketEntryHelper } from './computeds/addDocketEntryHelper';
+import { addEditUserCaseNoteModalHelper } from './computeds/addEditUserCaseNoteModalHelper';
 import { addToTrialSessionModalHelper } from './computeds/addToTrialSessionModalHelper';
 import { advancedSearchHelper } from './computeds/advancedSearchHelper';
 import { alertHelper } from './computeds/alertHelper';
@@ -18,9 +19,11 @@ import { caseDetailHeaderHelper } from './computeds/caseDetailHeaderHelper';
 import { caseDetailHelper } from './computeds/caseDetailHelper';
 import { caseDetailSubnavHelper } from './computeds/caseDetailSubnavHelper';
 import { caseInformationHelper } from './computeds/caseInformationHelper';
+import { caseInventoryReportHelper } from './computeds/caseInventoryReportHelper';
 import { caseTypeDescriptionHelper } from './computeds/caseTypeDescriptionHelper';
 import { completeDocumentTypeSectionHelper } from './computeds/completeDocumentTypeSectionHelper';
 import { confirmInitiateServiceModalHelper } from './computeds/confirmInitiateServiceModalHelper';
+import { contactEditHelper } from './computeds/contactEditHelper';
 import { contactsHelper } from './computeds/contactsHelper';
 import { createOrderHelper } from './computeds/createOrderHelper';
 import { dashboardExternalHelper } from './computeds/dashboardExternalHelper';
@@ -28,6 +31,7 @@ import { docketRecordHelper } from './computeds/docketRecordHelper';
 import { documentDetailHelper } from './computeds/documentDetailHelper';
 import { documentSigningHelper } from './computeds/documentSigningHelper';
 import { editDocketEntryHelper } from './computeds/editDocketEntryHelper';
+import { editDocketEntryMetaHelper } from './computeds/editDocketEntryMetaHelper';
 import { editPetitionerInformationHelper } from './computeds/editPetitionerInformationHelper';
 import { extractedDocument } from './computeds/extractDocument';
 import { extractedPendingMessagesFromCaseDetail } from './computeds/extractPendingMessagesFromCaseDetail';
@@ -46,8 +50,9 @@ import { menuHelper } from './computeds/menuHelper';
 import { orderTypesHelper } from './computeds/orderTypesHelper';
 import { pdfPreviewModalHelper } from './computeds/PDFPreviewModal/pdfPreviewModalHelper';
 import { pdfSignerHelper } from './computeds/pdfSignerHelper';
-import { primaryContactEditHelper } from './computeds/primaryContactEditHelper';
 import { requestAccessHelper } from './computeds/requestAccessHelper';
+import { reviewPetitionFromPaperHelper } from './computeds/reviewPetitionFromPaperHelper';
+import { reviewSavedPetitionHelper } from './computeds/reviewSavedPetitionHelper';
 import { scanBatchPreviewerHelper } from './computeds/scanBatchPreviewerHelper';
 import { scanHelper } from './computeds/scanHelper';
 import { selectDocumentSelectHelper } from './computeds/selectDocumentSelectHelper';
@@ -60,6 +65,8 @@ import { trialCitiesHelper } from './computeds/trialCitiesHelper';
 import { trialSessionDetailsHelper } from './computeds/trialSessionDetailsHelper';
 import { trialSessionHeaderHelper } from './computeds/trialSessionHeaderHelper';
 import { trialSessionWorkingCopyHelper } from './computeds/trialSessionWorkingCopyHelper';
+import { trialSessionsHelper } from './computeds/trialSessionsHelper';
+import { trialSessionsSummaryHelper } from './computeds/trialSessionsSummaryHelper';
 import { updateCaseModalHelper } from './computeds/updateCaseModalHelper';
 import { viewAllDocumentsHelper } from './computeds/viewAllDocumentsHelper';
 import { workQueueHelper } from './computeds/workQueueHelper';
@@ -69,6 +76,7 @@ export const state = {
   addCourtIssuedDocketEntryHelper,
   addCourtIssuedDocketEntryNonstandardHelper,
   addDocketEntryHelper,
+  addEditUserCaseNoteModalHelper,
   addToTrialSessionModalHelper,
   advancedSearchForm: {},
   advancedSearchHelper,
@@ -98,6 +106,7 @@ export const state = {
   caseDetailPage: {},
   caseDetailSubnavHelper,
   caseInformationHelper,
+  caseInventoryReportHelper,
   caseTypeDescriptionHelper,
   caseTypes: [],
   cases: [],
@@ -105,6 +114,7 @@ export const state = {
   completeDocumentTypeSectionHelper,
   completeForm: {},
   confirmInitiateServiceModalHelper,
+  contactEditHelper,
   contactsHelper,
   createOrderHelper,
   currentPage: 'Interstitial',
@@ -126,6 +136,7 @@ export const state = {
   documentSigningHelper,
   documentUploadMode: 'scan',
   editDocketEntryHelper,
+  editDocketEntryMetaHelper,
   editPetitionerInformationHelper,
   extractedDocument,
   extractedPendingMessagesFromCaseDetail,
@@ -173,9 +184,10 @@ export const state = {
   permissions: null,
   petition: {},
   previewPdfFile: null,
-  primaryContactEditHelper,
   procedureTypes: [],
   requestAccessHelper,
+  reviewPetitionFromPaperHelper,
+  reviewSavedPetitionHelper,
   scanBatchPreviewerHelper,
   scanHelper,
   scanner: {},
@@ -202,6 +214,8 @@ export const state = {
   trialSessionDetailsHelper,
   trialSessionHeaderHelper,
   trialSessionWorkingCopyHelper,
+  trialSessionsHelper,
+  trialSessionsSummaryHelper,
   trialSessionsTab: {
     group: null,
   },
@@ -214,6 +228,7 @@ export const state = {
   validationErrors: {},
   viewAllDocumentsHelper,
   waitingForResponse: false,
+  waitingForResponseRequests: 0,
   workItem: {},
   workItemActions: {},
   workItemMetadata: {},

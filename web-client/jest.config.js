@@ -1,7 +1,8 @@
 const rootDir = '..';
-const { moduleNameMapper } = require('../aliases');
+const baseConfig = require('../jest.config');
 
 module.exports = {
+  ...baseConfig,
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.js',
@@ -16,20 +17,10 @@ module.exports = {
     '!src/index-public.dev.js',
     '!src/index-public.prod.js',
   ],
-  coverageDirectory: './coverage',
-  coverageThreshold: {
-    global: {
-      branches: 95,
-      functions: 95,
-      lines: 95,
-      statements: 95,
-    },
-  },
   globals: {
     atob: x => x,
     window: { document: {} },
   },
-  moduleNameMapper,
   rootDir,
   testEnvironment: 'node',
   transform: {
@@ -38,5 +29,5 @@ module.exports = {
     '^.+\\.js$': 'babel-jest',
     '^.+\\.jsx$': 'babel-jest',
   },
-  verbose: true,
+  verbose: false,
 };

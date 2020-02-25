@@ -22,11 +22,11 @@ const pageMock = {
 };
 
 const chromiumBrowserMock = {
-  close: () => {},
+  close: jest.fn(),
   newPage: () => pageMock,
 };
 
-const applicationContext = {
+let applicationContext = {
   getCaseCaptionNames: Case.getCaseCaptionNames,
   getChromiumBrowser: () => chromiumBrowserMock,
   getCurrentUser: () => {
@@ -84,6 +84,32 @@ describe('generateNoticeOfDocketChangePdf', () => {
   beforeEach(() => {
     isAuthorized.mockReturnValue(true);
   });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('fails to get chromium browser', async () => {
+    jest
+      .spyOn(applicationContext, 'getChromiumBrowser')
+      .mockImplementation(() => {
+        return null;
+      });
+
+    let error;
+    try {
+      await generateNoticeOfDocketChangePdf({
+        applicationContext,
+        docketChangeInfo,
+      });
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeDefined();
+    expect(chromiumBrowserMock.close).not.toHaveBeenCalled();
+  });
+
   it('requires permissions', async () => {
     isAuthorized.mockReturnValue(false);
     let result, error;
@@ -105,5 +131,35 @@ describe('generateNoticeOfDocketChangePdf', () => {
     });
 
     expect(result).toEqual('uniqueId');
+  });
+
+  it('catches a thrown exception', async () => {
+    applicationContext = {
+      ...applicationContext,
+      getChromiumBrowser: jest.fn().mockReturnValue({
+        close: () => {},
+        newPage: () => ({
+          pdf: () => {
+            throw new Error('error pdf');
+          },
+          setContent: () => {
+            throw new Error('error setContent');
+          },
+        }),
+      }),
+    };
+
+    let err;
+
+    try {
+      await generateNoticeOfDocketChangePdf({
+        applicationContext,
+        docketChangeInfo,
+      });
+    } catch (e) {
+      err = e;
+    }
+
+    expect(err).toBeDefined();
   });
 });

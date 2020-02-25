@@ -1,4 +1,4 @@
-service: ef-cms-public
+service: ef-cms-public-${opt:stageColor}
 
 plugins:
   - serverless-domain-manager
@@ -45,9 +45,6 @@ custom:
     topics:
       alarm:
         topic: arn:aws:sns:${opt:region}:${opt:accountId}:serverless-alerts-topic-${self:provider.stage}
-        notifications:
-          - protocol: email
-            endpoint: ustaxcourt@flexion.us
 
   customDomain:
     domainName: efcms-${self:provider.stage}.${opt:domain}
@@ -67,6 +64,7 @@ custom:
 
 provider:
   name: aws
+  endpointType: REGIONAL
   tracing: true
   stage: ${self:custom.stage}
   region: ${self:custom.region}

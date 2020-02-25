@@ -1,20 +1,18 @@
 import { Case } from '../../shared/src/business/entities/cases/Case';
-import { setupTest } from './helpers';
+import { setupTest, wait } from './helpers';
 import { uploadPetition } from './helpers';
-import calendarClerkLogIn from './journey/calendarClerkLogIn';
 import captureCreatedCase from './journey/captureCreatedCase';
 import docketClerkCreatesATrialSession from './journey/docketClerkCreatesATrialSession';
 import docketClerkLogIn from './journey/docketClerkLogIn';
 import docketClerkSetsCaseReadyForTrial from './journey/docketClerkSetsCaseReadyForTrial';
-import docketClerkViewsAnUpcomingTrialSession from './journey/docketClerkViewsAnUpcomingTrialSession';
+import docketClerkViewsNewTrialSession from './journey/docketClerkViewsNewTrialSession';
 import docketClerkViewsTrialSessionList from './journey/docketClerkViewsTrialSessionList';
 import markAllCasesAsQCed from './journey/markAllCasesAsQCed';
 import petitionerLogin from './journey/petitionerLogIn';
 import petitionerViewsDashboard from './journey/petitionerViewsDashboard';
 import petitionsClerkLogIn from './journey/petitionsClerkLogIn';
-import petitionsClerkRunsBatchProcess from './journey/petitionsClerkRunsBatchProcess';
-import petitionsClerkSendsCaseToIRSHoldingQueue from './journey/petitionsClerkSendsCaseToIRSHoldingQueue';
 import petitionsClerkSetsATrialSessionsSchedule from './journey/petitionsClerkSetsATrialSessionsSchedule';
+import petitionsClerkSubmitsCaseToIrs from './journey/petitionsClerkSubmitsCaseToIrs';
 import petitionsClerkUpdatesFiledBy from './journey/petitionsClerkUpdatesFiledBy';
 import userSignsOut from './journey/petitionerSignsOut';
 
@@ -23,6 +21,10 @@ const test = setupTest();
 describe('Trial Session Eligible Cases Journey', () => {
   beforeAll(() => {
     jest.setTimeout(30000);
+  });
+
+  afterAll(() => {
+    test.closeSocket();
   });
 
   const trialLocation = `Madison, Wisconsin, ${Date.now()}`;
@@ -39,7 +41,7 @@ describe('Trial Session Eligible Cases Journey', () => {
     docketClerkLogIn(test);
     docketClerkCreatesATrialSession(test, overrides);
     docketClerkViewsTrialSessionList(test, overrides);
-    docketClerkViewsAnUpcomingTrialSession(test);
+    docketClerkViewsNewTrialSession(test);
     userSignsOut(test);
   });
 
@@ -62,8 +64,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -88,8 +89,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -114,8 +114,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -127,7 +126,7 @@ describe('Trial Session Eligible Cases Journey', () => {
         ...overrides,
         caseType: 'CDP (Lien/Levy)',
         procedureType: 'Small',
-        receivedAtDay: '01',
+        receivedAtDay: '01', //
         receivedAtMonth: '02',
         receivedAtYear: '2019',
       };
@@ -140,8 +139,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -166,8 +164,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -196,7 +193,6 @@ describe('Trial Session Eligible Cases Journey', () => {
       expect(test.getState('trialSession.eligibleCases.3.caseId')).toEqual(
         createdCases[1],
       );
-      expect(test.getState('trialSession.status')).toEqual('Upcoming');
       expect(test.getState('trialSession.isCalendared')).toEqual(false);
     });
 
@@ -241,7 +237,6 @@ describe('Trial Session Eligible Cases Journey', () => {
       expect(test.getState('trialSession.eligibleCases.3.caseId')).toEqual(
         createdCases[0],
       );
-      expect(test.getState('trialSession.status')).toEqual('Upcoming');
       expect(test.getState('trialSession.isCalendared')).toEqual(false);
     });
 
@@ -279,7 +274,6 @@ describe('Trial Session Eligible Cases Journey', () => {
       expect(test.getState('trialSession.eligibleCases.3.caseId')).toEqual(
         createdCases[1],
       );
-      expect(test.getState('trialSession.status')).toEqual('Upcoming');
       expect(test.getState('trialSession.isCalendared')).toEqual(false);
     });
 
@@ -287,7 +281,7 @@ describe('Trial Session Eligible Cases Journey', () => {
   });
 
   describe('Calendar clerk marks all eligible cases as QCed', () => {
-    calendarClerkLogIn(test);
+    petitionsClerkLogIn(test);
     markAllCasesAsQCed(test, () => [
       createdCases[0],
       createdCases[1],
@@ -407,6 +401,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       expect(test.getState('caseDetail.status')).not.toEqual('Calendared');
 
       await test.runSequence('addCaseToTrialSessionSequence');
+      await wait(1000);
 
       expect(test.getState('validationErrors')).toEqual({
         trialSessionId: 'Select a Trial Session',
@@ -415,6 +410,7 @@ describe('Trial Session Eligible Cases Journey', () => {
       test.setState('modal.trialSessionId', test.trialSessionId);
 
       await test.runSequence('addCaseToTrialSessionSequence');
+      await wait(1000); // we need to wait for some reason
 
       await test.runSequence('gotoCaseDetailSequence', {
         docketNumber: createdDocketNumbers[0],

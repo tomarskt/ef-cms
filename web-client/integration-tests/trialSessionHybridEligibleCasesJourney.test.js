@@ -1,19 +1,17 @@
 import { setupTest } from './helpers';
 import { uploadPetition } from './helpers';
-import calendarClerkLogIn from './journey/calendarClerkLogIn';
 import captureCreatedCase from './journey/captureCreatedCase';
 import docketClerkCreatesATrialSession from './journey/docketClerkCreatesATrialSession';
 import docketClerkLogIn from './journey/docketClerkLogIn';
 import docketClerkSetsCaseReadyForTrial from './journey/docketClerkSetsCaseReadyForTrial';
-import docketClerkViewsAnUpcomingTrialSession from './journey/docketClerkViewsAnUpcomingTrialSession';
+import docketClerkViewsNewTrialSession from './journey/docketClerkViewsNewTrialSession';
 import docketClerkViewsTrialSessionList from './journey/docketClerkViewsTrialSessionList';
 import markAllCasesAsQCed from './journey/markAllCasesAsQCed';
 import petitionerLogin from './journey/petitionerLogIn';
 import petitionerViewsDashboard from './journey/petitionerViewsDashboard';
 import petitionsClerkLogIn from './journey/petitionsClerkLogIn';
-import petitionsClerkRunsBatchProcess from './journey/petitionsClerkRunsBatchProcess';
-import petitionsClerkSendsCaseToIRSHoldingQueue from './journey/petitionsClerkSendsCaseToIRSHoldingQueue';
 import petitionsClerkSetsATrialSessionsSchedule from './journey/petitionsClerkSetsATrialSessionsSchedule';
+import petitionsClerkSubmitsCaseToIrs from './journey/petitionsClerkSubmitsCaseToIrs';
 import petitionsClerkUpdatesFiledBy from './journey/petitionsClerkUpdatesFiledBy';
 import userSignsOut from './journey/petitionerSignsOut';
 
@@ -24,6 +22,9 @@ describe('Trial Session Eligible Cases - Both small and regular cases get schedu
     jest.setTimeout(30000);
   });
 
+  afterAll(() => {
+    test.closeSocket();
+  });
   const trialLocation = `Despacito, Texas, ${Date.now()}`;
   const overrides = {
     maxCases: 2,
@@ -37,7 +38,7 @@ describe('Trial Session Eligible Cases - Both small and regular cases get schedu
     docketClerkLogIn(test);
     docketClerkCreatesATrialSession(test, overrides);
     docketClerkViewsTrialSessionList(test, overrides);
-    docketClerkViewsAnUpcomingTrialSession(test);
+    docketClerkViewsNewTrialSession(test);
     userSignsOut(test);
   });
 
@@ -60,8 +61,7 @@ describe('Trial Session Eligible Cases - Both small and regular cases get schedu
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -86,8 +86,7 @@ describe('Trial Session Eligible Cases - Both small and regular cases get schedu
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -112,8 +111,7 @@ describe('Trial Session Eligible Cases - Both small and regular cases get schedu
       userSignsOut(test);
       petitionsClerkLogIn(test);
       petitionsClerkUpdatesFiledBy(test, caseOverrides);
-      petitionsClerkSendsCaseToIRSHoldingQueue(test);
-      petitionsClerkRunsBatchProcess(test);
+      petitionsClerkSubmitsCaseToIrs(test);
       userSignsOut(test);
       docketClerkLogIn(test);
       docketClerkSetsCaseReadyForTrial(test);
@@ -139,7 +137,6 @@ describe('Trial Session Eligible Cases - Both small and regular cases get schedu
       expect(test.getState('trialSession.eligibleCases.2.caseId')).toEqual(
         createdCases[2],
       );
-      expect(test.getState('trialSession.status')).toEqual('Upcoming');
       expect(test.getState('trialSession.isCalendared')).toEqual(false);
     });
 
@@ -147,7 +144,7 @@ describe('Trial Session Eligible Cases - Both small and regular cases get schedu
   });
 
   describe('Calendar clerk marks all eligible cases as QCed', () => {
-    calendarClerkLogIn(test);
+    petitionsClerkLogIn(test);
     markAllCasesAsQCed(test, () => [
       createdCases[0],
       createdCases[1],

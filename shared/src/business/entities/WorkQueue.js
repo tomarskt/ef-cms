@@ -6,8 +6,8 @@ exports.CALENDAR_SECTION = 'calendar';
 exports.CHAMBERS_SECTION = 'chambers';
 exports.CLERK_OF_COURT_SECTION = 'clerkofcourt';
 exports.DOCKET_SECTION = 'docket';
-exports.IRS_BATCH_SYSTEM_SECTION = 'irsBatchSection';
 exports.PETITIONS_SECTION = 'petitions';
+exports.IRS_SYSTEM_SECTION = 'irsSystem';
 exports.TRIAL_CLERKS_SECTION = 'trialClerks';
 
 exports.ARMENS_CHAMBERS_SECTION = 'armensChambers';
@@ -36,7 +36,7 @@ exports.PANUTHOS_CHAMBERS_SECTION = 'panuthosChambers';
 exports.PARIS_CHAMBERS_SECTION = 'parisChambers';
 exports.PUGHS_CHAMBERS_SECTION = 'pughsChambers';
 exports.RUWES_CHAMBERS_SECTION = 'ruwesChambers';
-exports.THORTONS_CHAMBERS_SECTION = 'thortonsChambers';
+exports.THORNTONS_CHAMBERS_SECTION = 'thorntonsChambers';
 exports.URDAS_CHAMBERS_SECTION = 'urdasChambers';
 exports.VASQUEZS_CHAMBERS_SECTION = 'vasquezsChambers';
 exports.WELLS_CHAMBERS_SECTION = 'wellsChambers';
@@ -48,7 +48,6 @@ exports.SECTIONS = sortBy([
   exports.CHAMBERS_SECTION,
   exports.CLERK_OF_COURT_SECTION,
   exports.DOCKET_SECTION,
-  // intentionally leaving out IRS_BATCH_SYSTEM_SECTION since that is an internal section
   exports.PETITIONS_SECTION,
   exports.TRIAL_CLERKS_SECTION,
 ]);
@@ -80,7 +79,7 @@ exports.CHAMBERS_SECTIONS = sortBy([
   exports.PARIS_CHAMBERS_SECTION,
   exports.PUGHS_CHAMBERS_SECTION,
   exports.RUWES_CHAMBERS_SECTION,
-  exports.THORTONS_CHAMBERS_SECTION,
+  exports.THORNTONS_CHAMBERS_SECTION,
   exports.URDAS_CHAMBERS_SECTION,
   exports.VASQUEZS_CHAMBERS_SECTION,
   exports.WELLS_CHAMBERS_SECTION,

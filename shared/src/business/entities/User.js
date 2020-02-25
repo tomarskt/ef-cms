@@ -1,4 +1,4 @@
-const joi = require('joi-browser');
+const joi = require('@hapi/joi');
 const {
   JoiValidationConstants,
 } = require('../../utilities/JoiValidationConstants');
@@ -9,11 +9,12 @@ const { ContactFactory } = require('../entities/contacts/ContactFactory');
 
 User.ROLES = {
   adc: 'adc',
+  admin: 'admin',
   admissionsClerk: 'admissionsclerk',
-  calendarClerk: 'calendarclerk',
   chambers: 'chambers',
   clerkOfCourt: 'clerkofcourt',
   docketClerk: 'docketclerk',
+  floater: 'floater',
   judge: 'judge',
   petitioner: 'petitioner',
   petitionsClerk: 'petitionsclerk',
@@ -42,6 +43,10 @@ const userDecorator = (obj, rawObj) => {
       postalCode: rawObj.contact.postalCode,
       state: rawObj.contact.state,
     };
+  }
+  if (obj.role === User.ROLES.judge) {
+    obj.judgeFullName = rawObj.judgeFullName;
+    obj.judgeTitle = rawObj.judgeTitle;
   }
 };
 
@@ -95,10 +100,20 @@ const userValidation = {
     })
     .optional(),
   email: joi.string().optional(),
+  judgeFullName: joi.when('role', {
+    is: User.ROLES.judge,
+    otherwise: joi.optional().allow(null),
+    then: joi.string().optional(),
+  }),
+  judgeTitle: joi.when('role', {
+    is: User.ROLES.judge,
+    otherwise: joi.optional().allow(null),
+    then: joi.string().optional(),
+  }),
   name: joi.string().optional(),
   role: joi
     .string()
-    .valid(Object.values(User.ROLES))
+    .valid(...Object.values(User.ROLES))
     .required(),
   section: joi.string().optional(),
   token: joi.string().optional(),
@@ -154,10 +169,10 @@ User.isInternalUser = function(role) {
   const internalRoles = [
     User.ROLES.adc,
     User.ROLES.admissionsClerk,
-    User.ROLES.calendarClerk,
     User.ROLES.chambers,
     User.ROLES.clerkOfCourt,
     User.ROLES.docketClerk,
+    User.ROLES.floater,
     User.ROLES.judge,
     User.ROLES.petitionsClerk,
     User.ROLES.trialClerk,

@@ -46,7 +46,9 @@ export const documentDetailHelper = (get, applicationContext) => {
     courtIssuedDoc => courtIssuedDoc.documentType,
   );
   const STIPULATED_DECISION_DOCUMENT_TYPE = 'Stipulated Decision';
-  const newOrRecalledStatus = [STATUS_TYPES.new, STATUS_TYPES.recalled];
+  const MISCELLANEOUS_DOCUMENT_TYPE = 'MISC - Miscellaneous';
+
+  const newOrInProgressStatus = [STATUS_TYPES.new, STATUS_TYPES.inProgress];
 
   const caseDetail = get(state.caseDetail);
   const permissions = get(state.permissions);
@@ -91,6 +93,7 @@ export const documentDetailHelper = (get, applicationContext) => {
 
   const isStipDecision =
     document.documentType === STIPULATED_DECISION_DOCUMENT_TYPE;
+  const isMiscellaneous = document.documentType === MISCELLANEOUS_DOCUMENT_TYPE;
 
   formattedDocument.signUrl = isStipDecision
     ? `/case-detail/${caseDetail.docketNumber}/documents/${formattedDocument.documentId}/sign`
@@ -98,6 +101,8 @@ export const documentDetailHelper = (get, applicationContext) => {
 
   formattedDocument.editUrl = isStipDecision
     ? `/case-detail/${caseDetail.docketNumber}/documents/${formattedDocument.documentId}/sign`
+    : isMiscellaneous
+    ? `/case-detail/${caseDetail.docketNumber}/edit-upload-court-issued/${formattedDocument.documentId}`
     : `/case-detail/${caseDetail.docketNumber}/edit-order/${formattedDocument.documentId}`;
 
   const stipulatedWorkItem = formattedDocument.workItems.find(
@@ -134,25 +139,13 @@ export const documentDetailHelper = (get, applicationContext) => {
       (isOrder && !isDocumentOnDocketRecord) ||
       (isCourtIssuedDocument && !isDocumentOnDocketRecord));
 
-  const showServeToIrsButton =
-    newOrRecalledStatus.includes(caseDetail.status) &&
-    formattedDocument.isPetition &&
-    user.role === USER_ROLES.petitionsClerk;
-  const showRecallButton =
-    caseDetail.status === STATUS_TYPES.batchedForIRS &&
-    formattedDocument.isPetition;
+  const showCaseDetailsEdit = newOrInProgressStatus.includes(caseDetail.status);
 
-  const showCaseDetailsEdit = newOrRecalledStatus.includes(caseDetail.status);
-  const showCaseDetailsView = [STATUS_TYPES.batchedForIRS].includes(
-    caseDetail.status,
-  );
   const showDocumentInfoTab =
-    formattedDocument.isPetition &&
-    (showCaseDetailsEdit || showCaseDetailsView);
+    formattedDocument.isPetition && showCaseDetailsEdit;
 
   const showViewOrdersNeededButton =
-    (document.status === 'served' ||
-      caseDetail.status === STATUS_TYPES.batchedForIRS) &&
+    document.status === 'served' &&
     user.role === USER_ROLES.petitionsClerk &&
     formattedDocument.isPetition;
 
@@ -173,7 +166,6 @@ export const documentDetailHelper = (get, applicationContext) => {
     },
     showAddCourtIssuedDocketEntryButton,
     showCaseDetailsEdit,
-    showCaseDetailsView,
     showConfirmEditOrder: isSigned && isOrder,
     showCreatedFiled: (!isOrder && !isCourtIssuedDocument) || isDraftDocument,
     showDocumentInfoTab,
@@ -186,12 +178,11 @@ export const documentDetailHelper = (get, applicationContext) => {
     showEditDocketEntry:
       !isDraftDocument &&
       permissions.DOCKET_ENTRY &&
+      !formattedDocument.qcWorkItemsCompleted &&
       formattedDocument.isPetition === false &&
       !formattedDocument.isCourtIssuedDocument,
     showPrintCaseConfirmationButton,
-    showRecallButton,
     showRemoveSignature: isOrder && document.eventCode !== 'NOT' && isSigned,
-    showServeToIrsButton,
     showSignDocumentButton,
     showSignedAt: isOrder && isSigned,
     showViewOrdersNeededButton,

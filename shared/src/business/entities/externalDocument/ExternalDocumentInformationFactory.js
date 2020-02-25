@@ -1,4 +1,4 @@
-const joi = require('joi-browser');
+const joi = require('@hapi/joi');
 const {
   addPropertyHelper,
   makeRequiredHelper,
@@ -16,6 +16,7 @@ const {
 const {
   SupportingDocumentInformationFactory,
 } = require('./SupportingDocumentInformationFactory');
+const { Document } = require('../Document');
 const { includes, isEqual, reduce, some, sortBy, values } = require('lodash');
 
 const VALIDATION_ERROR_MESSAGES = {
@@ -165,7 +166,7 @@ ExternalDocumentInformationFactory.get = documentMetadata => {
     hasSupportingDocuments: joi.boolean().required(),
     lodged: joi.boolean().optional(),
     ordinalValue: joi.string().optional(),
-    previousDocument: joi.string().optional(),
+    previousDocument: joi.object().optional(),
     primaryDocumentFile: joi.object().required(),
     primaryDocumentFileSize: joi
       .number()
@@ -200,8 +201,6 @@ ExternalDocumentInformationFactory.get = documentMetadata => {
     supportingDocuments: joi.array().optional(),
   };
 
-  let customValidate;
-
   const addProperty = (itemName, itemSchema, itemErrorMessage) => {
     addPropertyHelper({
       VALIDATION_ERROR_MESSAGES,
@@ -224,16 +223,21 @@ ExternalDocumentInformationFactory.get = documentMetadata => {
     makeRequired('certificateOfServiceDate');
   }
 
+  const objectionDocumentTypes = [
+    ...Document.CATEGORY_MAP['Motion'].map(entry => {
+      return entry.documentType;
+    }),
+    'Motion to Withdraw Counsel (filed by petitioner)',
+    'Motion to Withdraw as Counsel',
+    'Application to Take Deposition',
+  ];
+
   if (
-    documentMetadata.category === 'Motion' ||
-    includes(
-      [
-        'Motion to Withdraw Counsel',
-        'Motion to Withdraw As Counsel',
-        'Application to Take Deposition',
-      ],
-      documentMetadata.documentType,
-    )
+    objectionDocumentTypes.includes(documentMetadata.documentType) ||
+    (['AMAT', 'ADMT'].includes(documentMetadata.eventCode) &&
+      objectionDocumentTypes.includes(
+        documentMetadata.previousDocument.documentType,
+      ))
   ) {
     makeRequired('objections');
   }
@@ -302,7 +306,7 @@ ExternalDocumentInformationFactory.get = documentMetadata => {
   joiValidationDecorator(
     entityConstructor,
     schema,
-    customValidate,
+    undefined,
     VALIDATION_ERROR_MESSAGES,
   );
 

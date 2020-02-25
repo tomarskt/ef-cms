@@ -7,18 +7,16 @@ import { primePropsForCanConsolidateAction } from '../actions/caseConsolidation/
 import { refreshCaseAction } from '../actions/refreshCaseAction';
 import { setAddConsolidatedCaseSuccessMessageAction } from '../actions/caseConsolidation/setAddConsolidatedCaseSuccessMessageAction';
 import { setAlertSuccessAction } from '../actions/setAlertSuccessAction';
-import { setCanConsolidateErrorAction } from '../actions/caseConsolidation/setCanConsolidateErrorAction';
 import { setConsolidatedCasesForCaseAction } from '../actions/caseConsolidation/setConsolidatedCasesForCaseAction';
-import { setWaitingForResponseAction } from '../actions/setWaitingForResponseAction';
-import { unsetWaitingForResponseAction } from '../actions/unsetWaitingForResponseAction';
+import { setModalErrorAction } from '../actions/setModalErrorAction';
+import { showProgressSequenceDecorator } from '../utilities/sequenceHelpers';
 
 export const submitAddConsolidatedCaseSequence = [
   primePropsForCanConsolidateAction,
   canConsolidateAction,
   {
-    error: [setCanConsolidateErrorAction],
-    success: [
-      setWaitingForResponseAction,
+    error: [setModalErrorAction],
+    success: showProgressSequenceDecorator([
       addConsolidatedCaseAction,
       refreshCaseAction,
       getConsolidatedCasesByCaseAction,
@@ -27,7 +25,6 @@ export const submitAddConsolidatedCaseSequence = [
       clearModalStateAction,
       setAddConsolidatedCaseSuccessMessageAction,
       setAlertSuccessAction,
-      unsetWaitingForResponseAction,
-    ],
+    ]),
   },
 ];

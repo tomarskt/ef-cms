@@ -8,6 +8,9 @@ const {
 const {
   getDocumentQCInboxForSectionInteractor,
 } = require('../useCases/workitems/getDocumentQCInboxForSectionInteractor');
+const {
+  updateCaseAutomaticBlock,
+} = require('../useCaseHelper/automaticBlock/updateCaseAutomaticBlock');
 const { Case } = require('../entities/cases/Case');
 const { ContactFactory } = require('../entities/contacts/ContactFactory');
 const { createCaseInteractor } = require('../useCases/createCaseInteractor');
@@ -28,8 +31,9 @@ describe('fileExternalDocumentInteractor integration test', () => {
         userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
       },
     });
-    applicationContext.getDispatchers = () => ({
-      sendBulkTemplatedEmail: jest.fn(),
+    applicationContext.getUseCaseHelpers = () => ({
+      sendServedPartiesEmails: jest.fn(),
+      updateCaseAutomaticBlock,
     });
   });
 
@@ -42,6 +46,7 @@ describe('fileExternalDocumentInteractor integration test', () => {
       applicationContext,
       petitionFileId: '92eac064-9ca5-4c56-80a0-c5852c752277',
       petitionMetadata: {
+        caseCaption: 'Caption',
         caseType: 'Innocent Spouse',
         contactPrimary: {
           address1: '19 First Freeway',
@@ -56,6 +61,15 @@ describe('fileExternalDocumentInteractor integration test', () => {
           state: 'AP',
         },
         contactSecondary: {},
+        docketRecord: [
+          {
+            description: 'first record',
+            documentId: '8675309b-18d0-43ec-bafb-654e83405411',
+            eventCode: 'P',
+            filingDate: '2018-03-01T00:01:00.000Z',
+            index: 1,
+          },
+        ],
         filingType: 'Myself',
         hasIrsNotice: false,
         partyType: ContactFactory.PARTY_TYPES.petitioner,
@@ -76,38 +90,44 @@ describe('fileExternalDocumentInteractor integration test', () => {
       documentMetadata: {
         attachments: false,
         caseId,
-        category: 'Motion',
         certificateOfService: false,
         certificateOfServiceDate: 'undefined-undefined-undefined',
         docketNumber: '201-19',
         documentTitle: 'Motion for Leave to File Brief in Support of Petition',
         documentType: 'Motion for Leave to File',
+        eventCode: 'M115',
         hasSupportingDocuments: true,
         partyPrimary: true,
         scenario: 'Nonstandard H',
         secondaryDocument: {
-          category: 'Supporting Document',
           documentTitle: 'Brief in Support of Petition',
           documentType: 'Brief in Support',
-          previousDocument: 'Petition',
+          eventCode: 'BRF',
+          previousDocument: { documentType: 'Petition' },
           scenario: 'Nonstandard A',
         },
         secondarySupportingDocuments: [
           {
-            category: 'Supporting Document',
             documentTitle: 'Brief in Support of Amended Answer',
             documentType: 'Brief in Support',
-            previousDocument: 'Amended Answer',
+            eventCode: 'BRF',
+            previousDocument: {
+              documentTitle: 'Amended Answer',
+              documentType: 'Amended',
+            },
             scenario: 'Nonstandard A',
           },
         ],
         supportingDocument: 'Brief in Support',
         supportingDocuments: [
           {
-            category: 'Supporting Document',
             documentTitle: 'Brief in Support of Amended Answer',
             documentType: 'Brief in Support',
-            previousDocument: 'Amended Answer',
+            eventCode: 'BRF',
+            previousDocument: {
+              documentTitle: 'Amended Answer',
+              documentType: 'Amended',
+            },
             scenario: 'Nonstandard A',
           },
         ],
@@ -213,7 +233,6 @@ describe('fileExternalDocumentInteractor integration test', () => {
         {
           attachments: false,
           caseId,
-          category: 'Motion',
           certificateOfService: false,
           docketNumber: '201-19',
           documentId: '12de0fac-f63c-464f-ac71-0f54fd248484',
@@ -236,7 +255,6 @@ describe('fileExternalDocumentInteractor integration test', () => {
               document: {
                 attachments: false,
                 caseId,
-                category: 'Motion',
                 certificateOfService: false,
                 certificateOfServiceDate: 'undefined-undefined-undefined',
                 docketNumber: '201-19',
@@ -265,12 +283,14 @@ describe('fileExternalDocumentInteractor integration test', () => {
         },
         {
           caseId,
-          category: 'Supporting Document',
           documentId: '22de0fac-f63c-464f-ac71-0f54fd248484',
           documentTitle: 'Brief in Support of Amended Answer',
           documentType: 'Brief in Support',
           partyPrimary: true,
-          previousDocument: 'Amended Answer',
+          previousDocument: {
+            documentTitle: 'Amended Answer',
+            documentType: 'Amended',
+          },
           scenario: 'Nonstandard A',
           userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
           workItems: [
@@ -282,12 +302,14 @@ describe('fileExternalDocumentInteractor integration test', () => {
               docketNumber: '101-19',
               docketNumberSuffix: 'S',
               document: {
-                category: 'Supporting Document',
                 documentId: '22de0fac-f63c-464f-ac71-0f54fd248484',
                 documentTitle: 'Brief in Support of Amended Answer',
                 documentType: 'Brief in Support',
                 partyPrimary: true,
-                previousDocument: 'Amended Answer',
+                previousDocument: {
+                  documentTitle: 'Amended Answer',
+                  documentType: 'Amended',
+                },
                 scenario: 'Nonstandard A',
                 userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
               },
@@ -306,13 +328,12 @@ describe('fileExternalDocumentInteractor integration test', () => {
           ],
         },
         {
-          category: 'Supporting Document',
           documentId: '32de0fac-f63c-464f-ac71-0f54fd248484',
           documentTitle: 'Brief in Support of Petition',
           documentType: 'Brief in Support',
           lodged: true,
           partyPrimary: true,
-          previousDocument: 'Petition',
+          previousDocument: { documentType: 'Petition' },
           scenario: 'Nonstandard A',
           userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
           workItems: [
@@ -323,13 +344,12 @@ describe('fileExternalDocumentInteractor integration test', () => {
               docketNumber: '101-19',
               docketNumberSuffix: 'S',
               document: {
-                category: 'Supporting Document',
                 documentId: '32de0fac-f63c-464f-ac71-0f54fd248484',
                 documentTitle: 'Brief in Support of Petition',
                 documentType: 'Brief in Support',
                 lodged: true,
                 partyPrimary: true,
-                previousDocument: 'Petition',
+                previousDocument: { documentType: 'Petition' },
                 scenario: 'Nonstandard A',
                 userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
               },
@@ -348,13 +368,15 @@ describe('fileExternalDocumentInteractor integration test', () => {
           ],
         },
         {
-          category: 'Supporting Document',
           documentId: '42de0fac-f63c-464f-ac71-0f54fd248484',
           documentTitle: 'Brief in Support of Amended Answer',
           documentType: 'Brief in Support',
           lodged: true,
           partyPrimary: true,
-          previousDocument: 'Amended Answer',
+          previousDocument: {
+            documentTitle: 'Amended Answer',
+            documentType: 'Amended',
+          },
           scenario: 'Nonstandard A',
           userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
           workItems: [
@@ -365,13 +387,15 @@ describe('fileExternalDocumentInteractor integration test', () => {
               docketNumber: '101-19',
               docketNumberSuffix: 'S',
               document: {
-                category: 'Supporting Document',
                 documentId: '42de0fac-f63c-464f-ac71-0f54fd248484',
                 documentTitle: 'Brief in Support of Amended Answer',
                 documentType: 'Brief in Support',
                 lodged: true,
                 partyPrimary: true,
-                previousDocument: 'Amended Answer',
+                previousDocument: {
+                  documentTitle: 'Amended Answer',
+                  documentType: 'Amended',
+                },
                 scenario: 'Nonstandard A',
                 userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
               },
@@ -436,7 +460,6 @@ describe('fileExternalDocumentInteractor integration test', () => {
         document: {
           attachments: false,
           caseId,
-          category: 'Motion',
           certificateOfService: false,
           docketNumber: '201-19',
           documentId: '12de0fac-f63c-464f-ac71-0f54fd248484',
@@ -468,12 +491,14 @@ describe('fileExternalDocumentInteractor integration test', () => {
         docketNumber: '101-19',
         docketNumberSuffix: 'S',
         document: {
-          category: 'Supporting Document',
           documentId: '22de0fac-f63c-464f-ac71-0f54fd248484',
           documentTitle: 'Brief in Support of Amended Answer',
           documentType: 'Brief in Support',
           partyPrimary: true,
-          previousDocument: 'Amended Answer',
+          previousDocument: {
+            documentTitle: 'Amended Answer',
+            documentType: 'Amended',
+          },
           scenario: 'Nonstandard A',
           userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
         },
@@ -496,13 +521,12 @@ describe('fileExternalDocumentInteractor integration test', () => {
         docketNumber: '101-19',
         docketNumberSuffix: 'S',
         document: {
-          category: 'Supporting Document',
           documentId: '32de0fac-f63c-464f-ac71-0f54fd248484',
           documentTitle: 'Brief in Support of Petition',
           documentType: 'Brief in Support',
           lodged: true,
           partyPrimary: true,
-          previousDocument: 'Petition',
+          previousDocument: { documentType: 'Petition' },
           scenario: 'Nonstandard A',
           userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
         },
@@ -525,13 +549,15 @@ describe('fileExternalDocumentInteractor integration test', () => {
         docketNumber: '101-19',
         docketNumberSuffix: 'S',
         document: {
-          category: 'Supporting Document',
           documentId: '42de0fac-f63c-464f-ac71-0f54fd248484',
           documentTitle: 'Brief in Support of Amended Answer',
           documentType: 'Brief in Support',
           lodged: true,
           partyPrimary: true,
-          previousDocument: 'Amended Answer',
+          previousDocument: {
+            documentTitle: 'Amended Answer',
+            documentType: 'Amended',
+          },
           scenario: 'Nonstandard A',
           userId: '7805d1ab-18d0-43ec-bafb-654e83405416',
         },

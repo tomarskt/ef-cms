@@ -17,6 +17,10 @@ const EXPECTED_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
 };
 
+// Suppress console output in test runner (RAE SAID THIS WOULD BE COOL)
+console.error = () => null;
+console.info = () => null;
+
 describe('handle', () => {
   it('should return warm up string if warm up source is passed in', async () => {
     const response = await handle(
@@ -30,12 +34,132 @@ describe('handle', () => {
     });
   });
 
+  it('should handle a response with pdf data', async () => {
+    const response = await handle({}, async () => '%PDF-'); // contains pdf header
+    expect(response).toEqual({
+      body: '%PDF-',
+      headers: {
+        ...EXPECTED_HEADERS,
+        'Content-Type': 'application/pdf',
+        'accept-ranges': 'bytes',
+      },
+      isBase64Encoded: true,
+      statusCode: 200,
+    });
+  });
+
+  it('should filter data based on the fields query string option', async () => {
+    const response = await handle(
+      {
+        queryStringParameters: {
+          fields: 'caseId,docketNumber',
+        },
+      },
+      async () => ({
+        caseId: '1',
+        docketNumber: 'b',
+        gg: undefined,
+        isAwesome: true,
+        something: 'false',
+        yup: null,
+      }),
+    );
+    expect(response).toMatchObject({
+      body: JSON.stringify({
+        caseId: '1',
+        docketNumber: 'b',
+      }),
+    });
+  });
+
+  it('should filter array data based on the fields query string option', async () => {
+    const response = await handle(
+      {
+        queryStringParameters: {
+          fields: 'caseId,docketNumber',
+        },
+      },
+      async () => [
+        {
+          caseId: '1',
+          docketNumber: 'b',
+          gg: undefined,
+          isAwesome: true,
+          something: 'false',
+          yup: null,
+        },
+        {
+          caseId: '2',
+          docketNumber: 'c',
+          gg: undefined,
+          isAwesome: false,
+          something: 'true',
+          yup: null,
+        },
+      ],
+    );
+    expect(response).toMatchObject({
+      body: JSON.stringify([
+        {
+          caseId: '1',
+          docketNumber: 'b',
+        },
+        {
+          caseId: '2',
+          docketNumber: 'c',
+        },
+      ]),
+    });
+  });
+
   it('should return an object representing an 200 status back if the callback function executes successfully', async () => {
     const response = await handle({}, async () => 'success');
     expect(response).toEqual({
       body: JSON.stringify('success'),
       headers: EXPECTED_HEADERS,
       statusCode: '200',
+    });
+  });
+
+  it('should return an object representing 500 status if the function returns an unsanitized entity (response contains private data as defined in app context)', async () => {
+    const response = await handle({}, async () => ({
+      pk: 'this is bad!',
+    }));
+    expect(response).toEqual({
+      body: JSON.stringify('Unsanitized entity'),
+      headers: EXPECTED_HEADERS,
+      statusCode: 500,
+    });
+  });
+
+  it('should return 200 status if response is undefined', async () => {
+    const response = await handle({}, async () => undefined);
+    expect(response).toEqual({
+      body: undefined,
+      headers: EXPECTED_HEADERS,
+      statusCode: '200',
+    });
+  });
+
+  it('should return 200 status if response is an array with an undefined value', async () => {
+    const response = await handle({}, async () => [undefined]);
+    expect(response).toEqual({
+      body: JSON.stringify([undefined]),
+      headers: EXPECTED_HEADERS,
+      statusCode: '200',
+    });
+  });
+
+  it('should return an object representing 500 status if the function returns an unsanitized entity as an array (response contains private data as defined in app context)', async () => {
+    const response = await handle({}, async () => [
+      {
+        pk: 'this is bad!',
+      },
+    ]);
+    expect(response).toEqual({
+      body: JSON.stringify('Unsanitized entity'),
+      headers: EXPECTED_HEADERS,
+      statusCode: 500,
     });
   });
 

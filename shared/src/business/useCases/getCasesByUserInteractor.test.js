@@ -1,5 +1,6 @@
 const { getCasesByUserInteractor } = require('./getCasesByUserInteractor');
 const { MOCK_CASE } = require('../../test/mockCase');
+const { MOCK_USERS } = require('../../test/mockUsers');
 const { omit } = require('lodash');
 
 describe('Send petition to IRS', () => {
@@ -8,6 +9,7 @@ describe('Send petition to IRS', () => {
   it('throws an error if the entity returned from persistence is invalid', async () => {
     applicationContext = {
       environment: { stage: 'local' },
+      getCurrentUser: () => MOCK_USERS['a7d90c05-f6cd-442c-a168-202db587f16f'],
       getPersistenceGateway: () => {
         return {
           getCasesByUser: () =>
@@ -26,7 +28,7 @@ describe('Send petition to IRS', () => {
       error = err;
     }
     expect(error.message).toContain(
-      'The Case entity was invalid ValidationError: child "docketNumber" fails because ["docketNumber" is required]',
+      'The Case entity was invalid ValidationError: "docketNumber" is required',
     );
   });
 });

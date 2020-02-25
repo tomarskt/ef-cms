@@ -17,11 +17,8 @@ const {
   getCaseByCaseId,
 } = require('../../persistence/dynamo/cases/getCaseByCaseId');
 const {
-  getDocumentQCBatchedForSection,
-} = require('../../persistence/dynamo/workitems/getDocumentQCBatchedForSection');
-const {
-  getDocumentQCBatchedForUser,
-} = require('../../persistence/dynamo/workitems/getDocumentQCBatchedForUser');
+  getCaseDeadlinesByCaseId,
+} = require('../../persistence/dynamo/caseDeadlines/getCaseDeadlinesByCaseId');
 const {
   getDocumentQCInboxForSection: getDocumentQCInboxForSectionPersistence,
 } = require('../../persistence/dynamo/workitems/getDocumentQCInboxForSection');
@@ -117,8 +114,7 @@ const createTestApplicationContext = ({ user } = {}) => {
         deleteUserOutboxRecord,
         deleteWorkItemFromInbox,
         getCaseByCaseId,
-        getDocumentQCBatchedForSection,
-        getDocumentQCBatchedForUser,
+        getCaseDeadlinesByCaseId,
         getDocumentQCInboxForSection: getDocumentQCInboxForSectionPersistence,
         getDocumentQCInboxForUser: getDocumentQCInboxForUserPersistence,
         getInboxMessagesForSection,

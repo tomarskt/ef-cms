@@ -3,10 +3,11 @@ const {
   MOCK_CASE,
   MOCK_CASE_WITHOUT_PENDING,
 } = require('../../../test/mockCase');
-const { Case } = require('./Case');
+const { Case, isAssociatedUser } = require('./Case');
 const { ContactFactory } = require('../contacts/ContactFactory');
 const { DocketRecord } = require('../DocketRecord');
 const { MOCK_DOCUMENTS } = require('../../../test/mockDocuments');
+const { MOCK_USERS } = require('../../../test/mockUsers');
 const { Practitioner } = require('../Practitioner');
 const { Respondent } = require('../Respondent');
 const { TrialSession } = require('../trialSessions/TrialSession');
@@ -18,6 +19,7 @@ describe('Case entity', () => {
 
   beforeAll(() => {
     applicationContext = {
+      getCurrentUser: () => MOCK_USERS['a7d90c05-f6cd-442c-a168-202db587f16f'],
       getUniqueId: () => 'c54ba5a9-b37b-479d-9201-067ec6e335bb',
     };
   });
@@ -29,6 +31,7 @@ describe('Case entity', () => {
   it('defaults the orders to false', () => {
     const myCase = new Case(MOCK_CASE, { applicationContext });
     expect(myCase).toMatchObject({
+      isSealed: false,
       noticeOfAttachments: false,
       orderForAmendedPetition: false,
       orderForAmendedPetitionAndFilingFee: false,
@@ -261,6 +264,36 @@ describe('Case entity', () => {
       expect(myCase.isValid()).toBeTruthy();
     });
 
+    it('Creates a valid case with automaticBlocked set to true and a valid automaticBlockedReason and automaticBlockedDate', () => {
+      const myCase = new Case(
+        {
+          ...MOCK_CASE,
+          automaticBlocked: true,
+          automaticBlockedDate: '2019-03-01T21:42:29.073Z',
+          automaticBlockedReason: Case.AUTOMATIC_BLOCKED_REASONS.pending,
+        },
+        {
+          applicationContext,
+        },
+      );
+      expect(myCase.isValid()).toBeTruthy();
+    });
+
+    it('Creates a valid case with automaticBlocked set to true and an invalid automaticBlockedReason and automaticBlockedDate', () => {
+      const myCase = new Case(
+        {
+          ...MOCK_CASE,
+          automaticBlocked: true,
+          automaticBlockedDate: '2019-03-01T21:42:29.073Z',
+          automaticBlockedReason: 'Some Other Reason Not Valid',
+        },
+        {
+          applicationContext,
+        },
+      );
+      expect(myCase.isValid()).toBeFalsy();
+    });
+
     it('Creates an invalid case with highPriority set to true but no highPriorityReason', () => {
       const myCase = new Case(
         {
@@ -280,6 +313,49 @@ describe('Case entity', () => {
           ...MOCK_CASE,
           highPriority: true,
           highPriorityReason: 'something',
+        },
+        {
+          applicationContext,
+        },
+      );
+      expect(myCase.isValid()).toBeTruthy();
+    });
+
+    it('Creates an invalid case with closed status and no closed date', () => {
+      const myCase = new Case(
+        {
+          ...MOCK_CASE,
+          status: Case.STATUS_TYPES.closed,
+        },
+        {
+          applicationContext,
+        },
+      );
+      expect(myCase.isValid()).toBeFalsy();
+      expect(myCase.getFormattedValidationErrors()).toMatchObject({
+        closedDate: expect.anything(),
+      });
+    });
+
+    it('Creates a valid case with closed status and a closed date', () => {
+      const myCase = new Case(
+        {
+          ...MOCK_CASE,
+          closedDate: '2019-03-01T21:40:46.415Z',
+          status: Case.STATUS_TYPES.closed,
+        },
+        {
+          applicationContext,
+        },
+      );
+      expect(myCase.isValid()).toBeTruthy();
+    });
+
+    it('Creates a valid case with sealedDate set to a valid date', () => {
+      const myCase = new Case(
+        {
+          ...MOCK_CASE,
+          sealedDate: '2019-09-19T16:42:00.000Z',
         },
         {
           applicationContext,
@@ -659,16 +735,6 @@ describe('Case entity', () => {
     });
   });
 
-  describe('sendToIRSHoldingQueue', () => {
-    it('sets status for irs batch', () => {
-      const caseRecord = new Case(MOCK_CASE, {
-        applicationContext,
-      });
-      caseRecord.sendToIRSHoldingQueue();
-      expect(caseRecord.status).toEqual(Case.STATUS_TYPES.batchedForIRS);
-    });
-  });
-
   describe('setRequestForTrialDocketRecord', () => {
     it('sets request for trial docket record when it does not already exist', () => {
       const caseRecord = new Case(MOCK_CASE, {
@@ -677,7 +743,9 @@ describe('Case entity', () => {
       const preferredTrialCity = 'Mobile, Alabama';
       const initialDocketLength =
         (caseRecord.docketRecord && caseRecord.docketRecord.length) || 0;
-      caseRecord.setRequestForTrialDocketRecord(preferredTrialCity);
+      caseRecord.setRequestForTrialDocketRecord(preferredTrialCity, {
+        applicationContext,
+      });
       const docketLength = caseRecord.docketRecord.length;
       expect(docketLength).toEqual(initialDocketLength + 1);
     });
@@ -687,10 +755,16 @@ describe('Case entity', () => {
         applicationContext,
       });
       const preferredTrialCity = 'Mobile, Alabama';
-      caseRecord.setRequestForTrialDocketRecord(preferredTrialCity);
+      caseRecord.setRequestForTrialDocketRecord(preferredTrialCity, {
+        applicationContext,
+      });
       const docketLength = caseRecord.docketRecord.length;
-      caseRecord.setRequestForTrialDocketRecord('Birmingham, Alabama');
-      caseRecord.setRequestForTrialDocketRecord('Some city, USA');
+      caseRecord.setRequestForTrialDocketRecord('Birmingham, Alabama', {
+        applicationContext,
+      });
+      caseRecord.setRequestForTrialDocketRecord('Some city, USA', {
+        applicationContext,
+      });
       expect(docketLength).toEqual(caseRecord.docketRecord.length);
     });
   });
@@ -701,11 +775,14 @@ describe('Case entity', () => {
         applicationContext,
       });
       caseRecord.addDocketRecord(
-        new DocketRecord({
-          description: 'test',
-          filingDate: new Date().toISOString(),
-          index: 5,
-        }),
+        new DocketRecord(
+          {
+            description: 'test',
+            filingDate: new Date().toISOString(),
+            index: 5,
+          },
+          { applicationContext },
+        ),
       );
 
       expect(caseRecord.docketRecord).toHaveLength(4);
@@ -713,10 +790,13 @@ describe('Case entity', () => {
       expect(caseRecord.docketRecord[3].index).toEqual(5);
 
       caseRecord.addDocketRecord(
-        new DocketRecord({
-          description: 'some description',
-          filingDate: new Date().toISOString(),
-        }),
+        new DocketRecord(
+          {
+            description: 'some description',
+            filingDate: new Date().toISOString(),
+          },
+          { applicationContext },
+        ),
       );
 
       expect(caseRecord.docketRecord[4].index).toEqual(6);
@@ -725,7 +805,9 @@ describe('Case entity', () => {
       const caseRecord = new Case(MOCK_CASE, {
         applicationContext,
       });
-      caseRecord.addDocketRecord(new DocketRecord({ description: 'test' }));
+      caseRecord.addDocketRecord(
+        new DocketRecord({ description: 'test' }, { applicationContext }),
+      );
       let error;
       try {
         caseRecord.validate();
@@ -741,12 +823,15 @@ describe('Case entity', () => {
       const caseRecord = new Case(MOCK_CASE, {
         applicationContext,
       });
-      const updatedDocketEntry = new DocketRecord({
-        description: 'second record now updated',
-        documentId: '8675309b-28d0-43ec-bafb-654e83405412',
-        filingDate: '2018-03-02T22:22:00.000Z',
-        index: 7,
-      });
+      const updatedDocketEntry = new DocketRecord(
+        {
+          description: 'second record now updated',
+          documentId: '8675309b-28d0-43ec-bafb-654e83405412',
+          filingDate: '2018-03-02T22:22:00.000Z',
+          index: 7,
+        },
+        { applicationContext },
+      );
       caseRecord.updateDocketRecordEntry(updatedDocketEntry);
 
       expect(caseRecord.docketRecord).toHaveLength(3); // unchanged
@@ -760,7 +845,9 @@ describe('Case entity', () => {
       const caseRecord = new Case(MOCK_CASE, {
         applicationContext,
       });
-      caseRecord.addDocketRecord(new DocketRecord({ description: 'test' }));
+      caseRecord.addDocketRecord(
+        new DocketRecord({ description: 'test' }, { applicationContext }),
+      );
       let error;
       try {
         caseRecord.validate();
@@ -846,11 +933,14 @@ describe('Case entity', () => {
           applicationContext,
         },
       );
-      caseToVerify.addDocument({
-        documentId: '123',
-        documentType: 'Answer',
-        userId: 'respondent',
-      });
+      caseToVerify.addDocument(
+        {
+          documentId: '123',
+          documentType: 'Answer',
+          userId: 'respondent',
+        },
+        { applicationContext },
+      );
       expect(caseToVerify.documents.length).toEqual(1);
       expect(caseToVerify.documents[0]).toMatchObject({
         documentId: '123',
@@ -910,7 +1000,9 @@ describe('Case entity', () => {
       );
       expect(caseToVerify.initialDocketNumberSuffix).toEqual('_');
       caseToVerify.docketNumberSuffix = 'W';
-      caseToVerify.updateDocketNumberRecord();
+      caseToVerify.updateDocketNumberRecord({
+        applicationContext,
+      });
       expect(caseToVerify.docketRecord.length).toEqual(1);
     });
 
@@ -922,7 +1014,9 @@ describe('Case entity', () => {
         },
       );
       expect(caseToVerify.initialDocketNumberSuffix).toEqual('_');
-      caseToVerify.updateDocketNumberRecord();
+      caseToVerify.updateDocketNumberRecord({
+        applicationContext,
+      });
       expect(caseToVerify.docketRecord.length).toEqual(0);
     });
 
@@ -947,11 +1041,14 @@ describe('Case entity', () => {
         },
       );
       caseToVerify.docketNumberSuffix = 'W';
-      caseToVerify.updateDocketNumberRecord();
+      caseToVerify.updateDocketNumberRecord({
+        applicationContext,
+      });
       expect(caseToVerify.docketRecord.length).toEqual(3);
       expect(caseToVerify.docketRecord[2].description).toEqual(
         "Docket Number is amended from '123-19P' to '123-19W'",
       );
+      expect(caseToVerify.docketRecord[2].eventCode).toEqual('MIND');
     });
   });
 
@@ -962,7 +1059,9 @@ describe('Case entity', () => {
         {
           applicationContext,
         },
-      ).updateCaseTitleDocketRecord();
+      ).updateCaseTitleDocketRecord({
+        applicationContext,
+      });
       expect(caseToVerify.docketRecord.length).toEqual(0);
     });
 
@@ -974,7 +1073,9 @@ describe('Case entity', () => {
         {
           applicationContext,
         },
-      ).updateCaseTitleDocketRecord();
+      ).updateCaseTitleDocketRecord({
+        applicationContext,
+      });
       expect(caseToVerify.docketRecord.length).toEqual(0);
     });
 
@@ -988,11 +1089,13 @@ describe('Case entity', () => {
         {
           applicationContext,
         },
-      ).updateCaseTitleDocketRecord();
+      ).updateCaseTitleDocketRecord({
+        applicationContext,
+      });
       expect(caseToVerify.docketRecord.length).toEqual(0);
     });
 
-    it('should add to the docket record when the caption changes from the initial title', () => {
+    it('should add to the docket record with event code MINC when the caption changes from the initial title', () => {
       const caseToVerify = new Case(
         {
           caseCaption: 'A New Caption',
@@ -1002,8 +1105,11 @@ describe('Case entity', () => {
         {
           applicationContext,
         },
-      ).updateCaseTitleDocketRecord();
+      ).updateCaseTitleDocketRecord({
+        applicationContext,
+      });
       expect(caseToVerify.docketRecord.length).toEqual(1);
+      expect(caseToVerify.docketRecord[0].eventCode).toEqual('MINC');
     });
 
     it('should not add to the docket record when the caption is equivalent to the last updated title', () => {
@@ -1026,7 +1132,9 @@ describe('Case entity', () => {
         {
           applicationContext,
         },
-      ).updateCaseTitleDocketRecord();
+      ).updateCaseTitleDocketRecord({
+        applicationContext,
+      });
       expect(caseToVerify.docketRecord.length).toEqual(2);
     });
 
@@ -1050,7 +1158,9 @@ describe('Case entity', () => {
         {
           applicationContext,
         },
-      ).updateCaseTitleDocketRecord();
+      ).updateCaseTitleDocketRecord({
+        applicationContext,
+      });
       expect(caseToVerify.docketRecord.length).toEqual(3);
     });
   });
@@ -1060,11 +1170,14 @@ describe('Case entity', () => {
       const myCase = new Case(MOCK_CASE, {
         applicationContext,
       });
-      myCase.addDocument({
-        documentId: '123',
-        documentType: 'Answer',
-        userId: 'respondent',
-      });
+      myCase.addDocument(
+        {
+          documentId: '123',
+          documentType: 'Answer',
+          userId: 'respondent',
+        },
+        { applicationContext },
+      );
       const workItem = new WorkItem(
         {
           assigneeId: 'bob',
@@ -1235,9 +1348,9 @@ describe('Case entity', () => {
       );
       expect(myCase.generateTrialSortTags()).toEqual({
         hybrid:
-          'WashingtonDC-H-D-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-H-D-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
         nonHybrid:
-          'WashingtonDC-R-D-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-R-D-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
       });
     });
 
@@ -1254,9 +1367,9 @@ describe('Case entity', () => {
       );
       expect(myCase.generateTrialSortTags()).toEqual({
         hybrid:
-          'WashingtonDC-H-D-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-H-D-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
         nonHybrid:
-          'WashingtonDC-S-D-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-S-D-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
       });
     });
 
@@ -1273,9 +1386,9 @@ describe('Case entity', () => {
       );
       expect(myCase.generateTrialSortTags()).toEqual({
         hybrid:
-          'WashingtonDC-H-C-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-H-C-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
         nonHybrid:
-          'WashingtonDC-R-C-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-R-C-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
       });
     });
 
@@ -1292,9 +1405,9 @@ describe('Case entity', () => {
       );
       expect(myCase.generateTrialSortTags()).toEqual({
         hybrid:
-          'WashingtonDC-H-B-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-H-B-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
         nonHybrid:
-          'WashingtonDC-R-B-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-R-B-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
       });
     });
 
@@ -1312,9 +1425,9 @@ describe('Case entity', () => {
       );
       expect(myCase.generateTrialSortTags()).toEqual({
         hybrid:
-          'WashingtonDC-H-A-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-H-A-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
         nonHybrid:
-          'WashingtonDC-S-A-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
+          'WashingtonDistrictofColumbia-S-A-20181212000000-c54ba5a9-b37b-479d-9201-067ec6e335bb',
       });
     });
   });
@@ -1353,7 +1466,7 @@ describe('Case entity', () => {
           startDate: '2025-03-01T00:00:00.000Z',
           term: 'Fall',
           termYear: '2025',
-          trialLocation: 'Birmingham, AL',
+          trialLocation: 'Birmingham, Alabama',
         },
         { applicationContext },
       );
@@ -1367,7 +1480,7 @@ describe('Case entity', () => {
       expect(myCase.trialTime).toBeTruthy();
     });
 
-    it('should set all trial session fields but not set the case as calendared if the trial session is not calendared', () => {
+    it('should set all trial session fields but not set the case as calendared or associated judge if the trial session is not calendared', () => {
       const myCase = new Case(
         {
           ...MOCK_CASE,
@@ -1385,7 +1498,7 @@ describe('Case entity', () => {
           startDate: '2025-03-01T00:00:00.000Z',
           term: 'Fall',
           termYear: '2025',
-          trialLocation: 'Birmingham, AL',
+          trialLocation: 'Birmingham, Alabama',
         },
         { applicationContext },
       );
@@ -1393,7 +1506,7 @@ describe('Case entity', () => {
 
       expect(myCase.status).toEqual(Case.STATUS_TYPES.new);
       expect(myCase.trialDate).toBeTruthy();
-      expect(myCase.associatedJudge).toBeTruthy();
+      expect(myCase.associatedJudge).toEqual(Case.CHIEF_JUDGE);
       expect(myCase.trialLocation).toBeTruthy();
       expect(myCase.trialSessionId).toBeTruthy();
       expect(myCase.trialTime).toBeTruthy();
@@ -1401,7 +1514,7 @@ describe('Case entity', () => {
   });
 
   describe('closeCase', () => {
-    it('should update the status of the case to closed', () => {
+    it('should update the status of the case to closed and add a closedDate', () => {
       const myCase = new Case(
         {
           ...MOCK_CASE,
@@ -1420,20 +1533,11 @@ describe('Case entity', () => {
         blocked: false,
         blockedDate: undefined,
         blockedReason: undefined,
+        closedDate: expect.anything(),
         highPriority: false,
         highPriorityReason: undefined,
         status: Case.STATUS_TYPES.closed,
       });
-    });
-  });
-
-  describe('recallFromIRSHoldingQueue', () => {
-    it('should update the status of the case to recalled', () => {
-      const myCase = new Case(MOCK_CASE, {
-        applicationContext,
-      });
-      myCase.recallFromIRSHoldingQueue();
-      expect(myCase.status).toEqual(Case.STATUS_TYPES.recalled);
     });
   });
 
@@ -1640,6 +1744,53 @@ describe('Case entity', () => {
     });
   });
 
+  describe('updateAutomaticBlocked', () => {
+    it('sets the case as automaticBlocked with a valid blocked reason', () => {
+      const caseToUpdate = new Case(
+        {
+          ...MOCK_CASE,
+        },
+        {
+          applicationContext,
+        },
+      );
+
+      expect(caseToUpdate.automaticBlocked).toBeFalsy();
+
+      caseToUpdate.updateAutomaticBlocked({});
+
+      expect(caseToUpdate.automaticBlocked).toEqual(true);
+      expect(caseToUpdate.automaticBlockedReason).toEqual(
+        Case.AUTOMATIC_BLOCKED_REASONS.pending,
+      );
+      expect(caseToUpdate.automaticBlockedDate).toBeDefined();
+      expect(caseToUpdate.isValid()).toBeTruthy();
+    });
+  });
+
+  describe('unupdateAutomaticBlocked', () => {
+    it('unsets the case as automatic blocked', () => {
+      const caseToUpdate = new Case(
+        {
+          ...MOCK_CASE_WITHOUT_PENDING,
+          automaticBlocked: true,
+          automaticBlockedReason: 'because reasons',
+        },
+        {
+          applicationContext,
+        },
+      );
+
+      expect(caseToUpdate.automaticBlocked).toBeTruthy();
+
+      caseToUpdate.updateAutomaticBlocked({});
+
+      expect(caseToUpdate.automaticBlocked).toBeFalsy();
+      expect(caseToUpdate.automaticBlockedReason).toBeUndefined();
+      expect(caseToUpdate.automaticBlockedDate).toBeUndefined();
+    });
+  });
+
   describe('setAsHighPriority', () => {
     it('sets the case as high priority with a high priority reason', () => {
       const caseToUpdate = new Case(
@@ -1701,7 +1852,7 @@ describe('Case entity', () => {
           startDate: '2025-03-01T00:00:00.000Z',
           term: 'Fall',
           termYear: '2025',
-          trialLocation: 'Birmingham, AL',
+          trialLocation: 'Birmingham, Alabama',
         },
         { applicationContext },
       );
@@ -1746,7 +1897,7 @@ describe('Case entity', () => {
           startDate: '2025-03-01T00:00:00.000Z',
           term: 'Fall',
           termYear: '2025',
-          trialLocation: 'Birmingham, AL',
+          trialLocation: 'Birmingham, Alabama',
         },
         { applicationContext },
       );
@@ -1786,7 +1937,7 @@ describe('Case entity', () => {
           startDate: '2025-03-01T00:00:00.000Z',
           term: 'Fall',
           termYear: '2025',
-          trialLocation: 'Birmingham, AL',
+          trialLocation: 'Birmingham, Alabama',
         },
         { applicationContext },
       );
@@ -1856,7 +2007,9 @@ describe('Case entity', () => {
       expect(updatedCase.associatedJudge).toEqual(Case.CHIEF_JUDGE);
     });
 
-    it('should update the case status and leave the associated judge unchanged if the new status is Closed', () => {
+    it('should update the case status, leave the associated judge unchanged, and call closeCase if the new status is Closed', () => {
+      const closeCaseSpy = jest.spyOn(Case.prototype, 'closeCase');
+
       const updatedCase = new Case(
         {
           ...MOCK_CASE,
@@ -1871,6 +2024,8 @@ describe('Case entity', () => {
 
       expect(updatedCase.status).toEqual(Case.STATUS_TYPES.closed);
       expect(updatedCase.associatedJudge).toEqual('Judge Buch');
+      expect(closeCaseSpy).toBeCalled();
+      closeCaseSpy.mockRestore();
     });
   });
 
@@ -2164,7 +2319,7 @@ describe('Case entity', () => {
         const caseEntity = new Case(
           {
             ...MOCK_CASE,
-            preferredTrialCity: 'Birmingham, AL',
+            preferredTrialCity: 'Birmingham, Alabama',
             procedureType: 'regular',
             status: 'Submitted',
           },
@@ -2173,6 +2328,24 @@ describe('Case entity', () => {
         const result = caseEntity.setLeadCase(leadCaseId);
 
         expect(result.leadCaseId).toEqual(leadCaseId);
+      });
+    });
+
+    describe('removeConsolidation', () => {
+      it('Should unset the leadCaseId on the given case', async () => {
+        const caseEntity = new Case(
+          {
+            ...MOCK_CASE,
+            leadCaseId: 'd64ba5a9-b37b-479d-9201-067ec6e335cc',
+            preferredTrialCity: 'Birmingham, Alabama',
+            procedureType: 'regular',
+            status: 'Submitted',
+          },
+          { applicationContext },
+        );
+        const result = caseEntity.removeConsolidation();
+
+        expect(result.leadCaseId).toBeUndefined();
       });
     });
 
@@ -2419,6 +2592,120 @@ describe('Case entity', () => {
       expect(caseEntity.qcCompleteForTrial).toEqual({
         '80950eee-7efd-4374-a642-65a8262135ab': true,
       });
+    });
+  });
+
+  it('required messages display for non-defaulted fields when an empty case is validated', () => {
+    const myCase = new Case(
+      {},
+      {
+        applicationContext,
+      },
+    );
+
+    expect(myCase.getFormattedValidationErrors()).toEqual({
+      caseCaption: 'Enter a case caption',
+      caseType: 'Select a case type',
+      docketNumber: 'Docket number is required',
+      docketRecord: 'At least one valid Docket Record is required',
+      documents: 'At least one valid document is required',
+      partyType: 'Select a party type',
+      procedureType: 'Select a case procedure',
+    });
+  });
+
+  describe('isAssociatedUser', () => {
+    const caseEntity = new Case(
+      {
+        ...MOCK_CASE,
+        practitioners: [{ userId: '271e5918-6461-4e67-bc38-274bc0aa0248' }],
+        respondents: [{ userId: '4c644ac6-e5bc-4905-9dc8-d658f25a8e72' }],
+      },
+      {
+        applicationContext: {
+          getCurrentUser: () =>
+            MOCK_USERS['a7d90c05-f6cd-442c-a168-202db587f16f'],
+          getUniqueId: () => 'c54ba5a9-b37b-479d-9201-067ec6e335bb',
+        },
+      },
+    );
+
+    it('returns true if the user is a respondent on the case', () => {
+      const isAssociated = isAssociatedUser({
+        caseRaw: caseEntity.toRawObject(),
+        userId: '4c644ac6-e5bc-4905-9dc8-d658f25a8e72',
+      });
+
+      expect(isAssociated).toBeTruthy();
+    });
+
+    it('returns true if the user is a practitioner on the case', () => {
+      const isAssociated = isAssociatedUser({
+        caseRaw: caseEntity.toRawObject(),
+        userId: '271e5918-6461-4e67-bc38-274bc0aa0248',
+      });
+
+      expect(isAssociated).toBeTruthy();
+    });
+
+    it('returns false if the user is a not a practitioner or respondent on the case', () => {
+      const isAssociated = isAssociatedUser({
+        caseRaw: caseEntity.toRawObject(),
+        userId: '4b32e14b-f583-4631-ba44-1439a093d6d0',
+      });
+
+      expect(isAssociated).toBeFalsy();
+    });
+  });
+
+  describe('DocketRecord indices must be unique', () => {
+    const caseEntity = new Case(
+      {
+        ...MOCK_CASE,
+        docketRecord: [
+          {
+            description: 'first record',
+            documentId: '8675309b-18d0-43ec-bafb-654e83405411',
+            eventCode: 'P',
+            filingDate: '2018-03-01T00:01:00.000Z',
+            index: 1,
+          },
+          {
+            description: 'second record',
+            documentId: '8675309b-28d0-43ec-bafb-654e83405412',
+            eventCode: 'STIN',
+            filingDate: '2018-03-01T00:02:00.000Z',
+            index: 1,
+          },
+        ],
+      },
+      {
+        applicationContext: {
+          getCurrentUser: () =>
+            MOCK_USERS['a7d90c05-f6cd-442c-a168-202db587f16f'],
+          getUniqueId: () => 'c54ba5a9-b37b-479d-9201-067ec6e335bb',
+        },
+      },
+    );
+
+    expect(caseEntity.getFormattedValidationErrors()).toEqual({
+      'docketRecord[1]': '"docketRecord[1]" contains a duplicate value',
+    });
+  });
+
+  describe('getCaseConfirmationGeneratedPdfFileName', () => {
+    it('generates the correct name for the case confirmation pdf', () => {
+      const caseToVerify = new Case(
+        {
+          docketNumber: '123-20',
+        },
+        {
+          applicationContext,
+        },
+      );
+      expect(caseToVerify.getCaseConfirmationGeneratedPdfFileName()).toEqual(
+        'case-123-20-confirmation.pdf',
+      );
     });
   });
 });

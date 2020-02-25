@@ -5,9 +5,6 @@ const {
   isAuthorized,
   ROLE_PERMISSIONS,
 } = require('../../../authorization/authorizationClientService');
-const {
-  sendServedPartiesEmails,
-} = require('../../utilities/sendServedPartiesEmails');
 const { capitalize, pick } = require('lodash');
 const { Case } = require('../../entities/cases/Case');
 const { DOCKET_SECTION } = require('../../entities/WorkQueue');
@@ -49,7 +46,7 @@ exports.fileExternalDocumentInteractor = async ({
       caseId,
     });
 
-  const caseEntity = new Case(caseToUpdate, { applicationContext });
+  let caseEntity = new Case(caseToUpdate, { applicationContext });
   const workItems = [];
 
   const {
@@ -129,10 +126,14 @@ exports.fileExternalDocumentInteractor = async ({
         { applicationContext },
       );
 
+      const highPriorityWorkItem =
+        caseEntity.status === Case.STATUS_TYPES.calendared;
+
       const workItem = new WorkItem(
         {
           assigneeId: null,
           assigneeName: null,
+          associatedJudge: caseToUpdate.associatedJudge,
           caseId: caseId,
           caseStatus: caseToUpdate.status,
           caseTitle: Case.getCaseCaptionNames(Case.getCaseCaption(caseEntity)),
@@ -142,9 +143,11 @@ exports.fileExternalDocumentInteractor = async ({
             ...documentEntity.toRawObject(),
             createdAt: documentEntity.createdAt,
           },
+          highPriority: highPriorityWorkItem,
           isQC: true,
           section: DOCKET_SECTION,
           sentBy: user.userId,
+          trialDate: caseEntity.trialDate,
         },
         { applicationContext },
       );
@@ -166,17 +169,21 @@ exports.fileExternalDocumentInteractor = async ({
       workItems.push(workItem);
       caseEntity.addDocumentWithoutDocketRecord(documentEntity);
 
-      const docketRecordEntity = new DocketRecord({
-        description: metadata.documentTitle,
-        documentId: documentEntity.documentId,
-        filingDate: documentEntity.receivedAt,
-      });
+      const docketRecordEntity = new DocketRecord(
+        {
+          description: metadata.documentTitle,
+          documentId: documentEntity.documentId,
+          eventCode: documentEntity.eventCode,
+          filingDate: documentEntity.receivedAt,
+        },
+        { applicationContext },
+      );
       caseEntity.addDocketRecord(docketRecordEntity);
 
       if (documentEntity.isAutoServed()) {
         documentEntity.setAsServed(servedParties.all);
 
-        await sendServedPartiesEmails({
+        await applicationContext.getUseCaseHelpers().sendServedPartiesEmails({
           applicationContext,
           caseEntity: caseToUpdate,
           documentEntity,
@@ -185,6 +192,13 @@ exports.fileExternalDocumentInteractor = async ({
       }
     }
   }
+
+  caseEntity = await applicationContext
+    .getUseCaseHelpers()
+    .updateCaseAutomaticBlock({
+      applicationContext,
+      caseEntity,
+    });
 
   await applicationContext.getPersistenceGateway().updateCase({
     applicationContext,

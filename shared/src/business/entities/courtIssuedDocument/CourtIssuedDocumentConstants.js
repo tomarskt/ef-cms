@@ -9,6 +9,10 @@ exports.VALIDATION_ERROR_MESSAGES = {
       contains: 'must be larger than or equal to',
       message: 'Enter a valid date',
     },
+    {
+      contains: 'must be less than or equal to',
+      message: 'Enter a valid date',
+    },
     'Enter a date',
   ],
   docketNumbers: 'Enter docket number(s)',
@@ -16,6 +20,7 @@ exports.VALIDATION_ERROR_MESSAGES = {
   freeText: 'Enter a description',
   judge: 'Select a judge',
   serviceStamp: 'Select a service stamp',
+  trialLocation: 'Select a trial location',
 };
 
 exports.ENTERED_AND_SERVED_EVENT_CODES = [

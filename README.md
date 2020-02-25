@@ -6,9 +6,17 @@ An as-yet-unnamed project by the [U.S. Tax Court](https://ustaxcourt.gov/), crea
 
 [![CircleCI](https://circleci.com/gh/flexion/ef-cms/tree/develop.svg?style=svg)](https://circleci.com/gh/flexion/ef-cms/tree/develop)
 
+#### master
+
+[![CircleCI](https://circleci.com/gh/ustaxcourt/ef-cms/tree/master.svg?style=svg)](https://circleci.com/gh/ustaxcourt/ef-cms/tree/master)
+
 #### staging
 
 [![CircleCI](https://circleci.com/gh/ustaxcourt/ef-cms/tree/staging.svg?style=svg)](https://circleci.com/gh/ustaxcourt/ef-cms/tree/staging)
+
+#### test
+
+[![CircleCI](https://circleci.com/gh/ustaxcourt/ef-cms/tree/test.svg?style=svg)](https://circleci.com/gh/ustaxcourt/ef-cms/tree/test)
 
 API | Front-End | Shared Code
 --- | --------- | -----------
@@ -42,8 +50,8 @@ For documentation about the CI/CD setup, API, style guide, UX, code review, etc.
 
 ## Dependency diagrams
 
-- <a href="docs/images/client-dependencies.png">Client</a>
-- <a href="docs/images/server-dependencies.png">Server</a>
+- <a href="docs/images/client-dependencies.jpg">Client</a>
+- <a href="docs/images/server-dependencies.jpg">Server</a>
 
 ## Backlog
 
@@ -132,7 +140,6 @@ respondent1 - respondent4
 ```
 adc
 admissionsclerk
-calendarclerk
 clerkofcourt
 docketclerk
 docketclerk1
@@ -168,7 +175,6 @@ respondent1@example.com – respondent10@example.com
 ```
 adc1@example.com – adc5@example.com
 admissionsclerk1@example.com – admissionsclerk5@example.com
-calendarclerk1@example.com – calendarclerk5@example.com
 clerkofcourt1@example.com – clerkofcourt5@example.com
 docketclerk1@example.com – docketclerk5@example.com
 petitionsclerk1@example.com – petitionsclerk5@example.com

@@ -3,13 +3,11 @@ module.exports = [
   'http://localhost:1234/mock-login?token=docketclerk&path=/case-detail/103-19/documents/f1aa4aa2-c214-424c-8870-d0049c5744d7/sign',
   {
     actions: [
-      'wait for #section-work-queue to be visible',
-      'wait for #label-337f4e0d-cf5e-4c4f-b373-5256edbbbdf2 to be visible',
-      'click element #label-337f4e0d-cf5e-4c4f-b373-5256edbbbdf2',
+      'wait for td.message-select-control>label to be visible',
+      'click element td.message-select-control>label',
       'wait for .action-section to be visible',
     ],
-    notes:
-      'checks a11y of section queue tab panel, may become brittle if element IDs change',
+    notes: 'checks a11y of section queue tab panel',
     url:
       'http://localhost:1234/mock-login?token=docketclerk&path=/document-qc/section/inbox&info=section-queue-tab',
   },
@@ -54,7 +52,7 @@ module.exports = [
       'click element #tab-pending-messages',
       "wait for .send-to[data-workitemid='337f4e0d-cf5e-4c4f-b373-5256edbbbdf2'] to be visible",
       "click element .send-to[data-workitemid='337f4e0d-cf5e-4c4f-b373-5256edbbbdf2']",
-      "wait for form.forward-form[data-workitemid='337f4e0d-cf5e-4c4f-b373-5256edbbbdf2'] to be visible",
+      "wait for .forward-form[data-workitemid='337f4e0d-cf5e-4c4f-b373-5256edbbbdf2'] to be visible",
     ],
     notes: 'checks a11y of forward form',
     url:
@@ -91,14 +89,22 @@ module.exports = [
   'http://localhost:1234/mock-login?token=docketclerk&path=/case-detail/110-19/documents/25100ec6-eeeb-4e88-872f-c99fad1fe6c7/add-court-issued-docket-entry',
   {
     actions: [
+      'wait for #judge to be visible',
+      'set field #judge to Judge Armen',
+      'check field #judge',
+      'set field #free-text to Anything',
       'wait for #serve-to-parties-btn to be visible',
       'click element #serve-to-parties-btn',
       'wait for .confirm-initiate-service-modal to be visible',
     ],
     notes: 'checks a11y of confirm-initiate-service-modal dialog',
     url:
-      'http://localhost:1234/mock-login?token=docketclerk&path=/case-detail/101-19/documents/25100ec6-eeeb-4e88-872f-c99fad1fe6c7/add-court-issued-docket-entry',
+      'http://localhost:1234/mock-login?token=docketclerk&path=/case-detail/101-19/documents/25100ec6-eeeb-4e88-872f-c99fad1fe6c7/add-court-issued-docket-entry&info=initiate-service-modal',
   },
   'http://localhost:1234/mock-login?token=docketclerk&path=/print-preview/110-19/',
   'http://localhost:1234/mock-login?token=docketclerk&path=/case-detail/105-19/edit-petitioner-information',
+  'http://localhost:1234/mock-login?token=docketclerk&path=/case-detail/102-19?openModal=PaperServiceConfirmModal',
+  'http://localhost:1234/mock-login?token=docketclerk&path=/case-detail/111-19?openModal=UnconsolidateCasesModal',
+  'http://localhost:1234/mock-login?token=docketclerk&path=/case-detail/104-20/upload-court-issued',
+  'http://localhost:1234/mock-login?token=docketclerk&path=/case-detail/104-20/edit-upload-court-issued/b1aa4aa2-c214-424c-8870-d0049c5744d8',
 ];

@@ -1,3 +1,4 @@
+import { Case } from '../../shared/src/business/entities/cases/Case';
 import { fakeFile, setupTest } from './helpers';
 
 // docketClerk
@@ -14,7 +15,11 @@ import petitionsClerkCreatesNewCase from './journey/petitionsClerkCreatesNewCase
 import petitionsClerkLogIn from './journey/petitionsClerkLogIn';
 import petitionsClerkSignsOut from './journey/petitionsClerkSignsOut';
 
-const test = setupTest();
+const test = setupTest({
+  useCases: {
+    loadPDFForSigningInteractor: () => Promise.resolve(null),
+  },
+});
 test.draftOrders = [];
 
 describe('Docket Clerk Adds Court-Issued Order to Docket Record', () => {
@@ -35,11 +40,15 @@ describe('Docket Clerk Adds Court-Issued Order to Docket Record', () => {
   docketClerkSignsOut(test);
 
   docketClerkLogIn(test);
-  docketClerkViewsCaseDetailForCourtIssuedDocketEntry(test);
+  docketClerkViewsCaseDetailForCourtIssuedDocketEntry(test, 0);
   docketClerkViewsDraftOrder(test, 0);
   docketClerkAddsDocketEntryFromOrder(test, 0);
-  docketClerkViewsCaseDetailForCourtIssuedDocketEntry(test);
+  docketClerkViewsCaseDetailForCourtIssuedDocketEntry(test, 0);
   docketClerkServesOrderWithPaperService(test, 0);
-  docketClerkViewsCaseDetailAfterServingCourtIssuedDocument(test, 0);
+  docketClerkViewsCaseDetailAfterServingCourtIssuedDocument(
+    test,
+    0,
+    Case.STATUS_TYPES.generalDocket,
+  );
   docketClerkSignsOut(test);
 });

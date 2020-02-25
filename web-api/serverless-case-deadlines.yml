@@ -1,4 +1,4 @@
-service: ef-cms-case-deadlines
+service: ef-cms-case-deadlines-${opt:stageColor}
 plugins:
   - serverless-domain-manager
   - serverless-plugin-bind-deployment-id
@@ -48,9 +48,6 @@ custom:
     topics:
       alarm:
         topic: arn:aws:sns:${opt:region}:${opt:accountId}:serverless-alerts-topic-${self:provider.stage}
-        notifications:
-          - protocol: email
-            endpoint: ustaxcourt@flexion.us
 
   customDomain:
     domainName: efcms-${self:provider.stage}.${opt:domain}
@@ -70,6 +67,7 @@ custom:
 
 provider:
   name: aws
+  endpointType: REGIONAL
   tracing: true
   stage: ${self:custom.stage}
   region: ${self:custom.region}

@@ -1,4 +1,4 @@
-service: ef-cms-case-documents
+service: ef-cms-case-docs-${opt:stageColor}
 plugins:
   - serverless-domain-manager
   - serverless-plugin-bind-deployment-id
@@ -48,9 +48,6 @@ custom:
     topics:
       alarm:
         topic: arn:aws:sns:${opt:region}:${opt:accountId}:serverless-alerts-topic-${self:provider.stage}
-        notifications:
-          - protocol: email
-            endpoint: ustaxcourt@flexion.us
 
   customDomain:
     domainName: efcms-${self:provider.stage}.${opt:domain}
@@ -70,6 +67,7 @@ custom:
 
 provider:
   name: aws
+  endpointType: REGIONAL
   tracing: true
   stage: ${self:custom.stage}
   region: ${self:custom.region}
@@ -254,6 +252,18 @@ functions:
     events:
       - http:
           path: /{caseId}/docket-entry
+          method: put
+          cors: ui-${self:provider.stage}.ef-cms.${opt:domain}
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+  updateDocketEntryMeta:
+    handler: web-api/${self:provider.dir}/caseDocumentsHandlers.updateDocketEntryMetaLambda
+    events:
+      - http:
+          path: /{caseId}/docket-entry-meta
           method: put
           cors: ui-${self:provider.stage}.ef-cms.${opt:domain}
           authorizer:

@@ -4,10 +4,11 @@ import {
   generatePrintableFilingReceiptInteractor,
 } from './generatePrintableFilingReceiptInteractor';
 import { getFormattedCaseDetail } from '../utilities/getFormattedCaseDetail';
+const { MOCK_USERS } = require('../../test/mockUsers');
 
 let generatePdfFromHtmlInteractorMock;
 let generatePrintableFilingReceiptTemplateMock;
-let saveDocumentMock;
+let saveDocumentFromLambdaMock;
 let getDownloadPolicyUrlMock;
 let applicationContext;
 let caseDetail;
@@ -16,7 +17,7 @@ describe('generatePrintableFilingReceiptInteractor', () => {
   beforeEach(() => {
     generatePdfFromHtmlInteractorMock = jest.fn();
     generatePrintableFilingReceiptTemplateMock = jest.fn();
-    saveDocumentMock = jest.fn();
+    saveDocumentFromLambdaMock = jest.fn();
     getDownloadPolicyUrlMock = jest.fn().mockReturnValue({
       url: 'a-document-download-url',
     });
@@ -62,6 +63,7 @@ describe('generatePrintableFilingReceiptInteractor', () => {
           },
         ],
       }),
+      getCurrentUser: () => MOCK_USERS['a7d90c05-f6cd-442c-a168-202db587f16f'],
       getEntityConstructors: () => ({
         Case,
       }),
@@ -70,7 +72,7 @@ describe('generatePrintableFilingReceiptInteractor', () => {
           ...caseDetail,
         }),
         getDownloadPolicyUrl: getDownloadPolicyUrlMock,
-        saveDocument: saveDocumentMock,
+        saveDocumentFromLambda: saveDocumentFromLambdaMock,
       }),
       getTemplateGenerators: () => {
         return {
@@ -97,7 +99,7 @@ describe('generatePrintableFilingReceiptInteractor', () => {
     };
   });
 
-  it('Calls generatePrintableFilingReceiptTemplate and generatePdfFromHtmlInteractor to build a PDF, then saveDocument and getDownloadPolicyUrl to store the PDF and return the link to it', async () => {
+  it('Calls generatePrintableFilingReceiptTemplate and generatePdfFromHtmlInteractor to build a PDF, then saveDocumentFromLambda and getDownloadPolicyUrl to store the PDF and return the link to it', async () => {
     await generatePrintableFilingReceiptInteractor({
       applicationContext,
       documents: {
@@ -111,7 +113,7 @@ describe('generatePrintableFilingReceiptInteractor', () => {
 
     expect(generatePrintableFilingReceiptTemplateMock).toHaveBeenCalled();
     expect(generatePdfFromHtmlInteractorMock).toHaveBeenCalled();
-    expect(saveDocumentMock).toHaveBeenCalled();
+    expect(saveDocumentFromLambdaMock).toHaveBeenCalled();
     expect(getDownloadPolicyUrlMock).toHaveBeenCalled();
   });
 

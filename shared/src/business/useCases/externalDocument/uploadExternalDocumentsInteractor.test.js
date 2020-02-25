@@ -27,6 +27,7 @@ describe('uploadExternalDocumentsInteractor', () => {
         userId: 'respondent',
       },
     ],
+    preferredTrialCity: 'Fresno, California',
     role: User.ROLES.petitioner,
     userId: 'petitioner',
   };
@@ -41,7 +42,7 @@ describe('uploadExternalDocumentsInteractor', () => {
         };
       },
       getPersistenceGateway: () => ({
-        uploadDocument: async () => caseRecord,
+        uploadDocumentFromClient: async () => caseRecord,
       }),
       getUseCases: () => ({
         fileExternalDocumentInteractor: () => {},
@@ -76,7 +77,7 @@ describe('uploadExternalDocumentsInteractor', () => {
           };
         },
         getPersistenceGateway: () => ({
-          uploadDocument: async () => caseRecord,
+          uploadDocumentFromClient: async () => caseRecord,
         }),
         getUseCases: () => ({
           fileExternalDocumentInteractor: () => {},
@@ -112,7 +113,7 @@ describe('uploadExternalDocumentsInteractor', () => {
           };
         },
         getPersistenceGateway: () => ({
-          uploadDocument: async () => caseRecord,
+          uploadDocumentFromClient: async () => caseRecord,
         }),
         getUseCases: () => ({
           fileExternalDocumentInteractor: () => {},
@@ -159,7 +160,7 @@ describe('uploadExternalDocumentsInteractor', () => {
           };
         },
         getPersistenceGateway: () => ({
-          uploadDocument: async () => caseRecord,
+          uploadDocumentFromClient: async () => caseRecord,
         }),
         getUseCases: () => ({
           fileExternalDocumentInteractor: () => {},
@@ -202,7 +203,7 @@ describe('uploadExternalDocumentsInteractor', () => {
         };
       },
       getPersistenceGateway: () => ({
-        uploadDocument: async () => caseRecord,
+        uploadDocumentFromClient: async () => caseRecord,
       }),
       getUseCases: () => ({
         fileExternalDocumentForConsolidatedInteractor: fileExternalDocumentForConsolidatedInteractorMock,

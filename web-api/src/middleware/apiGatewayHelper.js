@@ -2,8 +2,9 @@ const jwt = require('jsonwebtoken');
 const {
   NotFoundError,
   UnauthorizedError,
+  UnsanitizedEntityError,
 } = require('../../../shared/src/errors/errors');
-
+const { pick } = require('lodash');
 const headers = {
   'Access-Control-Allow-Origin': '*',
   'Cache-Control': 'max-age=0, private, no-cache, no-store, must-revalidate',
@@ -11,6 +12,7 @@ const headers = {
   Pragma: 'no-cache',
   'X-Content-Type-Options': 'nosniff',
 };
+const createApplicationContext = require('../applicationContext');
 
 exports.headers = headers;
 
@@ -22,14 +24,50 @@ exports.headers = headers;
  * @returns {object} the api gateway response object containing the statusCode, body, and headers
  */
 exports.handle = async (event, fun) => {
+  const applicationContext = createApplicationContext({});
   if (event.source === 'serverless-plugin-warmup') {
     return exports.sendOk('Lambda is warm!');
   }
   try {
-    const response = await fun();
-    return exports.sendOk(response);
+    let response = await fun();
+
+    // Check to see if the server responded with a pdf buffer
+    const isPdfBuffer =
+      response != null &&
+      typeof response[Symbol.iterator] === 'function' &&
+      response.indexOf('%PDF-') > -1;
+
+    if (isPdfBuffer) {
+      return {
+        body: response.toString('base64'),
+        headers: {
+          ...headers,
+          'Content-Type': 'application/pdf',
+          'accept-ranges': 'bytes',
+        },
+        isBase64Encoded: true,
+        statusCode: 200,
+      };
+    } else {
+      const privateKeys = applicationContext.getPersistencePrivateKeys();
+      (Array.isArray(response) ? response : [response]).forEach(item => {
+        if (item && Object.keys(item).some(key => privateKeys.includes(key))) {
+          throw new UnsanitizedEntityError();
+        }
+      });
+      if (event.queryStringParameters && event.queryStringParameters.fields) {
+        const { fields } = event.queryStringParameters;
+        const fieldsArr = fields.split(',');
+        if (Array.isArray(response)) {
+          response = response.map(object => pick(object, fieldsArr));
+        } else {
+          response = pick(response, fieldsArr);
+        }
+      }
+      return exports.sendOk(response);
+    }
   } catch (err) {
-    if (!process.env.CI) {
+    if (!process.env.CI && !err.skipLogging) {
       console.error('err', err);
     }
     if (err instanceof NotFoundError) {

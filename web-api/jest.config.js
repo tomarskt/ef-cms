@@ -1,18 +1,18 @@
 const rootDir = '..';
-const { moduleNameMapper } = require('../aliases');
+const baseConfig = require('../jest.config');
 
 module.exports = {
+  ...baseConfig,
   collectCoverage: true,
-  coverageDirectory: './coverage',
-  coverageThreshold: {
-    global: {
-      branches: 95,
-      functions: 95,
-      lines: 95,
-      statements: 95,
-    },
-  },
-  moduleNameMapper,
+  collectCoverageFrom: [
+    'switch-environment-color.js',
+    'migrations/*.js',
+    'src/**/*.js',
+    '!src/applicationContext.js',
+    '!src/**/*Handlers.js',
+    '!src/**/*Lambda.js',
+    '!src/**/*.test.js',
+  ],
   rootDir,
-  verbose: true,
+  verbose: false,
 };

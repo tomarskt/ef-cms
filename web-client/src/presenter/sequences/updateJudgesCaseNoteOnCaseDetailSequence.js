@@ -3,12 +3,11 @@ import { clearModalAction } from '../actions/clearModalAction';
 import { clearModalStateAction } from '../actions/clearModalStateAction';
 import { setJudgesCaseNoteOnCaseDetailAction } from '../actions/TrialSession/setJudgesCaseNoteOnCaseDetailAction';
 import { setValidationErrorsAction } from '../actions/setValidationErrorsAction';
-import { setWaitingForResponseAction } from '../actions/setWaitingForResponseAction';
+import { showProgressSequenceDecorator } from '../utilities/sequenceHelpers';
 import { startShowValidationAction } from '../actions/startShowValidationAction';
 import { stopShowValidationAction } from '../actions/stopShowValidationAction';
-import { unsetWaitingForResponseAction } from '../actions/unsetWaitingForResponseAction';
-import { updateJudgesCaseNoteAction } from '../actions/TrialSession/updateJudgesCaseNoteAction';
 import { updateNotePropsFromModalStateAction } from '../actions/TrialSessionWorkingCopy/updateNotePropsFromModalStateAction';
+import { updateUserCaseNoteAction } from '../actions/TrialSession/updateUserCaseNoteAction';
 import { validateNoteAction } from '../actions/validateNoteAction';
 
 export const updateJudgesCaseNoteOnCaseDetailSequence = [
@@ -16,16 +15,14 @@ export const updateJudgesCaseNoteOnCaseDetailSequence = [
   validateNoteAction,
   {
     error: [setValidationErrorsAction],
-    success: [
-      setWaitingForResponseAction,
+    success: showProgressSequenceDecorator([
       stopShowValidationAction,
       clearAlertsAction,
       updateNotePropsFromModalStateAction,
-      updateJudgesCaseNoteAction,
+      updateUserCaseNoteAction,
       setJudgesCaseNoteOnCaseDetailAction,
       clearModalAction,
       clearModalStateAction,
-      unsetWaitingForResponseAction,
-    ],
+    ]),
   },
 ];

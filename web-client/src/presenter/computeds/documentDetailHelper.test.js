@@ -180,7 +180,7 @@ describe('document detail helper', () => {
     expect(result.showCaseDetailsEdit).toEqual(true);
   });
 
-  it('sets the showCaseDetailsEdit boolean true when case status recalled', () => {
+  it('sets the showCaseDetailsEdit boolean true when case status inProgress', () => {
     const user = {
       role: User.ROLES.petitionsClerk,
       userId: '123',
@@ -191,7 +191,7 @@ describe('document detail helper', () => {
         caseDetail: {
           docketRecord: [],
           documents: [{ documentId: 'abc' }],
-          status: Case.STATUS_TYPES.recalled,
+          status: Case.STATUS_TYPES.inProgress,
         },
         documentId: 'abc',
         workItemActions: {
@@ -568,176 +568,6 @@ describe('document detail helper', () => {
     });
   });
 
-  describe('showServeToIrsButton and showRecallButton', () => {
-    it('should set showServeToIrsButton true and showRecallButton false when case status is new', () => {
-      const user = {
-        role: User.ROLES.petitionsClerk,
-        userId: '123',
-      };
-      const result = runCompute(documentDetailHelper, {
-        state: {
-          ...getBaseState(user),
-          caseDetail: {
-            docketRecord: [],
-            documents: [
-              {
-                documentId: 'abc',
-                documentType: 'Petition',
-              },
-            ],
-            status: Case.STATUS_TYPES.new,
-          },
-          documentId: 'abc',
-          workItemActions: {
-            abc: 'complete',
-          },
-        },
-      });
-      expect(result.showServeToIrsButton).toEqual(true);
-      expect(result.showRecallButton).toEqual(false);
-    });
-
-    it('should set showServeToIrsButton true and showRecallButton false when case status is recalled', () => {
-      const user = {
-        role: User.ROLES.petitionsClerk,
-        userId: '123',
-      };
-      const result = runCompute(documentDetailHelper, {
-        state: {
-          ...getBaseState(user),
-          caseDetail: {
-            docketRecord: [],
-            documents: [
-              {
-                documentId: 'abc',
-                documentType: 'Petition',
-              },
-            ],
-            status: Case.STATUS_TYPES.recalled,
-          },
-          documentId: 'abc',
-          workItemActions: {
-            abc: 'complete',
-          },
-        },
-      });
-      expect(result.showServeToIrsButton).toEqual(true);
-      expect(result.showRecallButton).toEqual(false);
-    });
-
-    it('should set showServeToIrsButton false and showRecallButton true when case status is Batched for IRS', () => {
-      const user = {
-        role: User.ROLES.petitionsClerk,
-        userId: '123',
-      };
-      const result = runCompute(documentDetailHelper, {
-        state: {
-          ...getBaseState(user),
-          caseDetail: {
-            docketRecord: [],
-            documents: [
-              {
-                documentId: 'abc',
-                documentType: 'Petition',
-              },
-            ],
-            status: Case.STATUS_TYPES.batchedForIRS,
-          },
-          documentId: 'abc',
-          workItemActions: {
-            abc: 'complete',
-          },
-        },
-      });
-      expect(result.showServeToIrsButton).toEqual(false);
-      expect(result.showRecallButton).toEqual(true);
-    });
-
-    it('should set showServeToIrsButton false and showRecallButton false when case status is general docket', () => {
-      const user = {
-        role: User.ROLES.petitionsClerk,
-        userId: '123',
-      };
-      const result = runCompute(documentDetailHelper, {
-        state: {
-          ...getBaseState(user),
-          caseDetail: {
-            docketRecord: [],
-            documents: [
-              {
-                documentId: 'abc',
-                documentType: 'Petition',
-              },
-            ],
-            status: Case.STATUS_TYPES.generalDocket,
-          },
-          documentId: 'abc',
-          workItemActions: {
-            abc: 'complete',
-          },
-        },
-      });
-      expect(result.showServeToIrsButton).toEqual(false);
-      expect(result.showRecallButton).toEqual(false);
-    });
-
-    it('should set showServeToIrsButton false and showRecallButton false if document type is not a petition', () => {
-      const user = {
-        role: User.ROLES.petitionsClerk,
-        userId: '123',
-      };
-      const result = runCompute(documentDetailHelper, {
-        state: {
-          ...getBaseState(user),
-          caseDetail: {
-            docketRecord: [],
-            documents: [
-              {
-                documentId: 'abc',
-                documentType: 'Answer',
-              },
-            ],
-            status: Case.STATUS_TYPES.batchedForIRS,
-          },
-          documentId: 'abc',
-          workItemActions: {
-            abc: 'complete',
-          },
-        },
-      });
-      expect(result.showServeToIrsButton).toEqual(false);
-      expect(result.showRecallButton).toEqual(false);
-    });
-
-    it('should not show the showServeToIrsButton or the showRecallButton for a docketclerk', () => {
-      const user = {
-        role: User.ROLES.docketClerk,
-        userId: '123',
-      };
-      const result = runCompute(documentDetailHelper, {
-        state: {
-          ...getBaseState(user),
-          caseDetail: {
-            docketRecord: [],
-            documents: [
-              {
-                documentId: 'abc',
-                documentType: 'Petition',
-              },
-            ],
-            status: Case.STATUS_TYPES.new,
-          },
-          documentId: 'abc',
-          workItemActions: {
-            abc: 'complete',
-          },
-        },
-      });
-      expect(result.showServeToIrsButton).toEqual(false);
-      expect(result.showRecallButton).toEqual(false);
-    });
-  });
-
   describe('showDocumentInfoTab', () => {
     it('should be false if document is not a petition', () => {
       const user = {
@@ -755,7 +585,7 @@ describe('document detail helper', () => {
                 documentType: 'NotAPetition',
               },
             ],
-            status: Case.STATUS_TYPES.recalled,
+            status: Case.STATUS_TYPES.new,
           },
           documentId: 'abc',
           workItemActions: {
@@ -766,7 +596,7 @@ describe('document detail helper', () => {
       expect(result.showDocumentInfoTab).toEqual(false);
     });
 
-    it('should be true if document is a petition and status is New, Recalled, or Batched for IRS', () => {
+    it('should be true if document is a petition and status is New, In Progress, or Batched for IRS', () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -782,7 +612,7 @@ describe('document detail helper', () => {
                 documentType: 'Petition',
               },
             ],
-            status: Case.STATUS_TYPES.recalled,
+            status: Case.STATUS_TYPES.inProgress,
           },
           documentId: 'abc',
           workItemActions: {
@@ -793,7 +623,7 @@ describe('document detail helper', () => {
       expect(result.showDocumentInfoTab).toEqual(true);
     });
 
-    it('should be false if document is a petition and status is not New, Recalled, or Batched for IRS', () => {
+    it('should be false if document is a petition and status is not New or In Progress', () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -822,7 +652,7 @@ describe('document detail helper', () => {
   });
 
   describe('showEditDocketEntry and showEditCourtIssuedDocketEntry', () => {
-    it('should set showEditDocketEntry false and showEditCourtIssuedDocketEntry true when the the document is a signed stipulated decision with a docket entry and the user has the DOCKET_ENTRY permission', async () => {
+    it('should set showEditDocketEntry false and showEditCourtIssuedDocketEntry true when the document is a signed stipulated decision with a docket entry and the user has the DOCKET_ENTRY permission', async () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -857,7 +687,7 @@ describe('document detail helper', () => {
       expect(result.showEditCourtIssuedDocketEntry).toEqual(true);
     });
 
-    it('should set showEditDocketEntry false when the the document is an unsigned stipulated decision and the user has the DOCKET_ENTRY permission', async () => {
+    it('should set showEditDocketEntry false when the document is an unsigned stipulated decision and the user has the DOCKET_ENTRY permission', async () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -886,7 +716,7 @@ describe('document detail helper', () => {
       expect(result.showEditDocketEntry).toEqual(false);
     });
 
-    it('should set showEditDocketEntry true when the the document is a served order and the user has the DOCKET_ENTRY permission', async () => {
+    it('should set showEditDocketEntry true when the non QCed document is a served order and the user has the DOCKET_ENTRY permission', async () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -902,6 +732,25 @@ describe('document detail helper', () => {
                 documentId: 'abc',
                 documentType: 'Order of Dismissal',
                 servedAt: getDateISO(),
+                workItems: [
+                  {
+                    caseStatus: Case.STATUS_TYPES.new,
+                    document: {
+                      receivedAt: '2018-11-21T20:49:28.192Z',
+                    },
+                    isQC: true,
+                    messages: [
+                      {
+                        createdAt: '2018-11-21T20:49:28.192Z',
+                        message: 'Served on IRS',
+                      },
+                      {
+                        createdAt: '2018-11-21T20:49:28.192Z',
+                        message: 'Test',
+                      },
+                    ],
+                  },
+                ],
               },
             ],
             status: Case.STATUS_TYPES.new,
@@ -916,7 +765,57 @@ describe('document detail helper', () => {
       expect(result.showEditDocketEntry).toEqual(true);
     });
 
-    it('should set showEditDocketEntry false when the the document is an unserved order and the user has the DOCKET_ENTRY permission', async () => {
+    it('should set showEditDocketEntry false on a QCed document even when it is a served order and the user has the DOCKET_ENTRY permission', async () => {
+      const user = {
+        role: User.ROLES.petitionsClerk,
+        userId: '123',
+      };
+
+      const result = runCompute(documentDetailHelper, {
+        state: {
+          ...getBaseState(user),
+          caseDetail: {
+            docketRecord: [],
+            documents: [
+              {
+                documentId: 'abc',
+                documentType: 'Order of Dismissal',
+                servedAt: getDateISO(),
+                workItems: [
+                  {
+                    caseStatus: Case.STATUS_TYPES.new,
+                    completedAt: '2018-11-21T20:49:28.192Z',
+                    document: {
+                      receivedAt: '2018-11-21T20:49:28.192Z',
+                    },
+                    isQC: true,
+                    messages: [
+                      {
+                        createdAt: '2018-11-21T20:49:28.192Z',
+                        message: 'Served on IRS',
+                      },
+                      {
+                        createdAt: '2018-11-21T20:49:28.192Z',
+                        message: 'Test',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            status: Case.STATUS_TYPES.new,
+          },
+          documentId: 'abc',
+          permissions: { DOCKET_ENTRY: true },
+          workItemActions: {
+            abc: 'complete',
+          },
+        },
+      });
+      expect(result.showEditDocketEntry).toEqual(false);
+    });
+
+    it('should set showEditDocketEntry false when the document is an unserved order and the user has the DOCKET_ENTRY permission', async () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -945,7 +844,7 @@ describe('document detail helper', () => {
       expect(result.showEditDocketEntry).toEqual(false);
     });
 
-    it('should set showEditDocketEntry false when the the document is petition and the user has the DOCKET_ENTRY permission', async () => {
+    it('should set showEditDocketEntry false when the document is petition and the user has the DOCKET_ENTRY permission', async () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -1456,7 +1355,7 @@ describe('document detail helper', () => {
   });
 
   describe('showPrintCaseConfirmationButton', () => {
-    it("should show the 'print confirmation' button if a document has been served and the document is a petition ", () => {
+    it("should show the 'Print Confirmation' button if a document has been served and the document is a petition ", () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -1482,7 +1381,7 @@ describe('document detail helper', () => {
       expect(result.showPrintCaseConfirmationButton).toEqual(true);
     });
 
-    it("should not show the 'print confirmation' button if a document has not been served", () => {
+    it("should not show the 'Print Confirmation' button if a document has not been served", () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -1508,7 +1407,7 @@ describe('document detail helper', () => {
       expect(result.showPrintCaseConfirmationButton).toEqual(false);
     });
 
-    it("should not show the 'print confirmation' button if the document is not a petition ", () => {
+    it("should not show the 'Print Confirmation' button if the document is not a petition ", () => {
       const user = {
         role: User.ROLES.petitionsClerk,
         userId: '123',
@@ -1714,6 +1613,91 @@ describe('document detail helper', () => {
       });
 
       expect(result.isDraftDocument).toEqual(false);
+    });
+
+    describe('editUrl', () => {
+      it('should go to the sign url when the document is a stip decision', () => {
+        const user = {
+          role: User.ROLES.petitionsClerk,
+          userId: '123',
+        };
+        const result = runCompute(documentDetailHelper, {
+          state: {
+            ...getBaseState(user),
+            caseDetail: {
+              docketRecord: [],
+              documents: [
+                {
+                  documentId: 'abc',
+                  documentType: 'Stipulated Decision',
+                },
+              ],
+            },
+            documentId: 'abc',
+            user,
+          },
+        });
+
+        expect(result.isDraftDocument).toEqual(true);
+        expect(result.formattedDocument.editUrl).toContain(
+          '/documents/abc/sign',
+        );
+      });
+
+      it('should go to the edit upload pdf url when the document is a Miscellaneous document', () => {
+        const user = {
+          role: User.ROLES.petitionsClerk,
+          userId: '123',
+        };
+        const result = runCompute(documentDetailHelper, {
+          state: {
+            ...getBaseState(user),
+            caseDetail: {
+              docketRecord: [],
+              documents: [
+                {
+                  documentId: 'abc',
+                  documentType: 'MISC - Miscellaneous',
+                },
+              ],
+            },
+            documentId: 'abc',
+            user,
+          },
+        });
+
+        expect(result.isDraftDocument).toEqual(true);
+        expect(result.formattedDocument.editUrl).toContain(
+          '/edit-upload-court-issued/abc',
+        );
+      });
+
+      it('should go to the edit order url when the document is a Order document', () => {
+        const user = {
+          role: User.ROLES.petitionsClerk,
+          userId: '123',
+        };
+        const result = runCompute(documentDetailHelper, {
+          state: {
+            ...getBaseState(user),
+            caseDetail: {
+              docketNumber: '123-20',
+              docketRecord: [],
+              documents: [
+                {
+                  documentId: 'abc',
+                  documentType: 'OAP - Order for Amended Petition',
+                },
+              ],
+            },
+            documentId: 'abc',
+            user,
+          },
+        });
+
+        expect(result.isDraftDocument).toEqual(true);
+        expect(result.formattedDocument.editUrl).toContain('/edit-order/abc');
+      });
     });
   });
 });

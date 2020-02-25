@@ -1,4 +1,7 @@
 const {
+  addServedStampToDocument,
+} = require('../../useCases/courtIssuedDocument/addServedStampToDocument');
+const {
   aggregatePartiesForService,
 } = require('../../utilities/aggregatePartiesForService');
 const {
@@ -13,10 +16,10 @@ const {
   ROLE_PERMISSIONS,
 } = require('../../../authorization/authorizationClientService');
 const { Case } = require('../../entities/cases/Case');
-const { createISODateString } = require('../../utilities/DateHandler');
 const { DOCKET_SECTION } = require('../../entities/WorkQueue');
 const { DocketRecord } = require('../../entities/DocketRecord');
 const { Document } = require('../../entities/Document');
+const { formatDateString } = require('../../utilities/DateHandler');
 const { omit } = require('lodash');
 const { PDFDocument } = require('pdf-lib');
 const { replaceBracketed } = require('../../utilities/replaceBracketed');
@@ -65,7 +68,7 @@ exports.completeDocketEntryQCInteractor = async ({
   const updatedDocument = new Document(
     {
       ...entryMetadata,
-      createdAt: currentDocument.createdAt, // eslint-disable-line
+      createdAt: currentDocument.createdAt,
       documentId,
       documentType,
       relationship: 'primaryDocument',
@@ -128,12 +131,16 @@ exports.completeDocketEntryQCInteractor = async ({
     },
   };
 
-  const docketRecordEntry = new DocketRecord({
-    description: updatedDocumentTitle,
-    documentId: updatedDocument.documentId,
-    editState: '{}',
-    filingDate: updatedDocument.receivedAt,
-  });
+  const docketRecordEntry = new DocketRecord(
+    {
+      description: updatedDocumentTitle,
+      documentId: updatedDocument.documentId,
+      editState: '{}',
+      eventCode: updatedDocument.eventCode,
+      filingDate: updatedDocument.receivedAt,
+    },
+    { applicationContext },
+  );
 
   caseEntity.updateDocketRecordEntry(omit(docketRecordEntry, 'index'));
   caseEntity.updateDocument(updatedDocument);
@@ -190,6 +197,7 @@ exports.completeDocketEntryQCInteractor = async ({
 
   let servedParties = aggregatePartiesForService(caseEntity);
   let paperServicePdfUrl;
+  let paperServiceDocumentTitle;
 
   if (
     Document.CONTACT_CHANGE_DOCUMENT_TYPES.includes(
@@ -206,54 +214,29 @@ exports.completeDocketEntryQCInteractor = async ({
         .promise();
 
       const noticeDoc = await PDFDocument.load(pdfData);
-      const addressPages = [];
+
       let newPdfDoc = await PDFDocument.create();
 
-      for (let party of servedParties.paper) {
-        addressPages.push(
-          await applicationContext
-            .getUseCaseHelpers()
-            .generatePaperServiceAddressPagePdf({
-              applicationContext,
-              contactData: party,
-              docketNumberWithSuffix: `${
-                caseEntity.docketNumber
-              }${caseEntity.docketNumberSuffix || ''}`,
-            }),
-        );
-      }
-
-      for (let addressPage of addressPages) {
-        const addressPageDoc = await PDFDocument.load(addressPage);
-        let copiedPages = await newPdfDoc.copyPages(
-          addressPageDoc,
-          addressPageDoc.getPageIndices(),
-        );
-        copiedPages.forEach(page => {
-          newPdfDoc.addPage(page);
-        });
-
-        copiedPages = await newPdfDoc.copyPages(
+      await applicationContext
+        .getUseCaseHelpers()
+        .appendPaperServiceAddressPageToPdf({
+          applicationContext,
+          caseEntity,
+          newPdfDoc,
           noticeDoc,
-          noticeDoc.getPageIndices(),
-        );
-        copiedPages.forEach(page => {
-          newPdfDoc.addPage(page);
+          servedParties,
         });
-      }
 
       const paperServicePdfData = await newPdfDoc.save();
 
       const paperServicePdfId = applicationContext.getUniqueId();
 
-      applicationContext.logger.time('Saving S3 Document');
-      await applicationContext.getPersistenceGateway().saveDocument({
+      await applicationContext.getPersistenceGateway().saveDocumentFromLambda({
         applicationContext,
         document: paperServicePdfData,
         documentId: paperServicePdfId,
         useTempBucket: true,
       });
-      applicationContext.logger.timeEnd('Saving S3 Document');
 
       const {
         url,
@@ -266,6 +249,7 @@ exports.completeDocketEntryQCInteractor = async ({
         });
 
       paperServicePdfUrl = url;
+      paperServiceDocumentTitle = updatedDocument.documentTitle;
     }
   } else if (needsNoticeOfDocketChange) {
     const noticeDocumentId = await generateNoticeOfDocketChangePdf({
@@ -289,29 +273,76 @@ exports.completeDocketEntryQCInteractor = async ({
 
     noticeUpdatedDocument.setAsServed(servedParties.all);
 
-    const docketEntry = caseEntity.docketRecord.find(
-      entry => entry.documentId === noticeUpdatedDocument.documentId,
+    caseEntity.addDocument(noticeUpdatedDocument, { applicationContext });
+
+    const { Body: pdfData } = await applicationContext
+      .getStorageClient()
+      .getObject({
+        Bucket: applicationContext.environment.documentsBucketName,
+        Key: noticeUpdatedDocument.documentId,
+      })
+      .promise();
+
+    const serviceStampDate = formatDateString(
+      noticeUpdatedDocument.servedAt,
+      'MMDDYY',
     );
 
-    const updatedDocketRecordEntity = new DocketRecord({
-      ...docketEntry,
-      filingDate: createISODateString(),
+    const newPdfData = await addServedStampToDocument({
+      pdfData,
+      serviceStampText: `Served ${serviceStampDate}`,
     });
-    updatedDocketRecordEntity.validate();
 
-    caseEntity.updateDocketRecordEntry(updatedDocketRecordEntity);
+    await applicationContext.getPersistenceGateway().saveDocumentFromLambda({
+      applicationContext,
+      document: newPdfData,
+      documentId: noticeUpdatedDocument.documentId,
+    });
 
-    caseEntity.addDocument(noticeUpdatedDocument);
+    await applicationContext.getUseCaseHelpers().sendServedPartiesEmails({
+      applicationContext,
+      caseEntity,
+      documentEntity: noticeUpdatedDocument,
+      servedParties,
+    });
 
-    //serve the notice
-    paperServicePdfUrl = await applicationContext
-      .getUseCaseHelpers()
-      .serveDocumentOnParties({
+    if (servedParties.paper.length > 0) {
+      const noticeDoc = await PDFDocument.load(newPdfData);
+      let newPdfDoc = await PDFDocument.create();
+
+      await applicationContext
+        .getUseCaseHelpers()
+        .appendPaperServiceAddressPageToPdf({
+          applicationContext,
+          caseEntity,
+          newPdfDoc,
+          noticeDoc,
+          servedParties,
+        });
+
+      const paperServicePdfData = await newPdfDoc.save();
+      const paperServicePdfId = applicationContext.getUniqueId();
+
+      await applicationContext.getPersistenceGateway().saveDocumentFromLambda({
         applicationContext,
-        caseEntity,
-        documentEntity: noticeUpdatedDocument,
-        servedParties,
+        document: paperServicePdfData,
+        documentId: paperServicePdfId,
+        useTempBucket: true,
       });
+
+      const {
+        url,
+      } = await applicationContext
+        .getPersistenceGateway()
+        .getDownloadPolicyUrl({
+          applicationContext,
+          documentId: paperServicePdfId,
+          useTempBucket: true,
+        });
+
+      paperServicePdfUrl = url;
+      paperServiceDocumentTitle = noticeUpdatedDocument.documentTitle;
+    }
   }
 
   await applicationContext.getPersistenceGateway().updateCase({
@@ -329,6 +360,7 @@ exports.completeDocketEntryQCInteractor = async ({
 
   return {
     caseDetail: caseEntity.toRawObject(),
+    paperServiceDocumentTitle,
     paperServiceParties: servedParties.paper,
     paperServicePdfUrl,
   };

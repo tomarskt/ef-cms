@@ -75,24 +75,34 @@ export const EditPetitionerInformation = connect(
 
             {(editPetitionerInformationHelper.showPrimaryContact ||
               editPetitionerInformationHelper.showSecondaryContact) && (
-              <Contacts
-                bind="form"
-                contactsHelper="startCaseInternalContactsHelper"
-                emailBind="form.contactPrimary"
-                showPrimaryContact={
-                  editPetitionerInformationHelper.showPrimaryContact
-                }
-                showSecondaryContact={
-                  editPetitionerInformationHelper.showSecondaryContact
-                }
-                wrapperClassName="contact-wrapper"
-                onBlur="validatePetitionerInformationFormSequence"
-                onChange="updateFormValueSequence"
-              />
+              <>
+                <Contacts
+                  bind="form"
+                  contactsHelper="startCaseInternalContactsHelper"
+                  emailBind="form.contactPrimary"
+                  showPrimaryContact={
+                    editPetitionerInformationHelper.showPrimaryContact
+                  }
+                  showPrimaryServiceIndicator={
+                    editPetitionerInformationHelper.showPrimaryContact
+                  }
+                  showSecondaryContact={
+                    editPetitionerInformationHelper.showSecondaryContact
+                  }
+                  showSecondaryServiceIndicator={
+                    editPetitionerInformationHelper.showSecondaryContact
+                  }
+                  validateSequence={validatePetitionerInformationFormSequence}
+                  wrapperClassName="contact-wrapper"
+                  onBlur="validatePetitionerInformationFormSequence"
+                  onChange="updateFormValueSequence"
+                />
+              </>
             )}
           </div>
 
           <Button
+            id="submit-edit-petitioner-information"
             onClick={() => {
               updatePetitionerInformationFormSequence();
             }}

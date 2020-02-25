@@ -9,7 +9,6 @@ const { StringDecoder } = require('string_decoder');
  * @returns {object} errors (null if no errors)
  */
 exports.validatePdfInteractor = async ({ applicationContext, documentId }) => {
-  applicationContext.logger.time('Fetching S3 File');
   let { Body: pdfData } = await applicationContext
     .getStorageClient()
     .getObject({

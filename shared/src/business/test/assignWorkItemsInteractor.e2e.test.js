@@ -8,7 +8,6 @@ const {
 const {
   getDocumentQCInboxForUserInteractor,
 } = require('../useCases/workitems/getDocumentQCInboxForUserInteractor');
-const { Case } = require('../entities/cases/Case');
 const { ContactFactory } = require('../entities/contacts/ContactFactory');
 const { createCaseInteractor } = require('../useCases/createCaseInteractor');
 const { getCaseInteractor } = require('../useCases/getCaseInteractor');
@@ -37,6 +36,7 @@ describe('assignWorkItemsInteractor integration test', () => {
   it('should create the expected case into the database', async () => {
     const { caseId } = await createCaseInteractor({
       applicationContext,
+      caseCaption: 'Caption',
       petitionFileId: '92eac064-9ca5-4c56-80a0-c5852c752277',
       petitionMetadata: {
         caseType: 'Innocent Spouse',
@@ -53,6 +53,15 @@ describe('assignWorkItemsInteractor integration test', () => {
           state: 'AP',
         },
         contactSecondary: {},
+        docketRecord: [
+          {
+            description: 'first record',
+            documentId: '8675309b-18d0-43ec-bafb-654e83405411',
+            eventCode: 'P',
+            filingDate: '2018-03-01T00:01:00.000Z',
+            index: 1,
+          },
+        ],
         filingType: 'Myself',
         hasIrsNotice: false,
         partyType: ContactFactory.PARTY_TYPES.petitioner,
@@ -99,7 +108,6 @@ describe('assignWorkItemsInteractor integration test', () => {
       {
         assigneeId: '3805d1ab-18d0-43ec-bafb-654e83405416',
         assigneeName: 'Test Petitionsclerk',
-        caseStatus: Case.STATUS_TYPES.new,
         docketNumber: '101-19',
         docketNumberSuffix: 'S',
         document: {
