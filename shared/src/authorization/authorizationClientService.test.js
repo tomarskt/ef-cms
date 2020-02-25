@@ -2,7 +2,7 @@ const {
   isAuthorized,
   ROLE_PERMISSIONS,
 } = require('./authorizationClientService');
-const { User } = require('../business/entities/User');
+const { User } = require('@/entities/User');
 
 describe('Authorization client service', () => {
   it('returns true for any user whose userId matches the 3rd owner argument, in this case "someUser" === "someUser"', () => {

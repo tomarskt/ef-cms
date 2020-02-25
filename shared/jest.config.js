@@ -1,7 +1,8 @@
 const rootDir = '..';
-const { moduleNameMapper } = require('../aliases');
+const baseConfig = require('../jest.config');
 
 module.exports = {
+  ...baseConfig,
   collectCoverage: true,
   collectCoverageFrom: [
     '!src/sharedAppContext.js',
@@ -23,7 +24,5 @@ module.exports = {
       statements: 95,
     },
   },
-  moduleNameMapper,
   rootDir,
-  verbose: true,
 };
