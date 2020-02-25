@@ -4,16 +4,16 @@ const { createCase1 } = require('./cases/createCase1');
 const { createUsers } = require('./createUsers');
 
 AWS.config = new AWS.Config();
-AWS.config.accessKeyId = 'noop';
-AWS.config.secretAccessKey = 'noop';
+AWS.config.accessKeyId = 'S3RVER';
+AWS.config.secretAccessKey = 'S3RVER';
 AWS.config.region = 'us-east-1';
 
 Error.stackTraceLimit = Infinity;
 
 const client = new AWS.DynamoDB.DocumentClient({
   credentials: {
-    accessKeyId: 'noop',
-    secretAccessKey: 'noop',
+    accessKeyId: 'S3RVER',
+    secretAccessKey: 'S3RVER',
   },
   endpoint: 'http://localhost:8000',
   region: 'us-east-1',

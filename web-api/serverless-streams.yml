@@ -27,8 +27,8 @@ custom:
     apiVersion: '2013-12-02'
     endpoint: http://0.0.0.0:8000
     region: us-east-1
-    accessKeyId: root
-    secretAccessKey: root
+    accessKeyId: S3RVER
+    secretAccessKey: S3RVER
     skipCacheInvalidation: false
     readInterval: 500
 
