@@ -1,7 +1,8 @@
 const rootDir = '..';
-const { moduleNameMapper } = require('../aliases');
+const baseConfig = require('../jest.config');
 
 module.exports = {
+  ...baseConfig,
   collectCoverage: true,
   collectCoverageFrom: [
     'src/presenter/**/*.js',
@@ -17,7 +18,6 @@ module.exports = {
       statements: 50,
     },
   },
-  moduleNameMapper,
   rootDir,
   testEnvironment: 'node',
   transform: {
