@@ -726,11 +726,6 @@ joiValidationDecorator(
       .description(
         'The unique ID of the User who added the case to the system.',
       ),
-    workItems: joi
-      .array()
-      .optional()
-      .meta({ tags: ['Restricted'] })
-      .description('List of system messages associated with this case.'),
   }),
   function() {
     return (
