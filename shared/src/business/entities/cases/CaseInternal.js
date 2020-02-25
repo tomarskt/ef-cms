@@ -59,7 +59,10 @@ CaseInternal.VALIDATION_ERROR_MESSAGES = Object.assign(
 );
 
 const paperRequirements = joi.object().keys({
-  applicationForWaiverOfFilingFeeFile: joi.object().optional(),
+  applicationForWaiverOfFilingFeeFile: joi
+    .object()
+    .type(File)
+    .optional(),
   applicationForWaiverOfFilingFeeFileSize: joi.when(
     'applicationForWaiverOfFilingFeeFile',
     {
@@ -79,7 +82,10 @@ const paperRequirements = joi.object().keys({
     .string()
     .max(25)
     .required(),
-  ownershipDisclosureFile: joi.object().optional(),
+  ownershipDisclosureFile: joi
+    .object()
+    .type(File)
+    .optional(),
   ownershipDisclosureFileSize: joi.when('ownershipDisclosureFile', {
     is: joi.exist().not(null),
     otherwise: joi.optional().allow(null),
@@ -91,7 +97,10 @@ const paperRequirements = joi.object().keys({
       .integer(),
   }),
   partyType: joi.string().required(),
-  petitionFile: joi.object().required(),
+  petitionFile: joi
+    .object()
+    .type(File)
+    .required(),
   petitionFileSize: joi.when('petitionFile', {
     is: joi.exist().not(null),
     otherwise: joi.optional().allow(null),
@@ -119,8 +128,14 @@ const paperRequirements = joi.object().keys({
     .alternatives()
     .conditional('preferredTrialCity', {
       is: joi.exist().not(null),
-      otherwise: joi.object().optional(),
-      then: joi.object().required(),
+      otherwise: joi
+        .object()
+        .type(File)
+        .optional(),
+      then: joi
+        .object()
+        .type(File)
+        .required(),
     }),
   requestForPlaceOfTrialFileSize: joi.when('requestForPlaceOfTrialFile', {
     is: joi.exist().not(null),
@@ -132,7 +147,10 @@ const paperRequirements = joi.object().keys({
       .max(MAX_FILE_SIZE_BYTES)
       .integer(),
   }),
-  stinFile: joi.object().required(),
+  stinFile: joi
+    .object()
+    .type(File)
+    .required(),
   stinFileSize: joi.when('stinFile', {
     is: joi.exist().not(null),
     otherwise: joi.optional().allow(null),
