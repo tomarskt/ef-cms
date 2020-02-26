@@ -1,13 +1,8 @@
 const { CaseInternal } = require('./CaseInternal');
 const { ContactFactory } = require('../contacts/ContactFactory');
+const { MOCK_FILE } = require('../../../test/mockFile');
 
 const { VALIDATION_ERROR_MESSAGES } = CaseInternal;
-
-const mockFile = new Blob([], {
-  type: 'text/plain',
-});
-mockFile.name = 'test.pdf';
-mockFile.lastModified = 1234;
 
 describe('CaseInternal entity', () => {
   describe('validation', () => {
@@ -28,11 +23,11 @@ describe('CaseInternal entity', () => {
         },
         mailingDate: 'test',
         partyType: ContactFactory.PARTY_TYPES.petitioner,
-        petitionFile: mockFile,
+        petitionFile: MOCK_FILE,
         petitionFileSize: 1,
         procedureType: 'Small',
         receivedAt: new Date().toISOString(),
-        stinFile: mockFile,
+        stinFile: MOCK_FILE,
         stinFileSize: 1,
       });
       expect(caseInternal.getFormattedValidationErrors()).toEqual(null);
@@ -52,7 +47,7 @@ describe('CaseInternal entity', () => {
     it('fails validation if petitionFile is set, but petitionFileSize is not', () => {
       const caseInternal = new CaseInternal({
         caseCaption: 'Dr. Leo Marvin, Petitioner',
-        petitionFile: mockFile,
+        petitionFile: MOCK_FILE,
         receivedAt: new Date().toISOString(),
       });
 
@@ -63,7 +58,7 @@ describe('CaseInternal entity', () => {
 
     it('fails validation if applicationForWaiverOfFilingFeeFile is set, but applicationForWaiverOfFilingFeeFileSize is not', () => {
       const caseInternal = new CaseInternal({
-        applicationForWaiverOfFilingFeeFile: mockFile,
+        applicationForWaiverOfFilingFeeFile: MOCK_FILE,
         caseCaption: 'Dr. Leo Marvin, Petitioner',
         receivedAt: new Date().toISOString(),
       });
@@ -80,7 +75,7 @@ describe('CaseInternal entity', () => {
       const caseInternal = new CaseInternal({
         caseCaption: 'Dr. Leo Marvin, Petitioner',
         receivedAt: new Date().toISOString(),
-        stinFile: mockFile,
+        stinFile: MOCK_FILE,
       });
 
       expect(caseInternal.getFormattedValidationErrors().stinFileSize).toEqual(
@@ -91,7 +86,7 @@ describe('CaseInternal entity', () => {
     it('fails validation if ownershipDisclosureFile is set, but ownershipDisclosureFileSize is not', () => {
       const caseInternal = new CaseInternal({
         caseCaption: 'Dr. Leo Marvin, Petitioner',
-        ownershipDisclosureFile: mockFile,
+        ownershipDisclosureFile: MOCK_FILE,
         receivedAt: new Date().toISOString(),
       });
 
@@ -104,7 +99,7 @@ describe('CaseInternal entity', () => {
       const caseInternal = new CaseInternal({
         caseCaption: 'Dr. Leo Marvin, Petitioner',
         receivedAt: new Date().toISOString(),
-        requestForPlaceOfTrialFile: mockFile,
+        requestForPlaceOfTrialFile: MOCK_FILE,
       });
 
       expect(
@@ -117,7 +112,7 @@ describe('CaseInternal entity', () => {
       const caseInternal = new CaseInternal({
         caseCaption: 'Dr. Leo Marvin, Petitioner',
         receivedAt: new Date().toISOString(),
-        requestForPlaceOfTrialFile: mockFile,
+        requestForPlaceOfTrialFile: MOCK_FILE,
       });
 
       expect(

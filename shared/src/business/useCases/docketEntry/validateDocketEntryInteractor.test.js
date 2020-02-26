@@ -4,6 +4,7 @@ const {
 const {
   validateDocketEntryInteractor,
 } = require('./validateDocketEntryInteractor');
+const { MOCK_FILE } = require('../../../test/mockFile');
 
 const { VALIDATION_ERROR_MESSAGES } = DocketEntryFactory;
 
@@ -42,7 +43,7 @@ describe('validateDocketEntryInteractor', () => {
         lodged: false,
         ordinalValue: 'First',
         partyPrimary: true,
-        primaryDocumentFile: {},
+        primaryDocumentFile: MOCK_FILE,
         primaryDocumentFileSize: 1,
         scenario: 'Nonstandard G',
       },

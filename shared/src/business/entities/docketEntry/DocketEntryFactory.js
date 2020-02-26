@@ -61,9 +61,9 @@ function DocketEntryFactory(rawProps) {
     this.partyRespondent = rawPropsParam.partyRespondent;
     this.partySecondary = rawPropsParam.partySecondary;
     this.previousDocument = rawPropsParam.previousDocument;
-    this.primaryDocumentFile = rawPropsParam.primaryDocumentFile || {};
+    this.primaryDocumentFile = rawPropsParam.primaryDocumentFile;
     this.primaryDocumentFileSize = rawPropsParam.primaryDocumentFileSize;
-    this.secondaryDocumentFile = rawPropsParam.secondaryDocumentFile || {};
+    this.secondaryDocumentFile = rawPropsParam.secondaryDocumentFile;
 
     const { secondaryDocument } = rawPropsParam;
     if (secondaryDocument) {
@@ -96,7 +96,7 @@ function DocketEntryFactory(rawProps) {
     previousDocument: fileSchema.optional(),
     primaryDocumentFile: fileSchema.optional(),
     primaryDocumentFileSize: joi.when('primaryDocumentFile', {
-      is: joi.exist(),
+      is: joi.exist().not(null),
       otherwise: joi.optional().allow(null),
       then: joi
         .number()

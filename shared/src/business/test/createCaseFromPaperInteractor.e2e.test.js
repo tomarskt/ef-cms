@@ -14,6 +14,7 @@ const {
 const { Case } = require('../entities/cases/Case');
 const { getCaseInteractor } = require('../useCases/getCaseInteractor');
 const { MOCK_CASE } = require('../../test/mockCase');
+const { MOCK_FILE } = require('../../test/mockFile');
 const { User } = require('../entities/User');
 
 const RECEIVED_DATE = '2019-02-01T22:54:06.000Z';
@@ -55,15 +56,12 @@ describe('createCaseFromPaperInteractor integration test', () => {
         caseCaption: 'Bob Jones2, Petitioner',
         createdAt: RECEIVED_DATE,
         mailingDate: 'testing',
-        petitionFile: { name: 'something' },
+        petitionFile: MOCK_FILE,
         petitionFileSize: 1,
         receivedAt: RECEIVED_DATE,
-        requestForPlaceOfTrialFile: new File(
-          [],
-          'requestForPlaceOfTrialFile.pdf',
-        ),
+        requestForPlaceOfTrialFile: MOCK_FILE,
         requestForPlaceOfTrialFileSize: 1,
-        stinFile: { name: 'something else' },
+        stinFile: MOCK_FILE,
         stinFileSize: 1,
       },
       stinFileId: '72de0fac-f63c-464f-ac71-0f54fd248484',

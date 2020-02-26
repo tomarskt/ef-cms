@@ -1,6 +1,7 @@
 const { CaseExternal } = require('../cases/CaseExternal');
 const { CaseInternal } = require('../cases/CaseInternal');
 const { ContactFactory } = require('./ContactFactory');
+const { MOCK_FILE } = require('../../../test/mockFile');
 
 let caseExternal;
 
@@ -577,18 +578,15 @@ describe('Petition', () => {
       irsNoticeDate: '2009-10-13',
       mailingDate: 'testing',
       partyType: ContactFactory.PARTY_TYPES.transferee,
-      petitionFile: {},
+      petitionFile: MOCK_FILE,
       petitionFileSize: 1,
       preferredTrialCity: 'Chattanooga, Tennessee',
       procedureType: 'Small',
       receivedAt: '2009-10-13',
-      requestForPlaceOfTrialFile: new File(
-        [],
-        'requestForPlaceOfTrialFile.pdf',
-      ),
+      requestForPlaceOfTrialFile: MOCK_FILE,
       requestForPlaceOfTrialFileSize: 1,
       signature: true,
-      stinFile: {},
+      stinFile: MOCK_FILE,
       stinFileSize: 1,
     });
 
