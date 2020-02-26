@@ -360,7 +360,7 @@ joiValidationDecorator(
     partySecondary: joi.boolean().optional(),
     pending: joi.boolean().optional(),
     practitioner: joi.array().optional(),
-    previousDocument: fileSchema.optional(),
+    previousDocument: joi.object().optional(),
     processingStatus: joi.string().optional(),
     qcAt: joi
       .date()
@@ -385,7 +385,7 @@ joiValidationDecorator(
         'A secondary date associated with the document, typically related to time-restricted availability.',
       ),
     // TODO: What's the difference between servedAt and serviceDate?
-    secondaryDocument: fileSchema.optional(),
+    secondaryDocument: joi.object().optional(),
     servedAt: joi
       .date()
       .iso()

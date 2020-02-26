@@ -155,7 +155,7 @@ TrialSession.prototype.init = function(rawSession, { applicationContext }) {
   this.createdAt = rawSession.createdAt || createISODateString();
   this.irsCalendarAdministrator = rawSession.irsCalendarAdministrator;
   this.isCalendared = rawSession.isCalendared || false;
-  this.judge = rawSession.judge;
+  this.judge = rawSession.judge || {};
   this.maxCases = rawSession.maxCases;
   this.notes = rawSession.notes;
   this.noticeIssuedDate = rawSession.noticeIssuedDate;
@@ -168,7 +168,7 @@ TrialSession.prototype.init = function(rawSession, { applicationContext }) {
   this.swingSessionId = rawSession.swingSessionId;
   this.term = rawSession.term;
   this.termYear = rawSession.termYear;
-  this.trialClerk = rawSession.trialClerk;
+  this.trialClerk = rawSession.trialClerk || {};
   this.trialLocation = rawSession.trialLocation;
   this.trialSessionId =
     rawSession.trialSessionId || applicationContext.getUniqueId();
