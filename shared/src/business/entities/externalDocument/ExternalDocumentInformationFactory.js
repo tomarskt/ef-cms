@@ -94,6 +94,11 @@ const VALIDATION_ERROR_MESSAGES = {
  */
 function ExternalDocumentInformationFactory() {}
 
+const fileSchema = joi.object().keys({
+  lastModified: joi.number().required(),
+  name: joi.string().required(),
+});
+
 /**
  *
  * @param {object} documentMetadata the document metadata
@@ -102,7 +107,7 @@ function ExternalDocumentInformationFactory() {}
 ExternalDocumentInformationFactory.get = documentMetadata => {
   let entityConstructor = function(rawProps) {
     this.attachments = rawProps.attachments;
-    this.casesParties = rawProps.casesParties;
+    this.casesParties = rawProps.casesParties || {};
     this.certificateOfService = rawProps.certificateOfService;
     this.certificateOfServiceDate = rawProps.certificateOfServiceDate;
     this.documentType = rawProps.documentType;
@@ -117,13 +122,14 @@ ExternalDocumentInformationFactory.get = documentMetadata => {
     this.partyPrimary = rawProps.partyPrimary;
     this.partyRespondent = rawProps.partyRespondent;
     this.partySecondary = rawProps.partySecondary;
-    this.previousDocument = rawProps.previousDocument;
+    this.previousDocument = rawProps.previousDocument || {};
     this.primaryDocumentFile = rawProps.primaryDocumentFile;
     this.secondaryDocument = rawProps.secondaryDocument;
     this.secondaryDocumentFile = rawProps.secondaryDocumentFile;
-    this.secondarySupportingDocuments = rawProps.secondarySupportingDocuments;
-    this.selectedCases = rawProps.selectedCases;
-    this.supportingDocuments = rawProps.supportingDocuments;
+    this.secondarySupportingDocuments =
+      rawProps.secondarySupportingDocuments || [];
+    this.selectedCases = rawProps.selectedCases || [];
+    this.supportingDocuments = rawProps.supportingDocuments || [];
 
     if (this.secondaryDocument) {
       this.secondaryDocument = SecondaryDocumentInformationFactory.get(
@@ -167,7 +173,7 @@ ExternalDocumentInformationFactory.get = documentMetadata => {
     lodged: joi.boolean().optional(),
     ordinalValue: joi.string().optional(),
     previousDocument: joi.object().optional(),
-    primaryDocumentFile: joi.object().required(),
+    primaryDocumentFile: fileSchema.required(),
     primaryDocumentFileSize: joi
       .number()
       .optional()
@@ -186,7 +192,7 @@ ExternalDocumentInformationFactory.get = documentMetadata => {
     partyPrimary: joi.boolean(),
     partyRespondent: joi.boolean(),
     partySecondary: joi.boolean(),
-    secondaryDocumentFile: joi.object(),
+    secondaryDocumentFile: fileSchema,
     secondaryDocumentFileSize: joi
       .number()
       .optional()
