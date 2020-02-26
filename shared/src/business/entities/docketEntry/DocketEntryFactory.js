@@ -61,15 +61,20 @@ function DocketEntryFactory(rawProps) {
     this.partyRespondent = rawPropsParam.partyRespondent;
     this.partySecondary = rawPropsParam.partySecondary;
     this.previousDocument = rawPropsParam.previousDocument;
-    this.primaryDocumentFile = rawPropsParam.primaryDocumentFile;
+    this.primaryDocumentFile = rawPropsParam.primaryDocumentFile || {};
     this.primaryDocumentFileSize = rawPropsParam.primaryDocumentFileSize;
-    this.secondaryDocumentFile = rawPropsParam.secondaryDocumentFile;
+    this.secondaryDocumentFile = rawPropsParam.secondaryDocumentFile || {};
 
     const { secondaryDocument } = rawPropsParam;
     if (secondaryDocument) {
       this.secondaryDocument = ExternalDocumentFactory.get(secondaryDocument);
     }
   };
+
+  const fileSchema = joi.object().keys({
+    lastModified: joi.number().required(),
+    name: joi.string().required(),
+  });
 
   let schema = joi.object().keys({
     addToCoversheet: joi.boolean(),
@@ -88,10 +93,10 @@ function DocketEntryFactory(rawProps) {
     hasSupportingDocuments: joi.boolean(),
     lodged: joi.boolean(),
     ordinalValue: joi.string().optional(),
-    previousDocument: joi.object().optional(),
-    primaryDocumentFile: joi.object().optional(),
+    previousDocument: fileSchema.optional(),
+    primaryDocumentFile: fileSchema.optional(),
     primaryDocumentFileSize: joi.when('primaryDocumentFile', {
-      is: joi.exist().not(null),
+      is: joi.exist(),
       otherwise: joi.optional().allow(null),
       then: joi
         .number()
@@ -121,7 +126,7 @@ function DocketEntryFactory(rawProps) {
       .required(),
     partyRespondent: joi.boolean().required(),
     partySecondary: joi.boolean().required(),
-    secondaryDocumentFile: joi.object().optional(),
+    secondaryDocumentFile: fileSchema.optional(),
   };
 
   let customValidate;
