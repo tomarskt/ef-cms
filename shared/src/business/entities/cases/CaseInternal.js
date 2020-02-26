@@ -58,11 +58,13 @@ CaseInternal.VALIDATION_ERROR_MESSAGES = Object.assign(
   },
 );
 
+const fileSchema = joi.object().keys({
+  lastModified: joi.number().required(),
+  name: joi.string().required(),
+});
+
 const paperRequirements = joi.object().keys({
-  applicationForWaiverOfFilingFeeFile: joi
-    .object()
-    .type(File)
-    .optional(),
+  applicationForWaiverOfFilingFeeFile: fileSchema.optional(),
   applicationForWaiverOfFilingFeeFileSize: joi.when(
     'applicationForWaiverOfFilingFeeFile',
     {
@@ -82,10 +84,7 @@ const paperRequirements = joi.object().keys({
     .string()
     .max(25)
     .required(),
-  ownershipDisclosureFile: joi
-    .object()
-    .type(File)
-    .optional(),
+  ownershipDisclosureFile: fileSchema.optional(),
   ownershipDisclosureFileSize: joi.when('ownershipDisclosureFile', {
     is: joi.exist().not(null),
     otherwise: joi.optional().allow(null),
@@ -97,10 +96,7 @@ const paperRequirements = joi.object().keys({
       .integer(),
   }),
   partyType: joi.string().required(),
-  petitionFile: joi
-    .object()
-    .type(File)
-    .required(),
+  petitionFile: fileSchema.required(),
   petitionFileSize: joi.when('petitionFile', {
     is: joi.exist().not(null),
     otherwise: joi.optional().allow(null),
@@ -128,14 +124,8 @@ const paperRequirements = joi.object().keys({
     .alternatives()
     .conditional('preferredTrialCity', {
       is: joi.exist().not(null),
-      otherwise: joi
-        .object()
-        .type(File)
-        .optional(),
-      then: joi
-        .object()
-        .type(File)
-        .required(),
+      otherwise: fileSchema.optional(),
+      then: fileSchema.required(),
     }),
   requestForPlaceOfTrialFileSize: joi.when('requestForPlaceOfTrialFile', {
     is: joi.exist().not(null),
@@ -147,10 +137,7 @@ const paperRequirements = joi.object().keys({
       .max(MAX_FILE_SIZE_BYTES)
       .integer(),
   }),
-  stinFile: joi
-    .object()
-    .type(File)
-    .required(),
+  stinFile: fileSchema.required(),
   stinFileSize: joi.when('stinFile', {
     is: joi.exist().not(null),
     otherwise: joi.optional().allow(null),
