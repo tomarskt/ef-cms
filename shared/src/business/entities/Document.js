@@ -25,6 +25,11 @@ Document.PETITION_DOCUMENT_TYPES = ['Petition'];
 
 Document.validationName = 'Document';
 
+const fileSchema = joi.object().keys({
+  lastModified: joi.number().required(),
+  name: joi.string().required(),
+});
+
 /**
  * constructor
  *
@@ -48,7 +53,7 @@ function Document(rawDocument, { applicationContext }) {
   this.documentId = rawDocument.documentId;
   this.documentTitle = rawDocument.documentTitle;
   this.documentType = rawDocument.documentType;
-  this.draftState = rawDocument.draftState;
+  this.draftState = rawDocument.draftState || {};
   this.eventCode = rawDocument.eventCode;
   this.exhibits = rawDocument.exhibits;
   this.filedBy = rawDocument.filedBy;
@@ -70,11 +75,11 @@ function Document(rawDocument, { applicationContext }) {
     rawDocument.pending === undefined
       ? Document.isPendingOnCreation(rawDocument)
       : rawDocument.pending;
-  this.practitioner = rawDocument.practitioner;
+  this.practitioner = rawDocument.practitioner || [];
   this.previousDocument = rawDocument.previousDocument;
   this.processingStatus = rawDocument.processingStatus || 'pending';
   this.qcAt = rawDocument.qcAt;
-  this.qcByUser = rawDocument.qcByUser;
+  this.qcByUser = rawDocument.qcByUser || {};
   this.qcByUserId = rawDocument.qcByUserId;
   this.receivedAt = rawDocument.receivedAt || createISODateString();
   this.relationship = rawDocument.relationship;
@@ -82,7 +87,7 @@ function Document(rawDocument, { applicationContext }) {
   this.secondaryDate = rawDocument.secondaryDate;
   this.secondaryDocument = rawDocument.secondaryDocument;
   this.servedAt = rawDocument.servedAt;
-  this.servedParties = rawDocument.servedParties;
+  this.servedParties = rawDocument.servedParties || [];
   this.serviceDate = rawDocument.serviceDate;
   this.serviceStamp = rawDocument.serviceStamp;
   this.signedAt = rawDocument.signedAt;
@@ -355,7 +360,7 @@ joiValidationDecorator(
     partySecondary: joi.boolean().optional(),
     pending: joi.boolean().optional(),
     practitioner: joi.array().optional(),
-    previousDocument: joi.object().optional(),
+    previousDocument: fileSchema.optional(),
     processingStatus: joi.string().optional(),
     qcAt: joi
       .date()
@@ -380,7 +385,7 @@ joiValidationDecorator(
         'A secondary date associated with the document, typically related to time-restricted availability.',
       ),
     // TODO: What's the difference between servedAt and serviceDate?
-    secondaryDocument: joi.object().optional(),
+    secondaryDocument: fileSchema.optional(),
     servedAt: joi
       .date()
       .iso()

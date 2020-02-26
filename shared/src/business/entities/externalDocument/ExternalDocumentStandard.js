@@ -15,7 +15,7 @@ function ExternalDocumentStandard(rawProps) {
   this.category = rawProps.category;
   this.documentTitle = rawProps.documentTitle;
   this.documentType = rawProps.documentType;
-  this.selectedCases = rawProps.selectedCases;
+  this.selectedCases = rawProps.selectedCases || [];
 }
 
 ExternalDocumentStandard.prototype.getDocumentTitle = function() {

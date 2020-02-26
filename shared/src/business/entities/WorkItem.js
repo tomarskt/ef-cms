@@ -30,7 +30,7 @@ function WorkItem(rawWorkItem, { applicationContext }) {
   this.createdAt = rawWorkItem.createdAt || createISODateString();
   this.docketNumber = rawWorkItem.docketNumber;
   this.docketNumberSuffix = rawWorkItem.docketNumberSuffix;
-  this.document = omit(rawWorkItem.document, 'workItems');
+  this.document = omit(rawWorkItem.document, 'workItems') || {};
   this.hideFromPendingMessages = rawWorkItem.hideFromPendingMessages;
   this.highPriority = rawWorkItem.highPriority;
   this.inProgress = rawWorkItem.inProgress;
