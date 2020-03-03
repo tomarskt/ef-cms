@@ -53,8 +53,9 @@ exports.updatePetitionDetailsInteractor = async ({
 
   if (oldCase.petitionPaymentStatus === Case.PAYMENT_STATUS.UNPAID) {
     if (isPaid) {
-      newCase.addDocketRecord(
-        new DocketRecord(
+      await newCase.addDocketRecord({
+        applicationContext,
+        docketRecord: new DocketRecord(
           {
             description: 'Filing Fee Paid',
             eventCode: 'FEE',
@@ -62,10 +63,11 @@ exports.updatePetitionDetailsInteractor = async ({
           },
           { applicationContext },
         ),
-      );
+      });
     } else if (isWaived) {
-      newCase.addDocketRecord(
-        new DocketRecord(
+      await newCase.addDocketRecord({
+        applicationContext,
+        docketRecord: new DocketRecord(
           {
             description: 'Filing Fee Waived',
             eventCode: 'FEEW',
@@ -73,7 +75,7 @@ exports.updatePetitionDetailsInteractor = async ({
           },
           { applicationContext },
         ),
-      );
+      });
     }
   }
 

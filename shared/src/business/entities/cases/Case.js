@@ -154,7 +154,6 @@ Case.VALIDATION_ERROR_MESSAGES = {
   caseCaption: 'Enter a case caption',
   caseType: 'Select a case type',
   docketNumber: 'Docket number is required',
-  docketRecord: 'At least one valid Docket Record is required',
   documents: 'At least one valid document is required',
   filingType: 'Select on whose behalf you are filing',
   hasIrsNotice: 'Indicate whether you received an IRS notice',
@@ -282,6 +281,7 @@ function Case(rawCase, { applicationContext }) {
   this.trialLocation = rawCase.trialLocation;
   this.trialSessionId = rawCase.trialSessionId;
   this.trialTime = rawCase.trialTime;
+  this.docketRecord = rawCase.docketRecord || [];
 
   this.initialDocketNumberSuffix =
     rawCase.initialDocketNumberSuffix || this.docketNumberSuffix || '_';
@@ -322,14 +322,6 @@ function Case(rawCase, { applicationContext }) {
       workItem.docketNumberSuffix = this.docketNumberSuffix;
     });
   });
-
-  if (Array.isArray(rawCase.docketRecord)) {
-    this.docketRecord = rawCase.docketRecord.map(
-      docketRecord => new DocketRecord(docketRecord, { applicationContext }),
-    );
-  } else {
-    this.docketRecord = [];
-  }
 
   this.noticeOfTrialDate = rawCase.noticeOfTrialDate || createISODateString();
   this.noticeOfAttachments = rawCase.noticeOfAttachments || false;
@@ -472,13 +464,6 @@ joiValidationDecorator(
       .allow(null)
       .valid(...Object.values(Case.DOCKET_NUMBER_SUFFIXES))
       .optional(),
-    docketRecord: joi
-      .array()
-      .items(joi.object().meta({ entityName: 'DocketRecord' }))
-      .min(1)
-      .required()
-      .unique((a, b) => a.index === b.index)
-      .description('List of DocketRecord Entities for the case.'),
     documents: joi
       .array()
       .items(joi.object().meta({ entityName: 'Document' }))
@@ -750,7 +735,6 @@ joiValidationDecorator(
     return (
       Case.isValidDocketNumber(this.docketNumber) &&
       Document.validateCollection(this.documents) &&
-      DocketRecord.validateCollection(this.docketRecord) &&
       Respondent.validateCollection(this.respondents) &&
       Practitioner.validateCollection(this.practitioners)
     );
@@ -906,12 +890,13 @@ Case.prototype.removePractitioner = function(practitionerToRemove) {
  *
  * @param {object} document the document to add to the case
  */
-Case.prototype.addDocument = function(document, { applicationContext }) {
+Case.prototype.addDocument = async function(document, { applicationContext }) {
   document.caseId = this.caseId;
   this.documents = [...this.documents, document];
 
-  this.addDocketRecord(
-    new DocketRecord(
+  await this.addDocketRecord({
+    applicationContext,
+    docketRecord: new DocketRecord(
       {
         description: document.documentType,
         documentId: document.documentId,
@@ -922,7 +907,7 @@ Case.prototype.addDocument = function(document, { applicationContext }) {
       },
       { applicationContext },
     ),
-  );
+  });
 };
 
 /**
@@ -968,7 +953,9 @@ Case.prototype.markAsSentToIRS = function(sendDate) {
  *
  * @returns {Case} the updated case entity
  */
-Case.prototype.updateCaseTitleDocketRecord = function({ applicationContext }) {
+Case.prototype.updateCaseTitleDocketRecord = async function({
+  applicationContext,
+}) {
   const caseTitleRegex = /^Caption of case is amended from '(.*)' to '(.*)'/;
   let lastTitle = this.initialTitle;
 
@@ -986,8 +973,9 @@ Case.prototype.updateCaseTitleDocketRecord = function({ applicationContext }) {
     this.status !== Case.STATUS_TYPES.new;
 
   if (needsTitleChangedRecord) {
-    this.addDocketRecord(
-      new DocketRecord(
+    await this.addDocketRecord({
+      applicationContext,
+      docketRecord: new DocketRecord(
         {
           description: `Caption of case is amended from '${lastTitle}' to '${this.caseTitle}'`,
           eventCode: 'MINC',
@@ -995,7 +983,7 @@ Case.prototype.updateCaseTitleDocketRecord = function({ applicationContext }) {
         },
         { applicationContext },
       ),
-    );
+    });
   }
 
   return this;
@@ -1005,7 +993,9 @@ Case.prototype.updateCaseTitleDocketRecord = function({ applicationContext }) {
  *
  * @returns {Case} the updated case entity
  */
-Case.prototype.updateDocketNumberRecord = function({ applicationContext }) {
+Case.prototype.updateDocketNumberRecord = async function({
+  applicationContext,
+}) {
   const docketNumberRegex = /^Docket Number is amended from '(.*)' to '(.*)'/;
 
   let lastDocketNumber =
@@ -1028,9 +1018,16 @@ Case.prototype.updateDocketNumberRecord = function({ applicationContext }) {
     lastDocketNumber !== newDocketNumber &&
     this.status !== Case.STATUS_TYPES.new;
 
+<<<<<<< Updated upstream
   if (needsDocketNumberChangeRecord) {
     this.addDocketRecord(
       new DocketRecord(
+=======
+  if (hasDocketNumberChanged) {
+    await this.addDocketRecord({
+      applicationContext,
+      docketRecord: new DocketRecord(
+>>>>>>> Stashed changes
         {
           description: `Docket Number is amended from '${lastDocketNumber}' to '${newDocketNumber}'`,
           eventCode: 'MIND',
@@ -1038,7 +1035,7 @@ Case.prototype.updateDocketNumberRecord = function({ applicationContext }) {
         },
         { applicationContext },
       ),
-    );
+    });
   }
 
   return this;
@@ -1061,7 +1058,7 @@ Case.prototype.getShowCaseNameForPrimary = function() {
  * @param {string} preferredTrialCity the preferred trial city
  * @returns {Case} the updated case entity
  */
-Case.prototype.setRequestForTrialDocketRecord = function(
+Case.prototype.setRequestForTrialDocketRecord = async function(
   preferredTrialCity,
   { applicationContext },
 ) {
@@ -1072,8 +1069,9 @@ Case.prototype.setRequestForTrialDocketRecord = function(
   );
 
   if (preferredTrialCity && !found) {
-    this.addDocketRecord(
-      new DocketRecord(
+    await this.addDocketRecord({
+      applicationContext,
+      docketRecord: new DocketRecord(
         {
           description: `Request for Place of Trial at ${this.preferredTrialCity}`,
           eventCode:
@@ -1082,7 +1080,7 @@ Case.prototype.setRequestForTrialDocketRecord = function(
         },
         { applicationContext },
       ),
-    );
+    });
   }
   return this;
 };
@@ -1092,16 +1090,15 @@ Case.prototype.setRequestForTrialDocketRecord = function(
  * @param {DocketRecord} docketRecordEntity the docket record entity to add to case's the docket record
  * @returns {Case} the updated case entity
  */
-Case.prototype.addDocketRecord = function(docketRecordEntity) {
-  const nextIndex =
-    this.docketRecord.reduce(
-      (maxIndex, docketRecord, currentIndex) =>
-        Math.max(docketRecord.index || 0, currentIndex, maxIndex),
-      0,
-    ) + 1;
-  docketRecordEntity.index = docketRecordEntity.index || nextIndex;
-  this.docketRecord = [...this.docketRecord, docketRecordEntity];
-  return this;
+Case.prototype.addDocketRecord = async function({
+  applicationContext,
+  docketRecord,
+}) {
+  await applicationContext.getPersistenceGateway().createDocketRecord({
+    applicationContext,
+    caseId: this.caseId,
+    docketRecord: docketRecord.validate().toRawObject(),
+  });
 };
 
 /**
@@ -1109,12 +1106,16 @@ Case.prototype.addDocketRecord = function(docketRecordEntity) {
  * @param {DocketRecord} updatedDocketEntry the update docket entry data
  * @returns {Case} the updated case entity
  */
-Case.prototype.updateDocketRecordEntry = function(updatedDocketEntry) {
-  const foundEntry = this.docketRecord.find(
-    entry => entry.documentId === updatedDocketEntry.documentId,
-  );
-  if (foundEntry) Object.assign(foundEntry, updatedDocketEntry);
-  return this;
+Case.prototype.updateDocketRecordEntry = function({
+  applicationContext,
+  caseId,
+  updatedDocketEntry,
+}) {
+  return applicationContext.getPersistenceGateway().updateDocketRecord({
+    applicationContext,
+    caseId,
+    docketRecord: updatedDocketEntry,
+  });
 };
 
 /**

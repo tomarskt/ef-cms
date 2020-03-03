@@ -47,7 +47,11 @@ exports.saveIntermediateDocketEntryInteractor = async ({
     { applicationContext },
   );
 
-  caseEntity.updateDocketRecordEntry(omit(docketRecordEntry, 'index'));
+  await caseEntity.updateDocketRecordEntry({
+    applicationContext,
+    caseId,
+    updatedDocketEntry: omit(docketRecordEntry, 'index'),
+  });
 
   const currentDocument = caseEntity.getDocumentById({
     documentId: entryMetadata.documentId,

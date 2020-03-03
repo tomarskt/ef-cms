@@ -12,15 +12,16 @@ const { PDFDocument } = require('pdf-lib');
 const { PETITIONS_SECTION } = require('../../entities/WorkQueue');
 const { UnauthorizedError } = require('../../../errors/errors');
 
-exports.addDocketEntryForPaymentStatus = ({
+exports.addDocketEntryForPaymentStatus = async ({
   applicationContext,
   caseEntity,
 }) => {
   const { Case, DocketRecord } = applicationContext.getEntityConstructors();
 
   if (caseEntity.petitionPaymentStatus === Case.PAYMENT_STATUS.PAID) {
-    caseEntity.addDocketRecord(
-      new DocketRecord(
+    await caseEntity.addDocketRecord({
+      applicationContext,
+      docketRecord: new DocketRecord(
         {
           description: 'Filing Fee Paid',
           eventCode: 'FEE',
@@ -28,10 +29,11 @@ exports.addDocketEntryForPaymentStatus = ({
         },
         { applicationContext },
       ),
-    );
+    });
   } else if (caseEntity.petitionPaymentStatus === Case.PAYMENT_STATUS.WAIVED) {
-    caseEntity.addDocketRecord(
-      new DocketRecord(
+    await caseEntity.addDocketRecord({
+      applicationContext,
+      docketRecord: new DocketRecord(
         {
           description: 'Filing Fee Waived',
           eventCode: 'FEEW',
@@ -39,7 +41,7 @@ exports.addDocketEntryForPaymentStatus = ({
         },
         { applicationContext },
       ),
-    );
+    });
   }
 };
 
@@ -110,10 +112,10 @@ exports.serveCaseToIrsInteractor = async ({ applicationContext, caseId }) => {
 
   exports.addDocketEntryForPaymentStatus({ applicationContext, caseEntity });
 
-  caseEntity
-    .updateCaseTitleDocketRecord({ applicationContext })
-    .updateDocketNumberRecord({ applicationContext })
-    .validate();
+  await caseEntity.updateCaseTitleDocketRecord({ applicationContext });
+
+  await caseEntity.updateDocketNumberRecord({ applicationContext });
+  caseEntity.validate();
 
   await exports.uploadZipOfDocuments({
     applicationContext,

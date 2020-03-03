@@ -115,7 +115,7 @@ exports.setNoticesForCalendaredTrialSessionInteractor = async ({
       { applicationContext },
     );
 
-    caseEntity.addDocument(noticeOfTrialDocument, { applicationContext });
+    await caseEntity.addDocument(noticeOfTrialDocument, { applicationContext });
     caseEntity.setNoticeOfTrialDate();
 
     // Standing Pretrial Notice/Order
@@ -174,7 +174,9 @@ exports.setNoticesForCalendaredTrialSessionInteractor = async ({
       { applicationContext },
     );
 
-    caseEntity.addDocument(standingPretrialDocument, { applicationContext });
+    await caseEntity.addDocument(standingPretrialDocument, {
+      applicationContext,
+    });
 
     // Serve notice
     const servedParties = await serveNoticesForCase({

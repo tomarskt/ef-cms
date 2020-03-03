@@ -48,10 +48,13 @@ exports.saveCaseDetailInternalEditInteractor = async ({
     }).secondary.toRawObject();
   }
 
-  const updatedCase = new Case(caseToUpdate, { applicationContext })
-    .setRequestForTrialDocketRecord(caseToUpdate.preferredTrialCity, {
+  const updatedCase = (
+    await new Case(caseToUpdate, {
+      applicationContext,
+    }).setRequestForTrialDocketRecord(caseToUpdate.preferredTrialCity, {
       applicationContext,
     })
+  )
     .validate()
     .toRawObject();
 

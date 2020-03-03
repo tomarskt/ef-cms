@@ -1,3 +1,4 @@
+const client = require('../../dynamodbClientService');
 const {
   getRecordViaMapping,
 } = require('../../dynamo/helpers/getRecordViaMapping');
@@ -15,11 +16,33 @@ exports.getCaseByDocketNumber = async ({
   applicationContext,
   docketNumber,
 }) => {
-  const aCase = await getRecordViaMapping({
+  const theCase = await getRecordViaMapping({
     applicationContext,
     key: docketNumber,
     type: 'case',
-  });
+  }).then(results =>
+    stripWorkItems(results, applicationContext.isAuthorizedForWorkItems()),
+  );
 
-  return stripWorkItems(aCase, applicationContext.isAuthorizedForWorkItems());
+  const docketRecord = await client.query({
+    ExpressionAttributeNames: {
+      '#pk': 'pk',
+      '#sk': 'sk',
+    },
+    ExpressionAttributeValues: {
+      ':pk': theCase.caseId,
+      ':prefix': 'docket-record',
+    },
+    KeyConditionExpression: '#pk = :pk and begins_with(#sk, :prefix)',
+    applicationContext,
+  });
+  docketRecord.sort((a, b) =>
+    a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0,
+  );
+  docketRecord.forEach((record, i) => (record.index = i + 1));
+
+  return {
+    ...theCase,
+    docketRecord,
+  };
 };

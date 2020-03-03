@@ -113,6 +113,9 @@ const {
   createCourtIssuedOrderPdfFromHtmlInteractor,
 } = require('../../shared/src/business/useCases/courtIssuedOrder/createCourtIssuedOrderPdfFromHtmlInteractor');
 const {
+  createDocketRecord,
+} = require('../../shared/src/persistence/dynamo/cases/createDocketRecord');
+const {
   createElasticsearchReindexRecord,
 } = require('../../shared/src/persistence/dynamo/elasticsearch/createElasticsearchReindexRecord');
 const {
@@ -680,6 +683,9 @@ const {
   updateDocketEntryMetaInteractor,
 } = require('../../shared/src/business/useCases/docketEntry/updateDocketEntryMetaInteractor');
 const {
+  updateDocketRecord,
+} = require('../../shared/src/persistence/dynamo/cases/updateDocketRecord');
+const {
   updateDocumentProcessingStatus,
 } = require('../../shared/src/persistence/dynamo/documents/updateDocumentProcessingStatus');
 const {
@@ -879,6 +885,7 @@ module.exports = (appContextUser = {}) => {
         createCaseCatalogRecord,
         createCaseDeadline,
         createCaseTrialSortMappingRecords,
+        createDocketRecord,
         createElasticsearchReindexRecord,
         createSectionInboxRecord,
         createTrialSession,
@@ -890,6 +897,7 @@ module.exports = (appContextUser = {}) => {
         deleteCaseTrialSortMappingRecords,
         deleteDocument,
         deleteElasticsearchReindexRecord,
+        updateDocketRecord,
         deleteSectionOutboxRecord,
         deleteTrialSession,
         deleteTrialSessionWorkingCopy,

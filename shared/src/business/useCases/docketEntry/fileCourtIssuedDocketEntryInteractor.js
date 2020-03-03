@@ -127,8 +127,9 @@ exports.fileCourtIssuedDocketEntryInteractor = async ({
     sentByUserId: user.userId,
   });
 
-  caseEntity.addDocketRecord(
-    new DocketRecord(
+  await caseEntity.addDocketRecord({
+    applicationContext,
+    docketRecord: new DocketRecord(
       {
         description: documentMeta.generatedDocumentTitle,
         documentId: documentEntity.documentId,
@@ -138,7 +139,7 @@ exports.fileCourtIssuedDocketEntryInteractor = async ({
       },
       { applicationContext },
     ),
-  );
+  });
 
   caseEntity = await applicationContext
     .getUseCaseHelpers()

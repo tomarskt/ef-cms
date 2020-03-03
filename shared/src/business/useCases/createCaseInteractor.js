@@ -14,7 +14,7 @@ const { UnauthorizedError } = require('../../errors/errors');
 const { User } = require('../entities/User');
 const { WorkItem } = require('../entities/WorkItem');
 
-const addPetitionDocumentToCase = ({
+const addPetitionDocumentToCase = async ({
   applicationContext,
   caseToAdd,
   documentEntity,
@@ -60,7 +60,7 @@ const addPetitionDocumentToCase = ({
   );
 
   documentEntity.addWorkItem(workItemEntity);
-  caseToAdd.addDocument(documentEntity, { applicationContext });
+  await caseToAdd.addDocument(documentEntity, { applicationContext });
 
   return workItemEntity;
 };
@@ -164,15 +164,16 @@ exports.createCaseInteractor = async ({
     { applicationContext },
   );
 
-  const newWorkItem = addPetitionDocumentToCase({
+  const newWorkItem = await addPetitionDocumentToCase({
     applicationContext,
     caseToAdd,
     documentEntity: petitionDocumentEntity,
     user,
   });
 
-  caseToAdd.addDocketRecord(
-    new DocketRecord(
+  await caseToAdd.addDocketRecord({
+    applicationContext,
+    docketRecord: new DocketRecord(
       {
         description: `Request for Place of Trial at ${caseToAdd.preferredTrialCity}`,
         eventCode:
@@ -181,7 +182,7 @@ exports.createCaseInteractor = async ({
       },
       { applicationContext },
     ),
-  );
+  });
 
   const stinDocumentEntity = new Document(
     {
@@ -224,7 +225,7 @@ exports.createCaseInteractor = async ({
       { applicationContext },
     );
 
-    caseToAdd.addDocument(odsDocumentEntity, { applicationContext });
+    await caseToAdd.addDocument(odsDocumentEntity, { applicationContext });
   }
 
   await applicationContext.getPersistenceGateway().createCase({

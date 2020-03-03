@@ -142,7 +142,11 @@ exports.completeDocketEntryQCInteractor = async ({
     { applicationContext },
   );
 
-  caseEntity.updateDocketRecordEntry(omit(docketRecordEntry, 'index'));
+  await caseEntity.updateDocketRecordEntry({
+    applicationContext,
+    caseId,
+    updatedDocketEntry: omit(docketRecordEntry, 'index'),
+  });
   caseEntity.updateDocument(updatedDocument);
 
   const workItemToUpdate = updatedDocument.getQCWorkItem();
@@ -274,7 +278,7 @@ exports.completeDocketEntryQCInteractor = async ({
 
     noticeUpdatedDocument.setAsServed(servedParties.all);
 
-    caseEntity.addDocument(noticeUpdatedDocument, { applicationContext });
+    await caseEntity.addDocument(noticeUpdatedDocument, { applicationContext });
 
     const { Body: pdfData } = await applicationContext
       .getStorageClient()

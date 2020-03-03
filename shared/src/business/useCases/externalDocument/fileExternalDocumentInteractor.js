@@ -179,7 +179,10 @@ exports.fileExternalDocumentInteractor = async ({
         },
         { applicationContext },
       );
-      caseEntity.addDocketRecord(docketRecordEntity);
+      await caseEntity.addDocketRecord({
+        applicationContext,
+        docketRecord: docketRecordEntity,
+      });
 
       if (documentEntity.isAutoServed()) {
         documentEntity.setAsServed(servedParties.all);

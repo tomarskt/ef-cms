@@ -28,12 +28,11 @@ describe('docket clerk edits a petition payment fee', () => {
     expect(test.getState('caseDetail.petitionPaymentStatus')).toEqual(
       Case.PAYMENT_STATUS.UNPAID,
     );
-    expect(test.getState('caseDetail.docketRecord')).not.toContainEqual({
-      description: 'Filing Fee Paid',
-      eventCode: 'FEE',
-      filingDate: '2001-01-01T05:00:00.000Z',
-      index: 3,
-    });
+    expect(
+      test
+        .getState('caseDetail.docketRecord')
+        .find(({ description }) => description === 'Filing Fee Paid'),
+    ).toBeUndefined();
 
     await test.runSequence('updateFormValueSequence', {
       key: 'petitionPaymentStatus',
@@ -70,18 +69,20 @@ describe('docket clerk edits a petition payment fee', () => {
 
     expect(test.getState('validationErrors')).toEqual({});
 
+    await test.runSequence('gotoCaseDetailSequence', {
+      docketNumber: caseDetail.docketNumber,
+    });
+
     expect(test.getState('caseDetail.petitionPaymentStatus')).toEqual(
       Case.PAYMENT_STATUS.PAID,
     );
     expect(test.getState('caseDetail.petitionPaymentDate')).toEqual(
       '2001-01-01T05:00:00.000Z',
     );
-
-    expect(test.getState('caseDetail.docketRecord')).toContainEqual({
-      description: 'Filing Fee Paid',
-      eventCode: 'FEE',
-      filingDate: '2001-01-01T05:00:00.000Z',
-      index: 3,
-    });
+    expect(
+      test
+        .getState('caseDetail.docketRecord')
+        .find(({ description }) => description === 'Filing Fee Paid'),
+    ).toBeDefined();
   });
 });

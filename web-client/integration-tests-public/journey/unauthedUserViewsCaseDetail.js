@@ -13,6 +13,10 @@ export default test => {
     await test.runSequence('gotoPublicCaseDetailSequence', {
       docketNumber: test.docketNumber,
     });
+    console.log(test.docketNumber);
+    console.log(test.docketNumber);
+    console.log(test.docketNumber);
+    console.log(test.docketNumber);
     expect(test.currentRouteUrl.includes('/case-detail')).toBeTruthy();
     expect(test.getState('caseDetail.contactPrimary.name')).toBeDefined();
     expect(test.getState('caseDetail.contactPrimary.address1')).toBeUndefined();

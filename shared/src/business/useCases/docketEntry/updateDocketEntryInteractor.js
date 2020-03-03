@@ -73,7 +73,11 @@ exports.updateDocketEntryInteractor = async ({
     { applicationContext },
   );
 
-  caseEntity.updateDocketRecordEntry(omit(docketRecordEntry, 'index'));
+  await caseEntity.updateDocketRecordEntry({
+    applicationContext,
+    caseId,
+    updatedDocketEntry: omit(docketRecordEntry, 'index'),
+  });
   caseEntity.updateDocument(documentEntity);
 
   if (documentMetadata.isFileAttached) {

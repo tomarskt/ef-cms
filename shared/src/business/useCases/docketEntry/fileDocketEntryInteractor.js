@@ -93,7 +93,7 @@ exports.fileDocketEntryInteractor = async ({
       secondarySupportingDocumentMetadata,
       'secondarySupportingDocument',
     ],
-  ].forEach(([documentId, metadata, relationship]) => {
+  ].forEach(async ([documentId, metadata, relationship]) => {
     if (documentId && metadata) {
       const documentEntity = new Document(
         {
@@ -173,8 +173,9 @@ exports.fileDocketEntryInteractor = async ({
       const docketRecordEditState =
         documentEntity.isFileAttached === false ? documentMetadata : {};
 
-      caseEntity.addDocketRecord(
-        new DocketRecord(
+      await caseEntity.addDocketRecord({
+        applicationContext,
+        docketRecord: new DocketRecord(
           {
             description: metadata.documentTitle,
             documentId: documentEntity.documentId,
@@ -184,7 +185,7 @@ exports.fileDocketEntryInteractor = async ({
           },
           { applicationContext },
         ),
-      );
+      });
     }
   });
 

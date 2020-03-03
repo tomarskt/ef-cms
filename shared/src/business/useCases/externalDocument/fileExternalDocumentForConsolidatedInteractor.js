@@ -257,7 +257,10 @@ exports.fileExternalDocumentForConsolidatedInteractor = async ({
           { applicationContext },
         );
 
-        caseEntity.addDocketRecord(docketRecordEntity);
+        await caseEntity.addDocketRecord({
+          applicationContext,
+          docketRecoord: docketRecordEntity,
+        });
 
         saveCasesMap[
           caseEntity.caseId

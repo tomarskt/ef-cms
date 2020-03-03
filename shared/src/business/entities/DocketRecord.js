@@ -2,6 +2,7 @@ const joi = require('@hapi/joi');
 const {
   joiValidationDecorator,
 } = require('../../utilities/JoiValidationDecorator');
+const { createISODateString } = require('../utilities/DateHandler');
 const { getAllEventCodes } = require('../../utilities/getAllEventCodes');
 
 /**
@@ -15,6 +16,7 @@ function DocketRecord(rawDocketRecord, { applicationContext }) {
     throw new TypeError('applicationContext must be defined');
   }
 
+  this.id = rawDocketRecord.id || applicationContext.getUniqueId();
   this.action = rawDocketRecord.action;
   this.description = rawDocketRecord.description;
   this.documentId = rawDocketRecord.documentId;
@@ -22,7 +24,8 @@ function DocketRecord(rawDocketRecord, { applicationContext }) {
   this.eventCode = rawDocketRecord.eventCode;
   this.filedBy = rawDocketRecord.filedBy;
   this.filingDate = rawDocketRecord.filingDate;
-  this.index = rawDocketRecord.index;
+  this.index = rawDocketRecord.index || 0;
+  this.createdAt = rawDocketRecord.createdAt || createISODateString();
   this.servedPartiesCode = rawDocketRecord.servedPartiesCode;
 }
 

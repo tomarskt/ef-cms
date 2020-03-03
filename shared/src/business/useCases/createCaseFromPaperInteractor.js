@@ -9,7 +9,7 @@ const { replaceBracketed } = require('../utilities/replaceBracketed');
 const { UnauthorizedError } = require('../../errors/errors');
 const { WorkItem } = require('../entities/WorkItem');
 
-const addPetitionDocumentWithWorkItemToCase = ({
+const addPetitionDocumentWithWorkItemToCase = async ({
   applicationContext,
   caseToAdd,
   documentEntity,
@@ -56,7 +56,7 @@ const addPetitionDocumentWithWorkItemToCase = ({
   workItemEntity.addMessage(newMessage);
 
   documentEntity.addWorkItem(workItemEntity);
-  caseToAdd.addDocument(documentEntity, { applicationContext });
+  await caseToAdd.addDocument(documentEntity, { applicationContext });
 
   return {
     message: newMessage,
@@ -158,7 +158,7 @@ exports.createCaseFromPaperInteractor = async ({
   const {
     message: newMessage,
     workItem: newWorkItem,
-  } = addPetitionDocumentWithWorkItemToCase({
+  } = await addPetitionDocumentWithWorkItemToCase({
     applicationContext,
     caseToAdd,
     documentEntity: petitionDocumentEntity,
@@ -196,7 +196,7 @@ exports.createCaseFromPaperInteractor = async ({
       { applicationContext },
     );
 
-    caseToAdd.addDocument(applicationForWaiverOfFilingFeeDocumentEntity, {
+    await caseToAdd.addDocument(applicationForWaiverOfFilingFeeDocumentEntity, {
       applicationContext,
     });
   }
@@ -236,7 +236,7 @@ exports.createCaseFromPaperInteractor = async ({
       { applicationContext },
     );
 
-    caseToAdd.addDocument(requestForPlaceOfTrialDocumentEntity, {
+    await caseToAdd.addDocument(requestForPlaceOfTrialDocumentEntity, {
       applicationContext,
     });
   }
@@ -292,7 +292,7 @@ exports.createCaseFromPaperInteractor = async ({
       { applicationContext },
     );
 
-    caseToAdd.addDocument(odsDocumentEntity, { applicationContext });
+    await caseToAdd.addDocument(odsDocumentEntity, { applicationContext });
   }
 
   await Promise.all([

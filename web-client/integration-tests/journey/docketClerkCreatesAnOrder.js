@@ -30,8 +30,6 @@ export default (test, data) => {
       value: data.documentTitle,
     });
 
-    await test.runSequence('submitCreateOrderModalSequence');
-
     await test.runSequence('updateFormValueSequence', {
       key: 'richText',
       value: 'Some order content',

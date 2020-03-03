@@ -73,6 +73,10 @@ exports.updateCourtIssuedDocketEntryInteractor = async ({
     { applicationContext },
   );
 
+  const record = caseEntity.docketRecord.find(
+    entry => entry.documentId === documentEntity.documentId,
+  );
+
   const docketRecordEntry = new DocketRecord(
     {
       description: documentMeta.generatedDocumentTitle,
@@ -80,11 +84,16 @@ exports.updateCourtIssuedDocketEntryInteractor = async ({
       editState: JSON.stringify(documentMeta),
       eventCode: documentEntity.eventCode,
       filingDate: documentEntity.receivedAt,
+      id: record.id,
     },
     { applicationContext },
   );
 
-  caseEntity.updateDocketRecordEntry(omit(docketRecordEntry, 'index'));
+  await caseEntity.updateDocketRecordEntry({
+    applicationContext,
+    caseId,
+    updatedDocketEntry: omit(docketRecordEntry, 'index'),
+  });
   caseEntity.updateDocument(documentEntity);
 
   const workItem = documentEntity.getQCWorkItem();

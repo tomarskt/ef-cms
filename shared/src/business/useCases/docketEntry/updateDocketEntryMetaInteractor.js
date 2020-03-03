@@ -159,7 +159,11 @@ exports.updateDocketEntryMetaInteractor = async ({
         { applicationContext },
       );
 
-      caseEntity.updateDocketRecordEntry(docketRecordEntity);
+      await caseEntity.updateDocketRecordEntry({
+        applicationContext,
+        caseId,
+        updatedDocketEntry: docketRecordEntity,
+      });
       caseEntity.updateDocument(documentEntity);
 
       await applicationContext.getPersistenceGateway().updateCase({
@@ -181,7 +185,11 @@ exports.updateDocketEntryMetaInteractor = async ({
   }
 
   if (!caseUpdated) {
-    caseEntity.updateDocketRecordEntry(docketRecordEntity);
+    await caseEntity.updateDocketRecordEntry({
+      applicationContext,
+      caseId,
+      updatedDocketEntry: docketRecordEntity,
+    });
 
     await applicationContext.getPersistenceGateway().updateCase({
       applicationContext,
