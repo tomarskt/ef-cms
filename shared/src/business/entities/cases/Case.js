@@ -1018,16 +1018,10 @@ Case.prototype.updateDocketNumberRecord = async function({
     lastDocketNumber !== newDocketNumber &&
     this.status !== Case.STATUS_TYPES.new;
 
-<<<<<<< Updated upstream
   if (needsDocketNumberChangeRecord) {
-    this.addDocketRecord(
-      new DocketRecord(
-=======
-  if (hasDocketNumberChanged) {
     await this.addDocketRecord({
       applicationContext,
       docketRecord: new DocketRecord(
->>>>>>> Stashed changes
         {
           description: `Docket Number is amended from '${lastDocketNumber}' to '${newDocketNumber}'`,
           eventCode: 'MIND',
