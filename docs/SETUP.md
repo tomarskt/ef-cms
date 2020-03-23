@@ -59,10 +59,6 @@
      - `DYNAMSOFT_PRODUCT_KEYS_PROD`  (the product key provided after purchasing Dynamic Web TWAIN)
      - `DYNAMSOFT_S3_ZIP_PATH` (the full S3 path to the Dynamic Web TWAIN ZIP, e.g. `s3://ef-cms.ustaxcourt.gov-software/Dynamsoft/dynamic-web-twain-sdk-14.3.1.tar.gz`)
      - `CLOUDWATCH_ROLE_ARN` (the ARN output after running Terraform in the `iam/terraform/account-specific/main` dir)
-     - `POST_CONFIRMATION_ROLE_ARN_DEV` (the ARN output after running Terraform in the `iam/terraform/environment-specific/main` dir)
-     - `POST_CONFIRMATION_ROLE_ARN_STG` (the ARN output after running Terraform in the `iam/terraform/environment-specific/main` dir)
-     - `POST_CONFIRMATION_ROLE_ARN_TEST` (the ARN output after running Terraform in the `iam/terraform/environment-specific/main` dir)
-     - `POST_CONFIRMATION_ROLE_ARN_PROD` (the ARN output after running Terraform in the `iam/terraform/environment-specific/main` dir)
      - `SES_DMARC_EMAIL` (email address used with SES to which aggregate DMARC validations are sent)
 8. Run a build in CircleCI.
 
@@ -79,10 +75,8 @@
     - to create Lambda roles & policies:
       - e.g. `cd iam/terraform/environment-specific/main && ../bin/deploy-app.sh $ENVIRONMENT`
     - mention your `DYNAMSOFT_PRODUCT_KEYS_$ENVIRONMENT`
-    - mention your `POST_CONFIRMATION_ROLE_ARN_$ENVIRONMENT`
 10. Run the `deploy-app.sh` command that you just added to `SETUP.md`.
 11. Mention your `$ENVIRONMENT`, if necessary, in `web-api/deploy-sandbox.sh` within the `run_development` function
 12. For all files matching `web-api/serverless-*yml`, include your `$ENVIRONMENT` within the list of `custom.alerts.stages` if you want your `$ENVIRONMENT` to be included in those which are monitored & emails delivered upon alarm.
 13. Update CircleCI to have all the new environment variables needed:
      - DYNAMSOFT_PRODUCT_KEYS_`$ENVIRONMENT`
-     - POST_CONFIRMATION_ROLE_ARN_`$ENVIRONMENT`

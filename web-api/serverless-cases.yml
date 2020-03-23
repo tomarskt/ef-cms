@@ -9,6 +9,7 @@ plugins:
   - serverless-plugin-tracing
   - serverless-latest-layer-version
   - serverless-jetpack
+  - serverless-log-forwarding
   # - serverless-plugin-warmup
 
 custom:
@@ -26,6 +27,18 @@ custom:
     skipCacheInvalidation: ${opt:skipCacheInvalidation}
     host: 0.0.0.0
     port: 3002
+
+  logForwarding:
+    destinationARN: arn:aws:lambda:us-east-1:${opt:accountId}:function:logging_alerts_${opt:stage}
+    # roleArn: '[ARN of the IAM role that grants Cloudwatch Logs permissions]'
+    filterPattern: 'error'
+    # normalizedFilterID: true
+    stages:
+      - dev
+      - stg
+      - test
+      - prod
+    # createLambdaPermission: true
 
   alerts:
     stages:

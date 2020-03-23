@@ -18,6 +18,10 @@ const { PublicCase } = require('../entities/cases/PublicCase');
 exports.getCaseInteractor = async ({ applicationContext, caseId }) => {
   let caseRecord;
 
+  console.log('ERROR a');
+  console.log('error b');
+  console.error('yolo');
+
   if (Case.isValidCaseId(caseId)) {
     caseRecord = await applicationContext
       .getPersistenceGateway()
