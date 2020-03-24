@@ -40,7 +40,13 @@ exports.genericHandler = (event, cb, options = {}) => {
   return handle(event, async () => {
     const user = options.user || getUserFromAuthHeader(event);
     const applicationContext =
-      options.applicationContext || createApplicationContext(user); // This is mostly for testing purposes
+      options.applicationContext ||
+      createApplicationContext(user, {
+        path: `${event.requestContext.httpMethod}@${event.requestContext.domainName}${event.requestContext.path}`,
+        requestId: event.requestContext.requestId,
+        requestTime: event.requestContext.requestTime,
+        userId: event.requestContext.authorizer.claims.sub,
+      }); // This is mostly for testing purposes
     const honeybadger = applicationContext.initHoneybadger();
 
     const {

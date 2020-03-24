@@ -20,7 +20,7 @@ gen.conf
 graph-generators/*.jpg
 graph-generators/node_modules/
 lambda-policy.json
-node_modules/
+/node_modules
 parcel-debug-*
 puppeteer_lambda_layer.tar.gz
 shared/coverage

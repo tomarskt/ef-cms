@@ -15,7 +15,8 @@ resource "aws_lambda_function" "logging_alerts_lambda" {
 
   environment {
     variables = {
-      DYNAMO_TABLE = "efcms-${var.environment}"
+      EMAIL_SOURCE = "noreply@mail.efcms-${var.environment}.${var.dns_domain}"
+      STAGE = "${var.environment}"
     }
   }
 }

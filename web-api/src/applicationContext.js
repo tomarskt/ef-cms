@@ -818,7 +818,7 @@ const entitiesByName = {
   Case: Case,
 };
 
-module.exports = (appContextUser = {}) => {
+module.exports = (appContextUser = {}, eventContext = {}) => {
   setCurrentUser(appContextUser);
 
   return {
@@ -1269,7 +1269,11 @@ module.exports = (appContextUser = {}) => {
     logger: {
       error: value => {
         // eslint-disable-next-line no-console
-        console.error(JSON.stringify(value));
+        console.error(
+          `${eventContext.path}|${eventContext.requestId}|${
+            eventContext.requestTime
+          }|${new Error().stack}|${JSON.stringify(value)}`,
+        );
       },
       info: (key, value) => {
         // eslint-disable-next-line no-console
