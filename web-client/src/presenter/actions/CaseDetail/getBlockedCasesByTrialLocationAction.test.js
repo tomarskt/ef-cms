@@ -5,11 +5,11 @@ import { runAction } from 'cerebral/test';
 
 presenter.providers.applicationContext = applicationContext;
 
-applicationContext
-  .getUseCases()
-  .getBlockedCasesInteractor.mockImplementation(async () => {
+applicationContext.getUseCases().getBlockedCasesInteractor = jest.fn(
+  async () => {
     return [{ blocked: true, caseId: '1', preferredTrialCity: 'Boise, Idaho' }];
-  });
+  },
+);
 
 describe('getBlockedCasesByTrialLocationAction', () => {
   it('should not call getBlockedCasesInteractor if the trialLocation is not on the form', async () => {

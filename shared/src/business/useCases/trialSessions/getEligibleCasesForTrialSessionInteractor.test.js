@@ -22,6 +22,8 @@ const MOCK_ASSOCIATED_CASE = {
   caseId: 'c54ba5a9-b37b-479d-9201-067ec6e335bc',
 };
 
+applicationContext.getUseCases().getCalendaredCasesForTrialSessionInteractor = jest.fn();
+
 describe('getEligibleCasesForTrialSessionInteractor', () => {
   it('throws an exception when it fails to find the cases for a trial session', async () => {
     let error;
@@ -68,7 +70,6 @@ describe('getEligibleCasesForTrialSessionInteractor', () => {
   });
 
   it('should return cases that are set for this session even if uncalendared', async () => {
-    const getCalendaredCasesForTrialSessionInteractorMock = jest.fn();
     applicationContext.getCurrentUser.mockImplementation(
       () =>
         new User({
@@ -80,7 +81,6 @@ describe('getEligibleCasesForTrialSessionInteractor', () => {
     applicationContext
       .getUseCases()
       .getCalendaredCasesForTrialSessionInteractor.mockImplementation(() => {
-        getCalendaredCasesForTrialSessionInteractorMock();
         return [MOCK_ASSOCIATED_CASE];
       });
     applicationContext

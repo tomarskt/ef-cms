@@ -3,6 +3,7 @@ import { getAllCaseDeadlinesAction } from './getAllCaseDeadlinesAction';
 import { presenter } from '../../presenter';
 import { runAction } from 'cerebral/test';
 
+applicationContext.getUseCases().getAllCaseDeadlinesInteractor = jest.fn();
 presenter.providers.applicationContext = applicationContext;
 
 describe('getAllCaseDeadlinesAction', () => {

@@ -9,7 +9,9 @@ describe('generatePublicDocketRecordPdfUrlAction', () => {
     global.Blob = jest.fn();
     createObjectURLStub = jest.fn().mockReturnValue('pdf url');
 
+    applicationContextForClient.getUseCases().generatePublicDocketRecordPdfInteractor = jest.fn();
     presenter.providers.applicationContext = applicationContextForClient;
+
     presenter.providers.router = {
       createObjectURL: createObjectURLStub,
     };

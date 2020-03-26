@@ -48,6 +48,7 @@ describe('updateUserContactInformationInteractor', () => {
     user = MOCK_USERS['f7d90c05-f6cd-442c-a168-202db587f16f'];
 
     applicationContext.environment.stage = 'local';
+    applicationContext.getUseCases().generatePdfFromHtmlInteractor = jest.fn();
     applicationContext.getChromiumBrowser.mockReturnValue(mockChromiumBrowser);
     applicationContext.getCurrentUser.mockImplementation(() => user);
     applicationContext

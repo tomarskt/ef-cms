@@ -6,11 +6,11 @@ import { runAction } from 'cerebral/test';
 describe('generatePrintableCaseInventoryReportAction', () => {
   const applicationContext = applicationContextForClient;
   beforeEach(() => {
-    applicationContext
-      .getUseCases()
-      .generatePrintableCaseInventoryReportInteractor.mockImplementation(() => {
+    applicationContext.getUseCases().generatePrintableCaseInventoryReportInteractor = jest.fn(
+      () => {
         return 'www.example.com';
-      });
+      },
+    );
     presenter.providers.applicationContext = applicationContext;
   });
 

@@ -22,9 +22,9 @@ const mockCaseDeadlines = [
 
 presenter.providers.applicationContext = applicationContext;
 
-applicationContext
-  .getUseCases()
-  .getCaseDeadlinesForCaseInteractor.mockReturnValue(mockCaseDeadlines);
+applicationContext.getUseCases().getCaseDeadlinesForCaseInteractor = jest.fn(
+  () => mockCaseDeadlines,
+);
 
 describe('getCaseDeadlinesForCaseAction', () => {
   it('calls getCaseDeadlinesForCaseInteractor', async () => {

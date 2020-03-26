@@ -3,6 +3,7 @@ import { generateTitlePreviewAction } from './generateTitlePreviewAction';
 import { presenter } from '../../presenter';
 import { runAction } from 'cerebral/test';
 
+applicationContext.getUseCases().generateDocumentTitleInteractor = jest.fn();
 presenter.providers.applicationContext = applicationContext;
 
 describe('generateTitlePreviewAction', () => {

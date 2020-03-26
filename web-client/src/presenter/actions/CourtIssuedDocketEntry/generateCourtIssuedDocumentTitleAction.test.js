@@ -3,6 +3,8 @@ import { generateCourtIssuedDocumentTitleAction } from './generateCourtIssuedDoc
 import { presenter } from '../../presenter';
 import { runAction } from 'cerebral/test';
 
+applicationContext.getUseCases().generateCourtIssuedDocumentTitleInteractor = jest.fn();
+
 describe('generateCourtIssuedDocumentTitleAction', () => {
   it('should call generateCourtIssuedDocumentTitle with correct data and set state.form.generatedDocumentTitle to what is returned', async () => {
     applicationContext
