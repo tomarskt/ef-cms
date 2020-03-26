@@ -3,6 +3,7 @@ import { presenter } from '../../presenter';
 import { runAction } from 'cerebral/test';
 import { submitCaseAdvancedSearchAction } from './submitCaseAdvancedSearchAction';
 
+applicationContext.getUseCases().caseAdvancedSearchInteractor = jest.fn();
 presenter.providers.applicationContext = applicationContext;
 
 describe('submitCaseAdvancedSearchAction', () => {

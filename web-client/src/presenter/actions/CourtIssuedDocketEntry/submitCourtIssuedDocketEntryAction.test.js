@@ -4,6 +4,7 @@ import { runAction } from 'cerebral/test';
 import { submitCourtIssuedDocketEntryAction } from './submitCourtIssuedDocketEntryAction';
 
 describe('submitCourtIssuedDocketEntryAction', () => {
+  applicationContext.getUseCases().fileCourtIssuedDocketEntryInteractor = jest.fn();
   presenter.providers.applicationContext = applicationContext;
 
   it('Calls the interactor for filing a court-issued docket entry', async () => {

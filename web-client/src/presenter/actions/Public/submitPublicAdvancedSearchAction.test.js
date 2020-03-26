@@ -5,6 +5,7 @@ import { submitPublicAdvancedSearchAction } from './submitPublicAdvancedSearchAc
 
 describe('submitPublicAdvancedSearchAction', () => {
   beforeEach(() => {
+    applicationContextForClient.getUseCases().casePublicSearchInteractor = jest.fn();
     presenter.providers.applicationContext = applicationContextForClient;
   });
 

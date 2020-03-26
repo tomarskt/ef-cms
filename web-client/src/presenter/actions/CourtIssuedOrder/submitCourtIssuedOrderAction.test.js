@@ -9,9 +9,9 @@ describe('submitCourtIssuedOrderAction', () => {
   });
 
   it('should call fileCourtIssuedOrder', async () => {
-    applicationContextForClient
-      .getUseCases()
-      .fileCourtIssuedOrderInteractor.mockReturnValue({ documents: [] });
+    applicationContextForClient.getUseCases().fileCourtIssuedOrderInteractor = jest.fn(
+      () => ({ documents: [] }),
+    );
 
     await runAction(submitCourtIssuedOrderAction, {
       modules: {

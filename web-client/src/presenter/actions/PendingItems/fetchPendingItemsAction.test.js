@@ -3,6 +3,7 @@ import { fetchPendingItemsAction } from './fetchPendingItemsAction';
 import { presenter } from '../../presenter';
 import { runAction } from 'cerebral/test';
 
+applicationContextForClient.getUseCases().fetchPendingItemsInteractor = jest.fn();
 presenter.providers.applicationContext = applicationContextForClient;
 
 describe('fetchPendingItemsAction', () => {

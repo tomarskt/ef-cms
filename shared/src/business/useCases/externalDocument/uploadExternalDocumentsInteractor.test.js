@@ -6,6 +6,9 @@ const {
 } = require('./uploadExternalDocumentsInteractor');
 const { User } = require('../../entities/User');
 
+applicationContext.getUseCases().fileExternalDocumentInteractor = jest.fn();
+applicationContext.getUseCases().fileExternalDocumentForConsolidatedInteractor = jest.fn();
+
 describe('uploadExternalDocumentsInteractor', () => {
   it('throws an error when an unauthorized user tries to access the use case', async () => {
     applicationContext.getCurrentUser.mockReturnValue({

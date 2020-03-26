@@ -3,6 +3,8 @@ import { presenter } from '../../presenter';
 import { runAction } from 'cerebral/test';
 import { submitDocketEntryWithFileAction } from './submitDocketEntryWithFileAction';
 
+applicationContext.getUseCases().addCoversheetInteractor = jest.fn();
+applicationContext.getUseCases().fileDocketEntryInteractor = jest.fn();
 presenter.providers.applicationContext = applicationContext;
 
 describe('submitDocketEntryWithFileAction', () => {

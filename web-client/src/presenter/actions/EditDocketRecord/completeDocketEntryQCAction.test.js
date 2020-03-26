@@ -18,9 +18,11 @@ describe('completeDocketEntryQCAction', () => {
       ],
     };
 
-    applicationContext
-      .getUseCases()
-      .completeDocketEntryQCInteractor.mockReturnValue({ caseDetail });
+    applicationContext.getUseCases().completeDocketEntryQCInteractor = jest.fn(
+      () => ({
+        caseDetail,
+      }),
+    );
 
     presenter.providers.applicationContext = applicationContext;
   });

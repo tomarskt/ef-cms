@@ -3,6 +3,7 @@ import { deleteCaseNoteAction } from './deleteCaseNoteAction';
 import { presenter } from '../../presenter';
 import { runAction } from 'cerebral/test';
 
+applicationContext.getUseCases().deleteCaseNoteInteractor = jest.fn();
 presenter.providers.applicationContext = applicationContext;
 
 describe('deleteCaseNote', () => {

@@ -3,6 +3,7 @@ import { presenter } from '../../presenter';
 import { runAction } from 'cerebral/test';
 import { submitDocketEntryAction } from './submitDocketEntryAction';
 
+applicationContext.getUseCases().fileDocketEntryInteractor = jest.fn();
 presenter.providers.applicationContext = applicationContext;
 
 describe('submitDocketEntryAction', () => {

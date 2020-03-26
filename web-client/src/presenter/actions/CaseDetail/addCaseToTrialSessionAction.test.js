@@ -4,11 +4,11 @@ import { applicationContextForClient as applicationContext } from '../../../../.
 import { presenter } from '../../presenter';
 import { runAction } from 'cerebral/test';
 
-presenter.providers.applicationContext = applicationContext;
+applicationContext.getUseCases().addCaseToTrialSessionInteractor = jest.fn(
+  () => MOCK_CASE,
+);
 
-applicationContext
-  .getUseCases()
-  .addCaseToTrialSessionInteractor.mockReturnValue(MOCK_CASE);
+presenter.providers.applicationContext = applicationContext;
 
 describe('addCaseToTrialSessionAction', () => {
   it('should call the addCaseToTrialSessionInteractor with the state.caseDetail.caseId and state.modal.trialSessionId and return alertSuccess and the caseDetail returned from the use case', async () => {

@@ -8,6 +8,7 @@ describe('addConsolidatedCaseAction', () => {
 
   beforeEach(() => {
     applicationContext = applicationContextForClient;
+    applicationContext.getUseCases().addConsolidatedCaseInteractor = jest.fn();
 
     presenter.providers.applicationContext = applicationContext;
   });

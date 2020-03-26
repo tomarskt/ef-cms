@@ -4,6 +4,8 @@ import { presenter } from '../presenter';
 import { runAction } from 'cerebral/test';
 
 const applicationContext = applicationContextForClient;
+
+applicationContext.getUseCases().archiveDraftDocumentInteractor = jest.fn();
 presenter.providers.applicationContext = applicationContext;
 
 describe('archiveDraftDocumentAction', () => {
