@@ -50,6 +50,7 @@ set -- \
   --dynamo_stream_arn="${DYNAMO_STREAM_ARN}" \
   --elasticsearch_endpoint="${ELASTICSEARCH_ENDPOINT}" \
   --verbose \
+  --honeybadgerRevision="${HONEYBADGER_REVISION}" \
   --circleHoneybadgerApiKey="${CIRCLE_HONEYBADGER_API_KEY}"
 
 ./node_modules/.bin/sls create_domain "$@"

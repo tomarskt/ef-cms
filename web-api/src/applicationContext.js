@@ -1259,11 +1259,13 @@ module.exports = (appContextUser = {}) => {
     initHoneybadger: () => {
       if (process.env.NODE_ENV === 'production') {
         const apiKey = process.env.CIRCLE_HONEYBADGER_API_KEY;
+        const revision = process.env.HONEYBADGER_REVISION;
 
         if (apiKey) {
           const config = {
             apiKey,
             environment: 'api',
+            revision,
           };
           Honeybadger.configure(config);
           return Honeybadger;
