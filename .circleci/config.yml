@@ -501,6 +501,9 @@ jobs:
       - run:
           name: 'Deploy - Public Web Client - S3'
           command: docker run -e "ENV=${ENV}" -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" -e "EFCMS_DOMAIN=${EFCMS_DOMAIN}" -e "COGNITO_SUFFIX=${COGNITO_SUFFIX}" -e "CIRCLE_SHA1=${CIRCLE_SHA1}" --rm efcms /bin/sh -c "./web-client/build-dist-public.sh $ENV && aws s3 sync dist-public s3://ui-public-${ENV}.${EFCMS_DOMAIN} --delete --cache-control no-cache && aws s3 sync dist-public s3://failover-ui-public-${ENV}.${EFCMS_DOMAIN} --delete --cache-control no-cache"
+      - run:
+          name: 'Upload Source Maps to Honeybadger'
+          command: './set-hb-source-maps.sh CIRCLE_HONEYBADGER_API_KEY CIRCLE_SHA1'
 
   post-deploy:
     machine:
