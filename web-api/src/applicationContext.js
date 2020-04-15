@@ -338,6 +338,9 @@ const {
   getCaseInventoryReportInteractor,
 } = require('../../shared/src/business/useCases/caseInventoryReport/getCaseInventoryReportInteractor');
 const {
+  getCasesByCaseIds,
+} = require('../../shared/src/persistence/dynamo/cases/getCasesByCaseIds');
+const {
   getCasesByLeadCaseId,
 } = require('../../shared/src/persistence/dynamo/cases/getCasesByLeadCaseId');
 const {
@@ -551,6 +554,9 @@ const {
 const {
   onDisconnectInteractor,
 } = require('../../shared/src/business/useCases/notifications/onDisconnectInteractor');
+const {
+  orderAdvancedSearchInteractor,
+} = require('../../shared/src/business/useCases/orderAdvancedSearchInteractor');
 const {
   prioritizeCaseInteractor,
 } = require('../../shared/src/business/useCases/prioritizeCaseInteractor');
@@ -954,7 +960,7 @@ module.exports = (appContextUser = {}) => {
         createWorkItem,
         deleteCaseDeadline,
         deleteCaseTrialSortMappingRecords,
-        deleteDocument,
+        deleteDocument: args => (process.env.CI ? null : deleteDocument(args)),
         deleteElasticsearchReindexRecord,
         deleteSectionOutboxRecord,
         deleteTrialSession,
@@ -971,6 +977,7 @@ module.exports = (appContextUser = {}) => {
         getCaseByCaseId,
         getCaseByDocketNumber,
         getCaseDeadlinesByCaseId,
+        getCasesByCaseIds,
         getCasesByLeadCaseId,
         getCasesByUser,
         getDocumentQCInboxForSection,
@@ -1193,6 +1200,7 @@ module.exports = (appContextUser = {}) => {
         getWorkItemInteractor,
         onConnectInteractor,
         onDisconnectInteractor,
+        orderAdvancedSearchInteractor,
         prioritizeCaseInteractor,
         processStreamRecordsInteractor,
         removeCaseFromTrialInteractor,

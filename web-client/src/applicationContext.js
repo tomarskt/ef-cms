@@ -31,6 +31,7 @@ import {
 import { fetchPendingItemsInteractor } from '../../shared/src/proxies/pendingItems/fetchPendingItemsProxy';
 import { generatePrintableCaseInventoryReportInteractor } from '../../shared/src/proxies/reports/generatePrintableCaseInventoryReportProxy';
 import { generatePrintablePendingReportInteractor } from '../../shared/src/proxies/pendingItems/generatePrintablePendingReportProxy';
+import { getJudgeLastName } from '../../shared/src/business/utilities/getFormattedJudgeName';
 import { getUserCaseNoteForCasesInteractor } from '../../shared/src/proxies/caseNote/getUserCaseNoteForCasesProxy';
 import { validateDocketRecordInteractor } from '../../shared/src/business/useCases/validateDocketRecordInteractor';
 const {
@@ -96,6 +97,7 @@ import { filterEmptyStrings } from '../../shared/src/business/utilities/filterEm
 import {
   formatCase,
   formatCaseDeadlines,
+  formatDocketNumberWithSuffix,
   formatDocument,
   getFilingsAndProceedings,
   getFormattedCaseDetail,
@@ -149,6 +151,7 @@ import { getUsersInSectionInteractor } from '../../shared/src/proxies/users/getU
 import { getWorkItemInteractor } from '../../shared/src/proxies/workitems/getWorkItemProxy';
 import { loadPDFForPreviewInteractor } from '../../shared/src/business/useCases/loadPDFForPreviewInteractor';
 import { loadPDFForSigningInteractor } from '../../shared/src/business/useCases/loadPDFForSigningInteractor';
+import { orderAdvancedSearchInteractor } from '../../shared/src/proxies/orderAdvancedSearchProxy';
 import { prioritizeCaseInteractor } from '../../shared/src/proxies/prioritizeCaseProxy';
 import { refreshTokenInteractor } from '../../shared/src/business/useCases/refreshTokenInteractor';
 import { removeCaseFromTrialInteractor } from '../../shared/src/proxies/trialSessions/removeCaseFromTrialProxy';
@@ -332,6 +335,7 @@ const allUseCases = {
   getWorkItemInteractor,
   loadPDFForPreviewInteractor,
   loadPDFForSigningInteractor,
+  orderAdvancedSearchInteractor,
   prioritizeCaseInteractor,
   refreshTokenInteractor,
   removeCaseFromTrialInteractor,
@@ -525,12 +529,14 @@ const applicationContext = {
       formatCaseDeadlines,
       formatCaseForTrialSession,
       formatDateString,
+      formatDocketNumberWithSuffix,
       formatDocument,
       formatJudgeName,
       formatNow,
       formattedTrialSessionDetails,
       getFilingsAndProceedings,
       getFormattedCaseDetail,
+      getJudgeLastName,
       getTrialSessionStatus,
       isExternalUser: User.isExternalUser,
       isInternalUser: User.isInternalUser,
