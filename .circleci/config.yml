@@ -16,8 +16,6 @@ jobs:
           key: source-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ .Revision }}
           paths:
             - '.git'
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run:
           name: Build Docker Image
           command: ./ci-build-docker-image.sh
