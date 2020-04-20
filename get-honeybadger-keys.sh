@@ -10,6 +10,8 @@ elif [[ $BRANCH == 'master' ]] ; then
   echo ""
 elif [[ $BRANCH == 'staging' ]] ; then
   echo "${CIRCLE_HONEYBADGER_API_KEY_STG}"
+elif [[ $BRANCH == 'irs' ]] ; then
+  echo "${CIRCLE_HONEYBADGER_API_KEY_IRS}"
 elif [[ $BRANCH == 'test' ]] ; then
   echo ""
 else
