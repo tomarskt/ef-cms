@@ -9,8 +9,17 @@ const { get } = require('./requests');
  * @returns {Promise<*>} the promise of the api call
  */
 exports.getCaseInteractor = ({ applicationContext, docketNumber }) => {
+  let endpointBase = 'cases';
+
+  const { role } = applicationContext.getCurrentUser();
+  const { USER_ROLES } = applicationContext.getConstants();
+
+  if (role === USER_ROLES.irsSuperuser) {
+    endpointBase = 'irs-cases';
+  }
+
   return get({
     applicationContext,
-    endpoint: `/cases/${docketNumber}`,
+    endpoint: `/${endpointBase}/${docketNumber}`,
   });
 };
