@@ -25,40 +25,36 @@ jobs:
             - project
 
   build-api:
-    docker:
-      - image: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ef-cms-us-east-1:latest
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    machine:
+      docker_layer_caching: true
     steps:
-      - attach_workspace:
-          at: ~/
+      - run:
+          name: Build Docker Image
+          command: ./ci-build-docker-image.sh
       - run:
           name: Lint
-          command: |
-            npm run lint
+          command: docker run -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "npm run lint"
       - run:
           name: Shellcheck
-          command: |
-            ./run-shellcheck.sh
+          command: docker run -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "./run-shellcheck.sh"
       - run:
           name: Web API - Test
-          command: npm run test:api
+          command: docker run -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "npm run test:api"
       - run:
           name: Normalize Coverage for SonarQube
-          command: npx istanbul-combine -d web-api/coverage web-api/coverage/coverage-final.json
+          command: docker run -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "npx istanbul-combine -d web-api/coverage web-api/coverage/coverage-final.json"
       - run:
           name: Web API - SonarQube
           command: |
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            /home/app/sonar_home/bin/sonar-scanner \
-            -Dsonar.projectKey="${API_SONAR_KEY}" \
-            -Dsonar.branch.name="${CIRCLE_BRANCH}" \
-            -Dsonar.organization="${SONAR_ORG}" \
-            -Dsonar.projectBaseDir="web-api" \
-            -Dproject.settings="web-api/sonar-project.properties" \
-            -Dsonar.login="${API_SONAR_TOKEN}" \
-            -Dsonar.host.url="https://sonarcloud.io"
+            docker run -e API_SONAR_KEY=${API_SONAR_KEY} -e CIRCLE_BRANCH=${CIRCLE_BRANCH} -e SONAR_ORG=${SONAR_ORG} -e API_SONAR_TOKEN=${API_SONAR_TOKEN} -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "export SONAR_SCANNER_OPTS="-Xmx2048m" \
+              /home/app/sonar_home/bin/sonar-scanner \
+              -Dsonar.projectKey=\"${API_SONAR_KEY}\" \
+              -Dsonar.branch.name=\"${CIRCLE_BRANCH}\" \
+              -Dsonar.organization=\"${SONAR_ORG}\" \
+              -Dsonar.projectBaseDir=\"web-api\" \
+              -Dproject.settings=\"web-api/sonar-project.properties\" \
+              -Dsonar.login=\"${API_SONAR_TOKEN}\" \
+              -Dsonar.host.url=\"https://sonarcloud.io\""
 
   build-shared:
     docker:
