@@ -21,7 +21,7 @@ jobs:
           command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
       - run:
           name: Build Docker Image
-          command: ./ci-build-docker-image.sh $ENV
+          command: ./ci-docker-build.sh $ENV
       - persist_to_workspace:
           root: ~/
           paths:
@@ -31,9 +31,8 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
-      - run:
-          name: Build Docker Image
-          command: ./ci-build-docker-image.sh
+      - attach_workspace:
+          at: ~/
       - run:
           name: Lint
           command: docker run -v $(pwd)/.cache:/home/app/.cache --rm efcms /bin/sh -c "npm run lint"
@@ -271,7 +270,7 @@ jobs:
           command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
       - run:
           name: Build Docker Image
-          command: ./ci-build-docker-image.sh
+          command: ./ci-docker-build.sh
       - run:
           name: Setup Dynamsoft Keys
           command: echo "export DYNAMSOFT_PRODUCT_KEYS='$(./get-keys.sh $CIRCLE_BRANCH)'" >> $BASH_ENV
