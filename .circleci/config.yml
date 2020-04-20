@@ -1,11 +1,8 @@
 version: 2
 jobs:
   bundle:
-    docker:
-      - image: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ef-cms-us-east-1:latest
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    machine:
+      docker_layer_caching: true
     steps:
       - restore_cache:
           name: Source - Restoring Cache
@@ -19,9 +16,11 @@ jobs:
           key: source-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ .Revision }}
           paths:
             - '.git'
+      - setup_remote_docker:
+          - docker_layer_caching: true
       - run:
-          name: NPM - Install
-          command: npm ci && npm rebuild node-sass
+          name: Build Docker Image
+          command: ./ci-build-docker-image.sh
       - persist_to_workspace:
           root: ~/
           paths:
