@@ -1,11 +1,8 @@
 version: 2
 jobs:
   bundle:
-    docker:
-      - image: $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ef-cms-us-east-1:latest
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    machine:
+      docker_layer_caching: true
     steps:
       - restore_cache:
           name: Source - Restoring Cache
@@ -19,9 +16,11 @@ jobs:
           key: source-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ .Revision }}
           paths:
             - '.git'
+      - setup_remote_docker:
+          - docker_layer_caching: true
       - run:
-          name: NPM - Install
-          command: npm ci && npm rebuild node-sass
+          name: Build Docker Image
+          command: ./ci-build-docker-image.sh
       - persist_to_workspace:
           root: ~/
           paths:
@@ -207,7 +206,6 @@ jobs:
       - run:
           name: Pa11y - Web Client 2
           command: |
-            npm run build:all
             SKIP_CACHE_INVALIDATION=true SLS_DEBUG="*" RUN_DIR=dist AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:api:ci start:client:ci > /tmp/pa11y/pa11y-server-2.txt &
             ./wait-until-services.sh
             ./wait-until.sh http://localhost:3000/api/swagger
@@ -216,7 +214,6 @@ jobs:
       - run:
           name: Pa11y - Web Client 3
           command: |
-            npm run build:all
             SKIP_CACHE_INVALIDATION=true SLS_DEBUG="*" RUN_DIR=dist AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:api:ci start:client:ci > /tmp/pa11y/pa11y-server-3.txt &
             ./wait-until-services.sh
             ./wait-until.sh http://localhost:3000/api/swagger
@@ -225,9 +222,11 @@ jobs:
       - run:
           name: Pa11y - Public Site
           command: |
-            SKIP_CACHE_INVALIDATION=true AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:public > /tmp/pa11y/pa11y-server-public.txt &
+            SKIP_CACHE_INVALIDATION=true AWS_ACCESS_KEY_ID=noop AWS_SECRET_ACCESS_KEY=noop npx run-p start:public:ci start:api:ci > /tmp/pa11y/pa11y-server-public.txt &
+            ./wait-until-services.sh
+            ./wait-until.sh http://localhost:3000/api/swagger
             sleep 15
-            npm run test:pa11y:public
+            npm run test:pa11y:public --node-flags --max-old-space-size=1024
       - store_artifacts:
           path: /tmp/pa11y
 
@@ -275,16 +274,7 @@ jobs:
           command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
       - run:
           name: Build Docker Image
-          command: |
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/puppeteer) = "true" ]]; then
-              cd web-api/runtimes/puppeteer && ./build.sh && cd ../../..
-            fi
-
-            if [[ $(./web-api/deploy-diff.sh $ENV web-api/runtimes/clamav) = "true" ]]; then
-              cd web-api/runtimes/clamav && ./build.sh && cd ../../..
-            fi
-
-            docker build -t efcms -f Dockerfile .
+          command: ./ci-build-docker-image.sh
       - run:
           name: Setup Dynamsoft Keys
           command: echo "export DYNAMSOFT_PRODUCT_KEYS='$(./get-keys.sh $CIRCLE_BRANCH)'" >> $BASH_ENV
