@@ -102,7 +102,6 @@ describe('casePublicSearchInteractor', () => {
       {
         caseCaption: 'Test Case Caption One',
         caseId: '8675309b-28d0-43ec-bafb-654e83405412',
-        caseTitle: undefined,
         contactPrimary: undefined,
         contactSecondary: undefined,
         createdAt: undefined,
@@ -116,7 +115,6 @@ describe('casePublicSearchInteractor', () => {
       {
         caseCaption: 'Test Case Caption Two',
         caseId: '8675309b-28d0-43ec-bafb-654e83405413',
-        caseTitle: undefined,
         contactPrimary: undefined,
         contactSecondary: undefined,
         createdAt: undefined,
@@ -163,7 +161,7 @@ describe('casePublicSearchInteractor', () => {
       .getSearchClient()
       .search.mockImplementation(async args => {
         //expected args for an exact matches search
-        if (args.body.query.bool.must[0].bool.should[0].bool) {
+        if (args.body.query.bool.must[0].bool) {
           return {
             hits: {},
           };
@@ -253,12 +251,13 @@ describe('casePublicSearchInteractor', () => {
         .bool.must,
     ).toEqual([
       {
-        bool: {
-          should: [
-            { match: { 'contactPrimary.M.name.S': 'test person' } },
-            { match: { 'contactPrimary.M.secondaryName.S': 'test person' } },
-            { match: { 'contactSecondary.M.name.S': 'test person' } },
+        query_string: {
+          fields: [
+            'contactPrimary.M.name.S',
+            'contactPrimary.M.secondaryName.S',
+            'contactSecondary.M.name.S',
           ],
+          query: '*test person*',
         },
       },
       ...commonExpectedQuery,
@@ -267,7 +266,6 @@ describe('casePublicSearchInteractor', () => {
       {
         caseCaption: 'Test Case Caption One',
         caseId: '8675309b-28d0-43ec-bafb-654e83405412',
-        caseTitle: undefined,
         contactPrimary: undefined,
         contactSecondary: undefined,
         createdAt: undefined,
@@ -281,7 +279,6 @@ describe('casePublicSearchInteractor', () => {
       {
         caseCaption: 'Test Case Caption Two',
         caseId: '8675309b-28d0-43ec-bafb-654e83405413',
-        caseTitle: undefined,
         contactPrimary: undefined,
         contactSecondary: undefined,
         createdAt: undefined,

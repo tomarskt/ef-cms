@@ -6,6 +6,12 @@ handler="${3}"
 config="${4}"
 build="${5}"
 
+pushd ./web-api/terraform/main
+  ../bin/deploy-init.sh "${slsStage}"
+  ELASTICSEARCH_ENDPOINT="$(terraform output elasticsearch_endpoint)"
+  export ELASTICSEARCH_ENDPOINT
+popd
+
 USER_POOL_ID=$(aws cognito-idp list-user-pools --query "UserPools[?Name == 'efcms-${slsStage}'].Id | [0]" --max-results 30 --region "us-east-1")
 # remove quotes surrounding string
 USER_POOL_ID="${USER_POOL_ID%\"}"
@@ -50,6 +56,7 @@ set -- \
   --dynamo_stream_arn="${DYNAMO_STREAM_ARN}" \
   --elasticsearch_endpoint="${ELASTICSEARCH_ENDPOINT}" \
   --verbose \
+  --honeybadgerRevision="${HONEYBADGER_REVISION}" \
   --circleHoneybadgerApiKey="${CIRCLE_HONEYBADGER_API_KEY}"
 
 ./node_modules/.bin/sls create_domain "$@"

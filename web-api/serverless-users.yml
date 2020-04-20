@@ -16,7 +16,8 @@ custom:
   #enabled: true
 
   jetpack:
-    mode: yarn
+    mode: npm
+    lockfile: ../package-lock.json
 
   prune:
     automatic: true
@@ -105,6 +106,7 @@ provider:
     CLAMAV_DEF_DIR: ${self:custom.vars.clamavDefDir, self:provider.clamavDefDir}
     EMAIL_SERVED_TEMPLATE: case_served_${opt:stage}
     EMAIL_SOURCE: noreply@mail.efcms-${opt:stage}.${opt:domain}
+    HONEYBADGER_REVISION: ${opt:honeybadgerRevision}
     CIRCLE_HONEYBADGER_API_KEY: ${opt:circleHoneybadgerApiKey}
 
 package:
@@ -191,30 +193,6 @@ functions:
       - http:
           path: /
           method: post
-          cors: ui-${self:provider.stage}.ef-cms.${opt:domain}
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
-
-  createPractitionerUser:
-    handler: web-api/${self:provider.dir}/usersHandlers.createPractitionerUserLambda
-    events:
-      - http:
-          path: /practitioner
-          method: post
-          cors: ui-${self:provider.stage}.ef-cms.${opt:domain}
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
-
-  updatePractitionerUser:
-    handler: web-api/${self:provider.dir}/usersHandlers.updatePractitionerUserLambda
-    events:
-      - http:
-          path: /practitioner
-          method: put
           cors: ui-${self:provider.stage}.ef-cms.${opt:domain}
           authorizer:
             type: COGNITO_USER_POOLS

@@ -127,7 +127,7 @@ const {
 } = require('../../shared/src/persistence/dynamo/users/createPractitionerUser');
 const {
   createPractitionerUserInteractor,
-} = require('../../shared/src/business/useCases/users/createPractitionerUserInteractor');
+} = require('../../shared/src/business/useCases/practitioners/createPractitionerUserInteractor');
 const {
   createSectionInboxRecord,
 } = require('../../shared/src/persistence/dynamo/workitems/createSectionInboxRecord');
@@ -337,6 +337,9 @@ const {
 const {
   getCaseInventoryReportInteractor,
 } = require('../../shared/src/business/useCases/caseInventoryReport/getCaseInventoryReportInteractor');
+const {
+  getCasesByCaseIds,
+} = require('../../shared/src/persistence/dynamo/cases/getCasesByCaseIds');
 const {
   getCasesByLeadCaseId,
 } = require('../../shared/src/persistence/dynamo/cases/getCasesByLeadCaseId');
@@ -552,6 +555,9 @@ const {
   onDisconnectInteractor,
 } = require('../../shared/src/business/useCases/notifications/onDisconnectInteractor');
 const {
+  orderAdvancedSearchInteractor,
+} = require('../../shared/src/business/useCases/orderAdvancedSearchInteractor');
+const {
   prioritizeCaseInteractor,
 } = require('../../shared/src/business/useCases/prioritizeCaseInteractor');
 const {
@@ -715,7 +721,7 @@ const {
 } = require('../../shared/src/persistence/dynamo/users/updatePractitionerUser');
 const {
   updatePractitionerUserInteractor,
-} = require('../../shared/src/business/useCases/users/updatePractitionerUserInteractor');
+} = require('../../shared/src/business/useCases/practitioners/updatePractitionerUserInteractor');
 const {
   updatePrimaryContactInteractor,
 } = require('../../shared/src/business/useCases/updatePrimaryContactInteractor');
@@ -954,7 +960,7 @@ module.exports = (appContextUser = {}) => {
         createWorkItem,
         deleteCaseDeadline,
         deleteCaseTrialSortMappingRecords,
-        deleteDocument,
+        deleteDocument: args => (process.env.CI ? null : deleteDocument(args)),
         deleteElasticsearchReindexRecord,
         deleteSectionOutboxRecord,
         deleteTrialSession,
@@ -971,6 +977,7 @@ module.exports = (appContextUser = {}) => {
         getCaseByCaseId,
         getCaseByDocketNumber,
         getCaseDeadlinesByCaseId,
+        getCasesByCaseIds,
         getCasesByLeadCaseId,
         getCasesByUser,
         getDocumentQCInboxForSection,
@@ -1193,6 +1200,7 @@ module.exports = (appContextUser = {}) => {
         getWorkItemInteractor,
         onConnectInteractor,
         onDisconnectInteractor,
+        orderAdvancedSearchInteractor,
         prioritizeCaseInteractor,
         processStreamRecordsInteractor,
         removeCaseFromTrialInteractor,
@@ -1259,11 +1267,13 @@ module.exports = (appContextUser = {}) => {
     initHoneybadger: () => {
       if (process.env.NODE_ENV === 'production') {
         const apiKey = process.env.CIRCLE_HONEYBADGER_API_KEY;
+        const revision = process.env.HONEYBADGER_REVISION;
 
         if (apiKey) {
           const config = {
             apiKey,
             environment: 'api',
+            revision,
           };
           Honeybadger.configure(config);
           return Honeybadger;
