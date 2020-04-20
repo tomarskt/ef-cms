@@ -17,8 +17,11 @@ jobs:
           paths:
             - '.git'
       - run:
+          name: Setup Env
+          command: echo "export ENV=$(./get-env.sh $CIRCLE_BRANCH)" >> $BASH_ENV
+      - run:
           name: Build Docker Image
-          command: ./ci-build-docker-image.sh
+          command: ./ci-build-docker-image.sh $ENV
       - persist_to_workspace:
           root: ~/
           paths:
