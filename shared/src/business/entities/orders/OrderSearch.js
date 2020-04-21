@@ -1,4 +1,8 @@
-const joi = require('@hapi/joi');
+const joi = require('@hapi/joi').extend(require('@hapi/joi-date'));
+const {
+  createEndOfDayISO,
+  createStartOfDayISO,
+} = require('../../utilities/DateHandler');
 const {
   joiValidationDecorator,
 } = require('../../../utilities/JoiValidationDecorator');
@@ -16,13 +20,34 @@ OrderSearch.validationName = 'OrderSearch';
 function OrderSearch(rawProps = {}) {
   this.orderKeyword = rawProps.orderKeyword;
   this.docketNumber = rawProps.docketNumber;
+  if (
+    rawProps.startDateDay ||
+    rawProps.startDateMonth ||
+    rawProps.startDateYear
+  ) {
+    this.startDate = createStartOfDayISO({
+      day: rawProps.startDateDay,
+      month: rawProps.startDateMonth,
+      year: rawProps.startDateYear,
+    });
+  }
+
+  if (rawProps.endDateDay || rawProps.endDateMonth || rawProps.endDateYear) {
+    this.endDate = createEndOfDayISO({
+      day: rawProps.endDateDay,
+      month: rawProps.endDateMonth,
+      year: rawProps.endDateYear,
+    });
+  }
   this.caseTitleOrPetitioner = rawProps.caseTitleOrPetitioner;
 }
 
 OrderSearch.VALIDATION_ERROR_MESSAGES = {
   chooseOneValue:
     'Enter either a Docket number or a Case name/Petitioner name, not both',
+  endDate: 'Enter a valid end date',
   orderKeyword: 'Enter a keyword or phrase',
+  startDate: 'Enter a valid start date',
 };
 
 OrderSearch.schema = joi
@@ -30,7 +55,32 @@ OrderSearch.schema = joi
   .keys({
     caseTitleOrPetitioner: joi.string().empty(''),
     docketNumber: joi.string().empty(''),
+    endDate: joi.alternatives().conditional('startDate', {
+      is: joi.exist().not(null),
+      otherwise: joi
+        .date()
+        .format(OrderSearch.VALID_DATE_SEARCH_FORMATS)
+        .optional(),
+      then: joi
+        .date()
+        .format(OrderSearch.VALID_DATE_SEARCH_FORMATS)
+        .min(joi.ref('startDate'))
+        .optional(),
+    }),
     orderKeyword: joi.string().required(),
+    startDate: joi.alternatives().conditional('endDate', {
+      is: joi.exist().not(null),
+      otherwise: joi
+        .date()
+        .format(OrderSearch.VALID_DATE_SEARCH_FORMATS)
+        .max('now')
+        .optional(),
+      then: joi
+        .date()
+        .format(OrderSearch.VALID_DATE_SEARCH_FORMATS)
+        .max('now')
+        .required(),
+    }),
   })
   .oxor('caseTitleOrPetitioner', 'docketNumber');
 
