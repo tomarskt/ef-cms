@@ -1,7 +1,7 @@
 /*
-This is an example script for creating an IRS Super User and setting up their MFA.  
+This is an example script for setting up MFA for the irs super user.
 
-This script isn't actually used in any manual or automated deploy process
+This script isn't actually used in any manual or automated deploy process.
 */
 
 const readline = require('readline');
@@ -11,8 +11,8 @@ const cognito = new CognitoIdentityServiceProvider({
   region: 'us-east-1',
 });
 
-const ClientId = '3e4rqqbn4nc7um3efjg9kaeljn';
-const UserPoolId = 'us-east-1_Gd7o8DQJT';
+const ClientId = '75vr188t81791ej5kibsl6iquo';
+const email = 'service.agent.test@irs.gov';
 
 const askQuestion = query => {
   const rl = readline.createInterface({
@@ -32,26 +32,11 @@ const registerUser = async () => {
   let response;
 
   response = await cognito
-    .adminCreateUser({
-      TemporaryPassword: 'Testing1234$',
-      UserAttributes: [
-        {
-          Name: 'email',
-          Value: 'irsSuperUser@example.com',
-        },
-      ],
-      UserPoolId,
-      Username: 'irsSuperUser@example.com',
-    })
-    .promise();
-  console.log('user created');
-
-  response = await cognito
     .initiateAuth({
       AuthFlow: 'USER_PASSWORD_AUTH',
       AuthParameters: {
         PASSWORD: 'Testing1234$',
-        USERNAME: 'irsSuperUser@example.com',
+        USERNAME: email,
       },
       ClientId,
     })
@@ -64,7 +49,7 @@ const registerUser = async () => {
         ChallengeName: 'NEW_PASSWORD_REQUIRED',
         ChallengeResponses: {
           NEW_PASSWORD: 'Testing1234$',
-          USERNAME: 'irsSuperUser@example.com',
+          USERNAME: email,
         },
         ClientId,
         Session: response.Session,
@@ -78,7 +63,7 @@ const registerUser = async () => {
       AuthFlow: 'USER_PASSWORD_AUTH',
       AuthParameters: {
         PASSWORD: 'Testing1234$',
-        USERNAME: 'irsSuperUser@example.com',
+        USERNAME: email,
       },
       ClientId,
     })
@@ -113,7 +98,7 @@ const login = async () => {
       AuthFlow: 'USER_PASSWORD_AUTH',
       AuthParameters: {
         PASSWORD: 'Testing1234$',
-        USERNAME: 'irsSuperUser@example.com',
+        USERNAME: email,
       },
       ClientId,
     })
@@ -128,7 +113,7 @@ const login = async () => {
         ChallengeName: 'SOFTWARE_TOKEN_MFA',
         ChallengeResponses: {
           SOFTWARE_TOKEN_MFA_CODE: mfa,
-          USERNAME: 'irsSuperUser@example.com',
+          USERNAME: email,
         },
         ClientId,
         Session: response.Session,
